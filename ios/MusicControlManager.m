@@ -10,7 +10,7 @@ RCT_EXPORT_MODULE()
 
 RCT_EXPORT_METHOD(setNowPlaying:(NSDictionary *) details)
 {
-    NSLog([details description]);
+    
     MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
     
     // Create media dictionary from existing keys or create a new one, this way we can update single attributes if we want to
@@ -87,6 +87,7 @@ RCT_EXPORT_METHOD(setNowPlaying:(NSDictionary *) details)
         [mediaDict setValue:[details objectForKey: @"chapterCount"] forKey:MPNowPlayingInfoPropertyChapterCount];
     }
     
+    
     center.nowPlayingInfo = mediaDict;
     
     // Custom handling of artwork in another thread, will be loaded async
@@ -104,7 +105,9 @@ RCT_EXPORT_METHOD(resetNowPlaying)
 
 RCT_EXPORT_METHOD(enableContol:(NSString *) controlName enabled:(BOOL) enabled)
 {
+    
     MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
+
     if ([controlName isEqual: @"@pause"]) {
         remoteCenter.pauseCommand.enabled = enabled;
     } else if ([controlName isEqual: @"play"]) {

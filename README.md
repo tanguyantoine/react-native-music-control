@@ -11,6 +11,8 @@ TODO
 
 *Now Playing*
 
+NB: You should call this method after a sound is playing
+
 ```javascript
 MusicControl.setNowPlaying({
   title: 'Billie Jean',
@@ -18,6 +20,8 @@ MusicControl.setNowPlaying({
   ...
 })
 ```
+
+
 
 *Reset now playing*
 
