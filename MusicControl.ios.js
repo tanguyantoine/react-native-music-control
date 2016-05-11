@@ -4,14 +4,14 @@
  */
 'use strict';
 
-import { NativeModules } from 'react-native';
+import { NativeModules, NativeAppEventEmitter } from 'react-native';
 const NativeMusicControl = NativeModules.MusicControlManager;
 
 /**
  * High-level docs for the MusicControl iOS API can be written here.
  */
-
- console.log(NativeModules, MusicControl);
+var handlers = { };
+var subscription = null;
 
 var MusicControl = {
   setNowPlaying: function(info){
@@ -23,8 +23,29 @@ var MusicControl = {
   enableContol: function(controlName, bool){
     NativeMusicControl.enableContol(controlName, bool)
   },
-  handleCommand: function(callback){
-
+  handleCommand: function(commandName){
+    if(handlers[commandName]){
+      handlers[commandName]()
+    }
+  },
+  on: function(actionName, cb){
+    if(!subscription){
+      subscription = NativeAppEventEmitter.addListener(
+        'RNMusicControlEvent',
+        (event) => {
+          console.log("Receive event", event);
+          MusicControl.handleCommand(event.name)
+        }
+      );
+    }
+    handlers[actionName] = cb
+  },
+  off: function(actionName, cb){
+    handlers.delete(actionName);
+    if(!Object.keys(handlers).length){
+      subscription.remove()
+      subscription = null;
+    }
   }
 };
 

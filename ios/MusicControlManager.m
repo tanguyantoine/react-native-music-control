@@ -1,10 +1,14 @@
 #import "MusicControlManager.h"
 #import "RCTConvert.h"
+#import "RCTBridge.h"
 #import "RCTEventDispatcher.h"
+
 
 @import MediaPlayer;
 
 @implementation MusicControlManager
+
+@synthesize bridge = _bridge;
 
 RCT_EXPORT_MODULE()
 
@@ -87,7 +91,7 @@ RCT_EXPORT_METHOD(setNowPlaying:(NSDictionary *) details)
         [mediaDict setValue:[details objectForKey: @"chapterCount"] forKey:MPNowPlayingInfoPropertyChapterCount];
     }
     
-    
+    NSLog([mediaDict description]);
     center.nowPlayingInfo = mediaDict;
     
     // Custom handling of artwork in another thread, will be loaded async
@@ -105,33 +109,71 @@ RCT_EXPORT_METHOD(resetNowPlaying)
 
 RCT_EXPORT_METHOD(enableContol:(NSString *) controlName enabled:(BOOL) enabled)
 {
-    
     MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
 
-    if ([controlName isEqual: @"@pause"]) {
-        remoteCenter.pauseCommand.enabled = enabled;
+    if ([controlName isEqual: @"pause"]) {
+        [self toggleHandler:remoteCenter.pauseCommand withSelector:@selector(onPause:) enabled:enabled];
+        
     } else if ([controlName isEqual: @"play"]) {
-        remoteCenter.playCommand.enabled = enabled;
+        [self toggleHandler:remoteCenter.playCommand withSelector:@selector(onPlay:) enabled:enabled];
+        
     } else if ([controlName isEqual: @"stop"]) {
-        remoteCenter.stopCommand.enabled = enabled;
+        [self toggleHandler:remoteCenter.stopCommand withSelector:@selector(onStop:) enabled:enabled];
+        
     } else if ([controlName isEqual: @"togglePlayPause"]) {
-        remoteCenter.togglePlayPauseCommand.enabled = enabled;
+        [self toggleHandler:remoteCenter.togglePlayPauseCommand withSelector:@selector(onTogglePlayPause:) enabled:enabled];
+        
     } else if ([controlName isEqual: @"enableLanguageOption"]) {
-        remoteCenter.enableLanguageOptionCommand.enabled = enabled;
+        [self toggleHandler:remoteCenter.enableLanguageOptionCommand withSelector:@selector(onEnableLanguageOption:) enabled:enabled];
+        
     } else if ([controlName isEqual: @"disableLanguageOption"]) {
-        remoteCenter.disableLanguageOptionCommand.enabled = enabled;
+        [self toggleHandler:remoteCenter.disableLanguageOptionCommand withSelector:@selector(onDisableLanguageOption:) enabled:enabled];
+        
     } else if ([controlName isEqual: @"nextTrack"]) {
-        remoteCenter.nextTrackCommand.enabled = enabled;
+        [self toggleHandler:remoteCenter.nextTrackCommand withSelector:@selector(onNextTrack:) enabled:enabled];
+        
     } else if ([controlName isEqual: @"previousTrack"]) {
-        remoteCenter.previousTrackCommand.enabled = enabled;
+        [self toggleHandler:remoteCenter.previousTrackCommand withSelector:@selector(onPreviousTrack:) enabled:enabled];
+        
     } else if ([controlName isEqual: @"seekForward"]) {
-        remoteCenter.seekForwardCommand.enabled = enabled;
+        [self toggleHandler:remoteCenter.seekForwardCommand withSelector:@selector(onSeekForward:) enabled:enabled];
+        
     } else if ([controlName isEqual: @"seekBackward"]) {
-        remoteCenter.seekBackwardCommand.enabled = enabled;
+        [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onSeekBackward:) enabled:enabled];
     }
+
+    
+    
 }
 
+- (void) toggleHandler:(MPRemoteCommand *) command withSelector:(SEL) selector enabled:(BOOL) enabled {
+    if(enabled){
+        [command addTarget:self action:selector];
+    } else {
+        [command removeTarget:self action:selector];
+    }
+    command.enabled = enabled;
+}
+
+
 #pragma mark internal
+
+
+- (void)onPause:(MPRemoteCommandEvent*)event { [self sendEvent:@"pause"]; }
+- (void)onPlay:(MPRemoteCommandEvent*)event { [self sendEvent:@"play"]; }
+- (void)onStop:(MPRemoteCommandEvent*)event { [self sendEvent:@"stop"]; }
+- (void)onTogglePlayPause:(MPRemoteCommandEvent*)event { [self sendEvent:@"togglePlayPause"]; }
+- (void)onEnableLanguageOption:(MPRemoteCommandEvent*)event { [self sendEvent:@"enableLanguageOption"]; }
+- (void)onDisableLanguageOption:(MPRemoteCommandEvent*)event { [self sendEvent:@"disableLanguageOption"]; }
+- (void)onNextTrack:(MPRemoteCommandEvent*)event { [self sendEvent:@"nextTrack"]; }
+- (void)onPreviousTrack:(MPRemoteCommandEvent*)event { [self sendEvent:@"previousTrack"]; }
+- (void)onSeekForward:(MPRemoteCommandEvent*)event { [self sendEvent:@"seekForward"]; }
+- (void)onSeekBackward:(MPRemoteCommandEvent*)event { [self sendEvent:@"seekBackward"]; }
+
+- (void)sendEvent:(NSString*)event {
+    [self.bridge.eventDispatcher sendAppEventWithName:@"RNMusicControlEvent"
+                                                 body:@{@"name": event}];
+}
 
 - (void)setNowPlayingArtwork:(NSString*)url
 {

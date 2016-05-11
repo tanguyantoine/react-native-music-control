@@ -31,12 +31,30 @@ MusicControl.resetNowPlaying()
 
 *Enable/disable controls on lockscreen*
 
-TODO
+```javascript
+MusicControl.enableContol('nextTrack', true)
+MusicControl.enableContol('previousTrack', false)
+```
 
 *Register to events*
 
-TODO
+```javascript
+MusicControl.on('play', ()=> {
+  console.log("Play");
+})
 
+MusicControl.on('nextTrack', ()=> {
+  console.log("nextTrack");
+})
+
+MusicControl.on('previousTrack', ()=> {
+  console.log("previousTrack");
+})
+
+MusicControl.on('pause', ()=> {
+  console.log("pause");
+})
+```
 
 
 # TODOS
