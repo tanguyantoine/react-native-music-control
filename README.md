@@ -61,3 +61,4 @@ MusicControl.on('pause', ()=> {
 
 - [ ] Android support
 - [ ] Test
+- [ ] Publish package
