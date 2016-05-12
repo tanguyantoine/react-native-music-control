@@ -19,15 +19,15 @@ var MusicControl = {
     // NativeMusicControl.enableBackgroundMode(enable)
   },
   setNowPlaying: function(info){
-    warning('Not yet implemented for Android.');
+    warning(true, 'Not yet implemented for Android.');
     // NativeMusicControl.setNowPlaying(info)
   },
   resetNowPlaying: function(){
-    warning('Not yet implemented for Android.');
+    warning(true, 'Not yet implemented for Android.');
     // NativeMusicControl.resetNowPlaying()
   },
   enableContol: function(controlName, bool){
-    warning('Not yet implemented for Android.');
+    warning(true, 'Not yet implemented for Android.');
     // NativeMusicControl.enableContol(controlName, bool)
   },
   handleCommand: function(commandName){
