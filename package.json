@@ -14,5 +14,6 @@
   "author": "Tanguy Antoine",
   "peerDependencies": {
     "react-native": ">=0.8.0"
-  }
+  },
+  "rnpm": {}
 }

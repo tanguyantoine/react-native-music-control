@@ -61,4 +61,5 @@ MusicControl.on('pause', ()=> {
 
 - [ ] Android support
 - [ ] Test
-- [ ] Publish package
+- [x] Publish package
+- [ ] rnpm configuration
