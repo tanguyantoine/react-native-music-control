@@ -142,10 +142,9 @@ RCT_EXPORT_METHOD(enableContol:(NSString *) controlName enabled:(BOOL) enabled)
 }
 
 - (void) toggleHandler:(MPRemoteCommand *) command withSelector:(SEL) selector enabled:(BOOL) enabled {
+    [command removeTarget:self action:selector];
     if(enabled){
-        [command addTarget:self action:selector];
-    } else {
-        [command removeTarget:self];
+        [command addTarget:self action:selector];        
     }
     command.enabled = enabled;
 }
@@ -180,7 +179,6 @@ RCT_EXPORT_METHOD(enableContol:(NSString *) controlName enabled:(BOOL) enabled)
 - (void)onSeekBackward:(MPRemoteCommandEvent*)event { [self sendEvent:@"seekBackward"]; }
 
 - (void)sendEvent:(NSString*)event {
-    NSLog(@"Send event");
     [self.bridge.eventDispatcher sendDeviceEventWithName:@"RNMusicControlEvent"
                                                  body:@{@"name": event}];
 }

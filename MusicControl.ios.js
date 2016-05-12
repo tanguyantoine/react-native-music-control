@@ -42,8 +42,8 @@ var MusicControl = {
     handlers[actionName] = cb
   },
   off: function(actionName, cb){
-    handlers.delete(actionName);
-    if(!Object.keys(handlers).length){
+    delete(handlers[actionName])
+    if(!Object.keys(handlers).length && subscription){
       subscription.remove()
       subscription = null;
     }
