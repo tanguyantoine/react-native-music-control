@@ -9,6 +9,10 @@ TODO
 
 # Use
 
+```javascript
+import MusicControl from 'react-native-music-control';
+```
+
 *Now Playing*
 
 NB: You should call this method after a sound is playing

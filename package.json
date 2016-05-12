@@ -1,12 +1,13 @@
 {
   "name": "react-native-music-control",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Add information on lockscreen and control playing music",
   "keywords": [
     "react-native",
     "remote controls",
     "lockscreen",
-    "nowplaying"],
+    "nowplaying"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tanguyantoine/react-native-music-control.git"
