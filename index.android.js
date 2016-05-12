@@ -15,20 +15,16 @@ var subscription = null;
 
 var MusicControl = {
   enableBackgroundMode: function(enable){
-    warning(true, 'Not yet implemented for Android.');
-    // NativeMusicControl.enableBackgroundMode(enable)
+    NativeMusicControl.enableBackgroundMode(enable)
   },
   setNowPlaying: function(info){
-    warning(true, 'Not yet implemented for Android.');
-    // NativeMusicControl.setNowPlaying(info)
+    NativeMusicControl.setNowPlaying(info)
   },
   resetNowPlaying: function(){
-    warning(true, 'Not yet implemented for Android.');
-    // NativeMusicControl.resetNowPlaying()
+    NativeMusicControl.resetNowPlaying()
   },
-  enableContol: function(controlName, bool){
-    warning(true, 'Not yet implemented for Android.');
-    // NativeMusicControl.enableContol(controlName, bool)
+  enableContol: function(controlName, enable){
+    NativeMusicControl.enableContol(controlName, enable)
   },
   handleCommand: function(commandName){
     if(handlers[commandName]){
