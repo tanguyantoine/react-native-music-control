@@ -5,7 +5,27 @@ Mix between : https://github.com/Muntligt/cordova-plugin-remotecommand and https
 
 # Install
 
-TODO
+## Android
+
+**app/build.gradle**
+
+```
+ compile project(':react-native-music-control')
+```
+
+**MainActivity.java**
+
+```
+import com.tanguyantoine.react.MusicControlPackage;
+```
+
+**settings.gradle**
+
+```
+include ':react-native-music-control'
+project(':react-native-music-control').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-music-control/android')
+```
+
 
 # Use
 
@@ -13,7 +33,7 @@ TODO
 import MusicControl from 'react-native-music-control';
 ```
 
-*Now Playing*
+**Now Playing**
 
 NB: You should call this method after a sound is playing
 
@@ -25,22 +45,20 @@ MusicControl.setNowPlaying({
 })
 ```
 
-
-
-*Reset now playing*
+**Reset now playing**
 
 ```javascript
 MusicControl.resetNowPlaying()
 ```
 
-*Enable/disable controls on lockscreen*
+**Enable/disable controls on lockscreen**
 
 ```javascript
 MusicControl.enableContol('nextTrack', true)
 MusicControl.enableContol('previousTrack', false)
 ```
 
-*Register to events*
+**Register to events**
 
 ```javascript
 MusicControl.on('play', ()=> {
