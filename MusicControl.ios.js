@@ -14,6 +14,9 @@ var handlers = { };
 var subscription = null;
 
 var MusicControl = {
+  enableBackgroundMode: function(enable){
+    NativeMusicControl.enableBackgroundMode(enable)
+  },
   setNowPlaying: function(info){
     NativeMusicControl.setNowPlaying(info)
   },
@@ -35,7 +38,6 @@ var MusicControl = {
     subscription = DeviceEventEmitter.addListener(
       'RNMusicControlEvent',
       (event) => {
-        console.log("Receive event", event);
         MusicControl.handleCommand(event.name)
       }
     );

@@ -2,7 +2,7 @@
 #import "RCTConvert.h"
 #import "RCTBridge.h"
 #import "RCTEventDispatcher.h"
-
+#import <AVFoundation/AVAudioSession.h>
 
 @import MediaPlayer;
 
@@ -141,6 +141,16 @@ RCT_EXPORT_METHOD(enableContol:(NSString *) controlName enabled:(BOOL) enabled)
     }
 }
 
+/* We need to set the category to allow remote control etc... */
+
+RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
+    AVAudioSession *session = [AVAudioSession sharedInstance];
+    [session setCategory: AVAudioSessionCategoryPlayback error: nil];
+    [session setActive: enabled error: nil];
+}
+
+#pragma mark internal
+
 - (void) toggleHandler:(MPRemoteCommand *) command withSelector:(SEL) selector enabled:(BOOL) enabled {
     [command removeTarget:self action:selector];
     if(enabled){
@@ -163,8 +173,6 @@ RCT_EXPORT_METHOD(enableContol:(NSString *) controlName enabled:(BOOL) enabled)
     [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onSeekBackward:) enabled:false];
 
 }
-
-#pragma mark internal
 
 
 - (void)onPause:(MPRemoteCommandEvent*)event { [self sendEvent:@"pause"]; }
