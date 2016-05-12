@@ -6,11 +6,53 @@
  */
 'use strict';
 
+import { NativeModules, DeviceEventEmitter } from 'react-native';
+const NativeMusicControl = NativeModules.MusicControlManager;
 var warning = require('fbjs/lib/warning');
 
+var handlers = { };
+var subscription = null;
+
 var MusicControl = {
-  test: function() {
+  enableBackgroundMode: function(enable){
+    warning(true, 'Not yet implemented for Android.');
+    // NativeMusicControl.enableBackgroundMode(enable)
+  },
+  setNowPlaying: function(info){
     warning('Not yet implemented for Android.');
+    // NativeMusicControl.setNowPlaying(info)
+  },
+  resetNowPlaying: function(){
+    warning('Not yet implemented for Android.');
+    // NativeMusicControl.resetNowPlaying()
+  },
+  enableContol: function(controlName, bool){
+    warning('Not yet implemented for Android.');
+    // NativeMusicControl.enableContol(controlName, bool)
+  },
+  handleCommand: function(commandName){
+    if(handlers[commandName]){
+      handlers[commandName]()
+    }
+  },
+  on: function(actionName, cb){
+    if(subscription){
+      subscription.remove();
+    }
+    subscription = DeviceEventEmitter.addListener(
+      'RNMusicControlEvent',
+      (event) => {
+        MusicControl.handleCommand(event.name)
+      }
+    );
+    handlers[actionName] = cb
+  },
+  off: function(actionName, cb){
+    delete(handlers[actionName])
+    if(!Object.keys(handlers).length && subscription){
+      subscription.remove()
+      subscription = null;
+    }
   }
 };
 
