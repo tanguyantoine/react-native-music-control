@@ -1,9 +1,28 @@
 # react-native-music-control
 
-Mix between : https://github.com/Muntligt/cordova-plugin-remotecommand and https://github.com/Muntligt/cordova-plugin-nowplaying but for React Native
+React Native module to control remote controls on lockscreen + display Now playing Info on lockscreen (MPNowPlayingInfoCenter)
+
+Mix between :
+
+* https://github.com/Muntligt/cordova-plugin-remotecommand (iOS)
+* https://github.com/Muntligt/cordova-plugin-nowplaying (iOS)
+* https://github.com/homerours/cordova-music-controls-plugin (Android)
 
 
 # Install
+
+**Add it to your project**
+
+```
+npm install react-native-music-control --save
+```
+
+## iOS
+
+In XCode, right click Libraries. Click Add Files to "[Your project]". Navigate to node_modules/react-native-music-control. Add the file MusicControl.xcodeproj.
+
+In the Project Navigator, select your project. Click the build target. Click Build Phases. Expand Link Binary With Libraries. Click the plus button and add libMusicControl.a under Workspace.
+
 
 ## Android
 
@@ -23,6 +42,7 @@ import com.tanguyantoine.react.MusicControlPackage;
 
 ```
 include ':react-native-music-control'
+
 project(':react-native-music-control').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-music-control/android')
 ```
 
