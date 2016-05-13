@@ -5,12 +5,14 @@ import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.session.MediaSession;
+import android.os.IBinder;
 import android.util.Log;
 
 import com.facebook.react.bridge.NativeModule;
@@ -59,9 +61,23 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         this.mediaSession = new MediaSession(reactContext, reactContext.getPackageName());
         this.enabledControls = new WritableNativeMap();
         this.infos = new ReadableNativeMap();
+
+        IntentFilter intentFilter = new IntentFilter("nextTrack");
+
+        reactContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String token = intent.getStringExtra("token");
+                WritableMap params = Arguments.createMap();
+                params.putString("deviceToken", token);
+
+                sendEvent("nextTrack");
+            }
+        }, intentFilter);
     }
 
     public void handleIntent(Intent intent) {
+        sendEvent("play");
         new AlertDialog.Builder(reactContext)
                 .setTitle("Delete entry")
                 .setMessage("Are you sure you want to delete this entry?")
@@ -108,6 +124,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         updateNotification();
     }
 
+
     private void sendEvent(String eventName) {
         WritableMap params = Arguments.createMap();
         params.putString("name", eventName);
@@ -117,7 +134,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
     }
 
     private Notification.Action generateAction(int icon, String title, String intentAction) {
-        Intent intent = new Intent(reactContext, getClass());
+        Intent intent = new Intent(reactContext, MusicControlBroadcastReceiver.class);
         intent.setAction(intentAction);
         PendingIntent pendingIntent = PendingIntent.getService(reactContext, 1, intent, 0);
         return new Notification.Action.Builder(icon, title, pendingIntent).build();
@@ -168,6 +185,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
             this.notificationBuilder = new Notification.Builder(reactContext);
             this.notificationBuilder
                     .setStyle(style)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
                     .setDeleteIntent(pendingIntent);
         }
     }

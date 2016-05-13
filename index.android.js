@@ -38,6 +38,7 @@ var MusicControl = {
     subscription = DeviceEventEmitter.addListener(
       'RNMusicControlEvent',
       (event) => {
+        console.log(event);
         MusicControl.handleCommand(event.name)
       }
     );
