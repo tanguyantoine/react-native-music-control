@@ -2,6 +2,8 @@
 
 React Native module to control remote controls on lockscreen + display Now playing Info on lockscreen (MPNowPlayingInfoCenter)
 
+Play well with React [Native Sound](https://github.com/zmxv/react-native-sound)
+
 Mix between :
 
 * https://github.com/Muntligt/cordova-plugin-remotecommand (iOS)
