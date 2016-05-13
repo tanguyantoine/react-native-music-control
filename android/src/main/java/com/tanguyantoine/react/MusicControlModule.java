@@ -124,7 +124,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
     }
 
     private void updateNotification(){
-        iniNotificationBuilder();
+        initNotificationBuilder();
 
         this.notificationBuilder
                 .setSmallIcon(android.R.drawable.arrow_up_float);
@@ -159,7 +159,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         return enabledControls.hasKey(controlName) && enabledControls.getBoolean(controlName);
 
     }
-    private void iniNotificationBuilder(){
+    private void initNotificationBuilder(){
         if(notificationBuilder == null) {
             Notification.MediaStyle style = new Notification.MediaStyle();
             Intent intent = new Intent(reactContext, getClass());
