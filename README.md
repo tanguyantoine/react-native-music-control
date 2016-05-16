@@ -107,3 +107,5 @@ MusicControl.on('pause', ()=> {
 - [ ] Test
 - [x] Publish package
 - [ ] rnpm configuration
+- [ ] Android : Handle remote events
+- [ ] Android : Display cover artwork
