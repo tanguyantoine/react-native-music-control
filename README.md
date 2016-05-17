@@ -76,8 +76,8 @@ MusicControl.resetNowPlaying()
 **Enable/disable controls on lockscreen**
 
 ```javascript
-MusicControl.enableContol('nextTrack', true)
-MusicControl.enableContol('previousTrack', false)
+MusicControl.enableControl('nextTrack', true)
+MusicControl.enableControl('previousTrack', false)
 ```
 
 **Register to events**
