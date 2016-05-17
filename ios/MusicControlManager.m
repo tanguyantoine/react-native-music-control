@@ -106,7 +106,7 @@ RCT_EXPORT_METHOD(resetNowPlaying)
 }
 
 
-RCT_EXPORT_METHOD(enableContol:(NSString *) controlName enabled:(BOOL) enabled)
+RCT_EXPORT_METHOD(enableControl:(NSString *) controlName enabled:(BOOL) enabled)
 {
     MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
 

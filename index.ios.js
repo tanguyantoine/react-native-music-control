@@ -23,8 +23,8 @@ var MusicControl = {
   resetNowPlaying: function(){
     NativeMusicControl.resetNowPlaying()
   },
-  enableContol: function(controlName, bool){
-    NativeMusicControl.enableContol(controlName, bool)
+  enableControl: function(controlName, bool){
+    NativeMusicControl.enableControl(controlName, bool)
   },
   handleCommand: function(commandName){
     if(handlers[commandName]){

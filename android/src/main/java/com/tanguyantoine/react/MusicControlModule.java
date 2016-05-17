@@ -115,7 +115,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void enableContol(String controlName, Boolean enabled) {
+    public void enableControl(String controlName, Boolean enabled) {
         this.enabledControls.putBoolean(controlName, enabled);
         updateNotification();
     }
