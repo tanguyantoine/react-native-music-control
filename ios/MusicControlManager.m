@@ -6,6 +6,12 @@
 
 @import MediaPlayer;
 
+@interface MusicControlManager ()
+
+@property (nonatomic, copy) NSString *artworkUrl;
+
+@end
+
 @implementation MusicControlManager
 
 @synthesize bridge = _bridge;
@@ -94,15 +100,15 @@ RCT_EXPORT_METHOD(setNowPlaying:(NSDictionary *) details)
     center.nowPlayingInfo = mediaDict;
 
     // Custom handling of artwork in another thread, will be loaded async
-    if ([details objectForKey: @"artwork"] != nil) {
-        [self setNowPlayingArtwork: [details objectForKey: @"artwork"]];
-    }
+    self.artworkUrl = details[@"artwork"];
+    [self updateNowPlayingArtwork];
 }
 
 RCT_EXPORT_METHOD(resetNowPlaying)
 {
     MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
     center.nowPlayingInfo = nil;
+    self.artworkUrl = nil;
 }
 
 
@@ -191,9 +197,10 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
                                                  body:@{@"name": event}];
 }
 
-- (void)setNowPlayingArtwork:(NSString*)url
+- (void)updateNowPlayingArtwork
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        NSString *url = self.artworkUrl;
         UIImage *image = nil;
         // check whether artwork path is present
         if (![url isEqual: @""]) {
@@ -221,14 +228,18 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
         // check whether image is loaded
         CGImageRef cgref = [image CGImage];
         CIImage *cim = [image CIImage];
+
         if (cim != nil || cgref != NULL) {
-            // Callback to main queue to set nowPlayingInfo
             dispatch_async(dispatch_get_main_queue(), ^{
-                MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
-                MPMediaItemArtwork *artwork = [[MPMediaItemArtwork alloc] initWithImage: image];
-                NSMutableDictionary *mediaDict = (center.nowPlayingInfo != nil) ? [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo] : [NSMutableDictionary dictionary];
-                [mediaDict setValue:artwork forKey:MPMediaItemPropertyArtwork];
-                center.nowPlayingInfo = mediaDict;
+
+                // Check if URL wasn't changed in the meantime
+                if ([url isEqual:self.artworkUrl]) {
+                    MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
+                    MPMediaItemArtwork *artwork = [[MPMediaItemArtwork alloc] initWithImage: image];
+                    NSMutableDictionary *mediaDict = (center.nowPlayingInfo != nil) ? [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo] : [NSMutableDictionary dictionary];
+                    [mediaDict setValue:artwork forKey:MPMediaItemPropertyArtwork];
+                    center.nowPlayingInfo = mediaDict;
+                }
             });
         }
     });
