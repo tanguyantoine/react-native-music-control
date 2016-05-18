@@ -112,7 +112,7 @@ RCT_EXPORT_METHOD(resetNowPlaying)
 }
 
 
-RCT_EXPORT_METHOD(enableControl:(NSString *) controlName enabled:(BOOL) enabled)
+RCT_EXPORT_METHOD(enableControl:(NSString *) controlName enabled:(BOOL) enabled options:(NSDictionary *)options)
 {
     MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
 
@@ -144,6 +144,16 @@ RCT_EXPORT_METHOD(enableControl:(NSString *) controlName enabled:(BOOL) enabled)
 
     } else if ([controlName isEqual: @"seekBackward"]) {
         [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onSeekBackward:) enabled:enabled];
+    } else if ([controlName isEqual:@"skipBackward"]) {
+        if (options[@"interval"]) {
+            remoteCenter.skipBackwardCommand.preferredIntervals = @[options[@"interval"]];
+        }
+        [self toggleHandler:remoteCenter.skipBackwardCommand withSelector:@selector(onSkipBackward:) enabled:enabled];
+    } else if ([controlName isEqual:@"skipForward"]) {
+        if (options[@"interval"]) {
+            remoteCenter.skipForwardCommand.preferredIntervals = @[options[@"interval"]];
+        }
+        [self toggleHandler:remoteCenter.skipForwardCommand withSelector:@selector(onSkipForward:) enabled:enabled];
     }
 }
 
@@ -177,7 +187,8 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
     [self toggleHandler:remoteCenter.previousTrackCommand withSelector:@selector(onPreviousTrack:) enabled:false];
     [self toggleHandler:remoteCenter.seekForwardCommand withSelector:@selector(onSeekForward:) enabled:false];
     [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onSeekBackward:) enabled:false];
-
+    [self toggleHandler:remoteCenter.skipBackwardCommand withSelector:@selector(onSkipBackward:) enabled:false];
+    [self toggleHandler:remoteCenter.skipForwardCommand withSelector:@selector(onSkipForward:) enabled:false];
 }
 
 
@@ -191,6 +202,8 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
 - (void)onPreviousTrack:(MPRemoteCommandEvent*)event { [self sendEvent:@"previousTrack"]; }
 - (void)onSeekForward:(MPRemoteCommandEvent*)event { [self sendEvent:@"seekForward"]; }
 - (void)onSeekBackward:(MPRemoteCommandEvent*)event { [self sendEvent:@"seekBackward"]; }
+- (void)onSkipBackward:(MPRemoteCommandEvent*)event { [self sendEvent:@"skipBackward"]; }
+- (void)onSkipForward:(MPRemoteCommandEvent*)event { [self sendEvent:@"skipForward"]; }
 
 - (void)sendEvent:(NSString*)event {
     [self.bridge.eventDispatcher sendDeviceEventWithName:@"RNMusicControlEvent"
