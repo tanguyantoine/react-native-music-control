@@ -101,6 +101,7 @@ MusicControl.on('pause', ()=> {
 ```
 
 
+
 # TODOS
 
 - [ ] Android support
@@ -109,3 +110,9 @@ MusicControl.on('pause', ()=> {
 - [ ] rnpm configuration
 - [ ] Android : Handle remote events
 - [ ] Android : Display cover artwork
+
+
+# Contributing
+
+### Of coursssssseeeeee. I'm waiting your PR :)
+ 
