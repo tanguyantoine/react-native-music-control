@@ -211,11 +211,9 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
                 image = [UIImage imageWithData:imageData];
             } else {
                 // artwork is local. so create it from a UIImage
-                NSString *basePath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-                NSString *fullPath = [NSString stringWithFormat:@"%@%@", basePath, url];
-                BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:fullPath];
+                BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:url];
                 if (fileExists) {
-                    image = [UIImage imageNamed:fullPath];
+                    image = [UIImage imageNamed:url];
                 }
             }
         }
