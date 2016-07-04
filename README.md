@@ -90,21 +90,24 @@ MusicControl.enableControl('skipForward', true, {interval: 30}))
 **Register to events**
 
 ```javascript
-MusicControl.on('play', ()=> {
-  console.log("Play");
-})
+componentDidMount() {
+    MusicControl.enableBackgroundMode(true);
+    MusicControl.on('play', ()=> {
+      this.props.dispatch(playRemoteControl());
+    })
 
-MusicControl.on('nextTrack', ()=> {
-  console.log("nextTrack");
-})
+    MusicControl.on('pause', ()=> {
+      this.props.dispatch(pauseRemoteControl());
+    })
 
-MusicControl.on('previousTrack', ()=> {
-  console.log("previousTrack");
-})
+    MusicControl.on('nextTrack', ()=> {
+      this.props.dispatch(nextRemoteControl());
+    })
 
-MusicControl.on('pause', ()=> {
-  console.log("pause");
-})
+    MusicControl.on('previousTrack', ()=> {
+      this.props.dispatch(previousRemoteControl());
+    })
+  }
 ```
 
 
