@@ -76,29 +76,40 @@ MusicControl.resetNowPlaying()
 **Enable/disable controls on lockscreen**
 
 ```javascript
-MusicControl.enableContol('nextTrack', true)
-MusicControl.enableContol('previousTrack', false)
+MusicControl.enableControl('nextTrack', true)
+MusicControl.enableControl('previousTrack', false)
+```
+
+`skipBackward` and `skipForward` controls on iOS accept additional configuration options with `interval` key:
+
+```javascript
+MusicControl.enableControl('skipBackward', true, {interval: 15}))
+MusicControl.enableControl('skipForward', true, {interval: 30}))
 ```
 
 **Register to events**
 
 ```javascript
-MusicControl.on('play', ()=> {
-  console.log("Play");
-})
+componentDidMount() {
+    MusicControl.enableBackgroundMode(true);
+    MusicControl.on('play', ()=> {
+      this.props.dispatch(playRemoteControl());
+    })
 
-MusicControl.on('nextTrack', ()=> {
-  console.log("nextTrack");
-})
+    MusicControl.on('pause', ()=> {
+      this.props.dispatch(pauseRemoteControl());
+    })
 
-MusicControl.on('previousTrack', ()=> {
-  console.log("previousTrack");
-})
+    MusicControl.on('nextTrack', ()=> {
+      this.props.dispatch(nextRemoteControl());
+    })
 
-MusicControl.on('pause', ()=> {
-  console.log("pause");
-})
+    MusicControl.on('previousTrack', ()=> {
+      this.props.dispatch(previousRemoteControl());
+    })
+  }
 ```
+
 
 
 # TODOS
@@ -107,3 +118,11 @@ MusicControl.on('pause', ()=> {
 - [ ] Test
 - [x] Publish package
 - [ ] rnpm configuration
+- [ ] Android : Handle remote events
+- [ ] Android : Display cover artwork
+
+
+# Contributing
+
+### Of coursssssseeeeee. I'm waiting your PR :)
+ 

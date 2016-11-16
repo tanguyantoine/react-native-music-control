@@ -67,10 +67,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         reactContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                String token = intent.getStringExtra("token");
-                WritableMap params = Arguments.createMap();
-                params.putString("deviceToken", token);
-
                 sendEvent("nextTrack");
             }
         }, intentFilter);
@@ -119,7 +115,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void enableContol(String controlName, Boolean enabled) {
+    public void enableControl(String controlName, Boolean enabled) {
         this.enabledControls.putBoolean(controlName, enabled);
         updateNotification();
     }

@@ -6,11 +6,22 @@
 
 @import MediaPlayer;
 
+@interface MusicControlManager ()
+
+@property (nonatomic, copy) NSString *artworkUrl;
+
+@end
+
 @implementation MusicControlManager
 
 @synthesize bridge = _bridge;
 
 RCT_EXPORT_MODULE()
+
+- (dispatch_queue_t)methodQueue
+{
+    return dispatch_get_main_queue();
+}
 
 RCT_EXPORT_METHOD(setNowPlaying:(NSDictionary *) details)
 {
@@ -94,19 +105,19 @@ RCT_EXPORT_METHOD(setNowPlaying:(NSDictionary *) details)
     center.nowPlayingInfo = mediaDict;
 
     // Custom handling of artwork in another thread, will be loaded async
-    if ([details objectForKey: @"artwork"] != nil) {
-        [self setNowPlayingArtwork: [details objectForKey: @"artwork"]];
-    }
+    self.artworkUrl = details[@"artwork"];
+    [self updateNowPlayingArtwork];
 }
 
 RCT_EXPORT_METHOD(resetNowPlaying)
 {
     MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
     center.nowPlayingInfo = nil;
+    self.artworkUrl = nil;
 }
 
 
-RCT_EXPORT_METHOD(enableContol:(NSString *) controlName enabled:(BOOL) enabled)
+RCT_EXPORT_METHOD(enableControl:(NSString *) controlName enabled:(BOOL) enabled options:(NSDictionary *)options)
 {
     MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
 
@@ -138,6 +149,16 @@ RCT_EXPORT_METHOD(enableContol:(NSString *) controlName enabled:(BOOL) enabled)
 
     } else if ([controlName isEqual: @"seekBackward"]) {
         [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onSeekBackward:) enabled:enabled];
+    } else if ([controlName isEqual:@"skipBackward"]) {
+        if (options[@"interval"]) {
+            remoteCenter.skipBackwardCommand.preferredIntervals = @[options[@"interval"]];
+        }
+        [self toggleHandler:remoteCenter.skipBackwardCommand withSelector:@selector(onSkipBackward:) enabled:enabled];
+    } else if ([controlName isEqual:@"skipForward"]) {
+        if (options[@"interval"]) {
+            remoteCenter.skipForwardCommand.preferredIntervals = @[options[@"interval"]];
+        }
+        [self toggleHandler:remoteCenter.skipForwardCommand withSelector:@selector(onSkipForward:) enabled:enabled];
     }
 }
 
@@ -171,7 +192,8 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
     [self toggleHandler:remoteCenter.previousTrackCommand withSelector:@selector(onPreviousTrack:) enabled:false];
     [self toggleHandler:remoteCenter.seekForwardCommand withSelector:@selector(onSeekForward:) enabled:false];
     [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onSeekBackward:) enabled:false];
-
+    [self toggleHandler:remoteCenter.skipBackwardCommand withSelector:@selector(onSkipBackward:) enabled:false];
+    [self toggleHandler:remoteCenter.skipForwardCommand withSelector:@selector(onSkipForward:) enabled:false];
 }
 
 
@@ -185,15 +207,18 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
 - (void)onPreviousTrack:(MPRemoteCommandEvent*)event { [self sendEvent:@"previousTrack"]; }
 - (void)onSeekForward:(MPRemoteCommandEvent*)event { [self sendEvent:@"seekForward"]; }
 - (void)onSeekBackward:(MPRemoteCommandEvent*)event { [self sendEvent:@"seekBackward"]; }
+- (void)onSkipBackward:(MPRemoteCommandEvent*)event { [self sendEvent:@"skipBackward"]; }
+- (void)onSkipForward:(MPRemoteCommandEvent*)event { [self sendEvent:@"skipForward"]; }
 
 - (void)sendEvent:(NSString*)event {
     [self.bridge.eventDispatcher sendDeviceEventWithName:@"RNMusicControlEvent"
                                                  body:@{@"name": event}];
 }
 
-- (void)setNowPlayingArtwork:(NSString*)url
+- (void)updateNowPlayingArtwork
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        NSString *url = self.artworkUrl;
         UIImage *image = nil;
         // check whether artwork path is present
         if (![url isEqual: @""]) {
@@ -204,11 +229,9 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
                 image = [UIImage imageWithData:imageData];
             } else {
                 // artwork is local. so create it from a UIImage
-                NSString *basePath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-                NSString *fullPath = [NSString stringWithFormat:@"%@%@", basePath, url];
-                BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:fullPath];
+                BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:url];
                 if (fileExists) {
-                    image = [UIImage imageNamed:fullPath];
+                    image = [UIImage imageNamed:url];
                 }
             }
         }
@@ -221,14 +244,18 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
         // check whether image is loaded
         CGImageRef cgref = [image CGImage];
         CIImage *cim = [image CIImage];
+
         if (cim != nil || cgref != NULL) {
-            // Callback to main queue to set nowPlayingInfo
             dispatch_async(dispatch_get_main_queue(), ^{
-                MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
-                MPMediaItemArtwork *artwork = [[MPMediaItemArtwork alloc] initWithImage: image];
-                NSMutableDictionary *mediaDict = (center.nowPlayingInfo != nil) ? [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo] : [NSMutableDictionary dictionary];
-                [mediaDict setValue:artwork forKey:MPMediaItemPropertyArtwork];
-                center.nowPlayingInfo = mediaDict;
+
+                // Check if URL wasn't changed in the meantime
+                if ([url isEqual:self.artworkUrl]) {
+                    MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
+                    MPMediaItemArtwork *artwork = [[MPMediaItemArtwork alloc] initWithImage: image];
+                    NSMutableDictionary *mediaDict = (center.nowPlayingInfo != nil) ? [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo] : [NSMutableDictionary dictionary];
+                    [mediaDict setValue:artwork forKey:MPMediaItemPropertyArtwork];
+                    center.nowPlayingInfo = mediaDict;
+                }
             });
         }
     });
