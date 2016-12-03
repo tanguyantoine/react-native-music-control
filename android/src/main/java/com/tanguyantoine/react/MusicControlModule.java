@@ -205,12 +205,12 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
     private void updateNotification(){
         initNotificationBuilder();
         //artwork uri : path absolute
-        //String filePath = infos.getString("artwork");
-        //Bitmap mybitmap = getBitmapCover(filePath);
+        String filePath = infos.hasKey("artwork") ? infos.getString("artwork") : "";
+        Bitmap mybitmap = getBitmapCover(filePath);
 
         this.notificationBuilder.setSmallIcon(android.R.drawable.ic_media_play);
         //icono largo es bitmap
-        //this.notificationBuilder.setLargeIcon(mybitmap);
+        this.notificationBuilder.setLargeIcon(mybitmap);
         String title = infos.hasKey("title") ? infos.getString("title") : "";
         String content = infos.hasKey("artist") ? infos.getString("artist") : "";
         this.notificationBuilder
