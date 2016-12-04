@@ -8,7 +8,6 @@
 
 import { NativeModules, DeviceEventEmitter } from 'react-native';
 const NativeMusicControl = NativeModules.MusicControlManager;
-var warning = require('fbjs/lib/warning');
 
 var handlers = { };
 var subscription = null;
@@ -26,9 +25,9 @@ var MusicControl = {
   enableControl: function(controlName, enable){
     NativeMusicControl.enableControl(controlName, enable)
   },
-  handleCommand: function(commandName){
+  handleCommand: function(commandName, value){
     if(handlers[commandName]){
-      handlers[commandName]()
+      handlers[commandName](value)
     }
   },
   on: function(actionName, cb){
@@ -39,7 +38,7 @@ var MusicControl = {
       'RNMusicControlEvent',
       (event) => {
         console.log(event);
-        MusicControl.handleCommand(event.name)
+        MusicControl.handleCommand(event.name, event.value)
       }
     );
     handlers[actionName] = cb
