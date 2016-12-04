@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -75,12 +76,16 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         this.enabledControls = new WritableNativeMap();
         this.infos = new ReadableNativeMap();
 
-        IntentFilter intentFilter = new IntentFilter("nextTrack");
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ACTION_PLAY);
+        intentFilter.addAction(ACTION_PAUSE);
+        intentFilter.addAction(ACTION_PREVIOUS);
+        intentFilter.addAction(ACTION_NEXT);
 
-        reactContext.registerReceiver(new BroadcastReceiver() {
+        LocalBroadcastManager.getInstance(reactContext).registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                sendEvent("nextTrack");
+                sendEvent(intent.getAction());
             }
         }, intentFilter);
     }
@@ -135,17 +140,15 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
 
 
     private void sendEvent(String eventName) {
-        WritableMap params = Arguments.createMap();
-        params.putString("name", eventName);
         reactContext
                 .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                .emit(MUSIC_CONTROL_EVENT_NAME, params);
+                .emit(MUSIC_CONTROL_EVENT_NAME, eventName);
     }
 
     private Notification.Action generateAction(int icon, String title, String intentAction) {
         Intent intent = new Intent(reactContext, MusicControlBroadcastReceiver.class);
         intent.setAction(intentAction);
-        PendingIntent pendingIntent = PendingIntent.getService(reactContext, 1, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(reactContext, 1, intent, 0);
         return new Notification.Action.Builder(icon, title, pendingIntent).build();
     }
 
@@ -202,7 +205,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
     private void updateNotification(){
         initNotificationBuilder();
         //artwork uri : path absolute
-        String filePath = infos.getString("artwork");
+        String filePath = infos.hasKey("artwork") ? infos.getString("artwork") : "";
         Bitmap mybitmap = getBitmapCover(filePath);
 
         this.notificationBuilder.setSmallIcon(android.R.drawable.ic_media_play);
