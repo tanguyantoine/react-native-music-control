@@ -50,7 +50,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
 
     @Override
     public String getName() {
-        return "MusicControl";
+        return "MusicControlManager";
     }
 
     @Override
@@ -224,11 +224,20 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
             case "pause":
                 controlValue = PlaybackStateCompat.ACTION_PAUSE;
                 break;
+            case "togglePlayPause":
+                controlValue = PlaybackStateCompat.ACTION_PLAY_PAUSE;
+                break;
             case "stop":
                 controlValue = PlaybackStateCompat.ACTION_STOP;
                 break;
             case "seek":
                 controlValue = PlaybackStateCompat.ACTION_SEEK_TO;
+                break;
+            case "seekForward":
+                controlValue = PlaybackStateCompat.ACTION_FAST_FORWARD;
+                break;
+            case "seekBackward":
+                controlValue = PlaybackStateCompat.ACTION_REWIND;
                 break;
             case "rate":
                 controlValue = PlaybackStateCompat.ACTION_SET_RATING;

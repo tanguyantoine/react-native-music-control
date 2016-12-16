@@ -13,12 +13,22 @@ var handlers = { };
 var subscription = null;
 
 var MusicControl = {
+
+  STATE_ERROR: NativeMusicControl.STATE_ERROR,
+  STATE_STOPPED: NativeMusicControl.STATE_STOPPED,
+  STATE_PLAYING: NativeMusicControl.STATE_PLAYING,
+  STATE_PAUSED: NativeMusicControl.STATE_PAUSED,
+  STATE_BUFFERING: NativeMusicControl.STATE_BUFFERING,
+
   enableBackgroundMode: function(enable){
     NativeMusicControl.enableBackgroundMode(enable)
   },
   setNowPlaying: function(info){
     NativeMusicControl.setNowPlaying(info)
   },
+  setPlayback: function(info){
+    NativeMusicControl.setPlayback(info)
+  }
   resetNowPlaying: function(){
     NativeMusicControl.resetNowPlaying()
   },

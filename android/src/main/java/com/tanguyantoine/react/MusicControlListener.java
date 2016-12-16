@@ -55,6 +55,16 @@ public class MusicControlListener extends MediaSessionCompat.Callback {
     }
 
     @Override
+    public void onFastForward() {
+        sendEvent(context, "seekForward", null);
+    }
+
+    @Override
+    public void onRewind() {
+        sendEvent(context, "seekBackward", null);
+    }
+
+    @Override
     public void onSetRating(RatingCompat rating) {
         sendEvent(context, "rate", (double)rating.getPercentRating());
     }

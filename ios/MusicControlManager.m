@@ -31,8 +31,8 @@ RCT_EXPORT_METHOD(setNowPlaying:(NSDictionary *) details)
     // Create media dictionary from existing keys or create a new one, this way we can update single attributes if we want to
     NSMutableDictionary *mediaDict = (center.nowPlayingInfo != nil) ? [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo] : [NSMutableDictionary dictionary];
 
-    if ([details objectForKey: @"albumTitle"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"albumTitle"] forKey:MPMediaItemPropertyAlbumTitle];
+    if ([details objectForKey: @"album"] != nil) {
+        [mediaDict setValue:[details objectForKey: @"album"] forKey:MPMediaItemPropertyAlbumTitle];
     }
 
     if ([details objectForKey: @"trackCount"] != nil) {
@@ -67,8 +67,8 @@ RCT_EXPORT_METHOD(setNowPlaying:(NSDictionary *) details)
         [mediaDict setValue:[details objectForKey: @"persistentID"] forKey:MPMediaItemPropertyPersistentID];
     }
 
-    if ([details objectForKey: @"playbackDuration"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"playbackDuration"] forKey:MPMediaItemPropertyPlaybackDuration];
+    if ([details objectForKey: @"duration"] != nil) {
+        [mediaDict setValue:[details objectForKey: @"duration"] forKey:MPMediaItemPropertyPlaybackDuration];
     }
 
     if ([details objectForKey: @"title"] != nil) {
