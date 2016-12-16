@@ -2,7 +2,6 @@ package com.tanguyantoine.react;
 
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.IBinder;
@@ -17,13 +16,16 @@ public class MusicControlNotification {
     protected static final String REMOVE_NOTIFICATION = "remove_notification";
 
     private final ReactApplicationContext context;
-    private final ComponentName compName;
 
+    private int smallIcon;
     private NotificationCompat.Action play, pause, stop, next, previous;
 
-    public MusicControlNotification(ReactApplicationContext context, ComponentName compName) {
+    public MusicControlNotification(ReactApplicationContext context) {
         this.context = context;
-        this.compName = compName;
+
+        Resources r = context.getResources();
+        String packageName = context.getPackageName();
+        smallIcon = r.getIdentifier("play", "drawable", packageName);
     }
 
     public void updateActions(long mask) {
@@ -45,6 +47,7 @@ public class MusicControlNotification {
         if(next != null) builder.addAction(next);
 
         builder.setOngoing(isPlaying);
+        builder.setSmallIcon(smallIcon);
 
         // Open the app when the notification is clicked
         Intent openApp = new Intent(context, context.getClass());
@@ -101,7 +104,6 @@ public class MusicControlNotification {
         // Replace this to MediaButtonReceiver.buildMediaButtonPendingIntent when React Native updates the support library
         int keyCode = toKeyCode(action);
         Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-        intent.setComponent(compName);
         intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
         PendingIntent i = PendingIntent.getBroadcast(context, keyCode, intent, 0);
 
@@ -121,7 +123,9 @@ public class MusicControlNotification {
 
         @Override
         public void onTaskRemoved(Intent rootIntent) {
-            MusicControlModule.INSTANCE.destroy();
+            if(MusicControlModule.INSTANCE != null) {
+                MusicControlModule.INSTANCE.destroy();
+            }
             stopSelf();
         }
 

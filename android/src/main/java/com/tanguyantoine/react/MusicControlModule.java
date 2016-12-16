@@ -11,17 +11,14 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
-import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.modules.network.OkHttpClientProvider;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,12 +37,13 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
     private MusicControlListener.VolumeListener volume;
     private MusicControlReceiver receiver;
 
+    private Thread artworkThread;
+
     private boolean isPlaying = false;
     private long controls = 0;
 
     public MusicControlModule(ReactApplicationContext context) {
         super(context);
-        init();
     }
 
     @Override
@@ -84,7 +82,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         nb = new NotificationCompat.Builder(context);
         nb.setStyle(new NotificationCompat.MediaStyle().setMediaSession(session.getSessionToken()));
 
-        notification = new MusicControlNotification(context, compName);
+        notification = new MusicControlNotification(context);
         notification.updateActions(controls);
 
         IntentFilter filter = new IntentFilter();
@@ -93,7 +91,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         receiver = new MusicControlReceiver(notification, session);
         context.registerReceiver(receiver, filter);
 
-        context.startService(new Intent(context.getBaseContext(), MusicControlNotification.NotificationService.class));
+        context.startService(new Intent(context, MusicControlNotification.NotificationService.class));
 
         isPlaying = false;
         init = true;
@@ -103,6 +101,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         notification.hide();
         session.release();
         getReactApplicationContext().unregisterReceiver(receiver);
+
+        if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
+        artworkThread = null;
 
         session = null;
         notification = null;
@@ -121,21 +122,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setNowPlaying(final ReadableMap metadata, final Promise promise) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    setNowPlayingSync(metadata, promise);
-                } catch(Exception ex) {
-                    promise.reject(ex);
-                }
-            }
-        }).start();
-    }
-
-    private void setNowPlayingSync(ReadableMap metadata, Promise promise) {
+    public void setNowPlaying(ReadableMap metadata) {
         if(!init) init();
+        if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
 
         String title = metadata.hasKey("title") ? metadata.getString("title") : null;
         String artist = metadata.hasKey("artist") ? metadata.getString("artist") : null;
@@ -144,7 +133,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         String description = metadata.hasKey("description") ? metadata.getString("description") : null;
         String date = metadata.hasKey("date") ? metadata.getString("date") : null;
         RatingCompat rating = metadata.hasKey("rating") ? RatingCompat.newPercentageRating(metadata.getInt("rating")) : null;
-        Bitmap artwork = metadata.hasKey("artwork") ? loadArtwork(metadata.getString("artwork")) : null;
+        final String artwork = metadata.hasKey("artwork") ? metadata.getString("artwork") : null;
         long duration = metadata.hasKey("duration") ? (long)(metadata.getDouble("duration") * 1000) : 0;
         int notificationColor = metadata.hasKey("color") ? metadata.getInt("color") : NotificationCompat.COLOR_DEFAULT;
 
@@ -156,24 +145,38 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         md.putText(MediaMetadataCompat.METADATA_KEY_DATE, date);
         md.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration);
         md.putRating(MediaMetadataCompat.METADATA_KEY_RATING, rating);
-        md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, artwork);
 
-        nb.setLargeIcon(artwork);
         nb.setContentTitle(title);
         nb.setContentText(artist);
         nb.setContentInfo(album);
         nb.setColor(notificationColor);
 
-        MediaMetadataCompat mediaMetadata = md.build();
-        session.setMetadata(mediaMetadata);
+        if(artwork != null) {
+            artworkThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Bitmap bitmap = loadArtwork(artwork);
+                    md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap);
+                    nb.setLargeIcon(bitmap);
+
+                    session.setMetadata(md.build());
+                    notification.show(nb, isPlaying);
+                    artworkThread = null;
+                }
+            });
+            artworkThread.start();
+        } else {
+            md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, null);
+            nb.setLargeIcon(null);
+        }
+
+        session.setMetadata(md.build());
         session.setActive(true);
         notification.show(nb, isPlaying);
-
-        promise.resolve(null);
     }
 
     @ReactMethod
-    public void setPlayback(ReadableMap info, Promise promise) {
+    public void setPlayback(ReadableMap info) {
         if(!init) init();
 
         long elapsedTime = info.hasKey("elapsedTime") ? (long)(info.getDouble("elapsedTime") * 1000) : 0;
@@ -191,13 +194,13 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         PlaybackStateCompat playbackState = pb.build();
         session.setPlaybackState(playbackState);
         session.setPlaybackToRemote(volume.create(null, vol));
-
-        promise.resolve(null);
     }
 
     @ReactMethod
     public void resetNowPlaying() {
         if(!init) return;
+        if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
+        artworkThread = null;
 
         md = new MediaMetadataCompat.Builder();
         pb = new PlaybackStateCompat.Builder();
@@ -210,7 +213,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
     public void enableControl(String control, boolean enable) {
         if(!init) init();
 
-        long controlValue = 0;
+        long controlValue;
         switch(control) {
             case "nextTrack":
                 controlValue = PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
@@ -245,6 +248,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
             case "volume":
                 session.setPlaybackToRemote(volume.create(enable, null));
                 return;
+            default:
+                // Unknown control type, let's just ignore it
+                return;
         }
 
         if(enable) {
@@ -262,10 +268,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         Bitmap bitmap = null;
         try {
             if(url.matches("^(https?|ftp)://.*$")) { // URL
-                // Use OkHttp to take advantage of configured options (such as caching)
-                OkHttpClient client = OkHttpClientProvider.getOkHttpClient();
-                Call call = client.newCall(new Request.Builder().url(url).build());
-                InputStream input = call.execute().body().byteStream();
+                URLConnection con = new URL(url).openConnection();
+                con.connect();
+                InputStream input = con.getInputStream();
                 bitmap = BitmapFactory.decodeStream(input);
                 input.close();
             } else { // File
