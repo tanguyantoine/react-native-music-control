@@ -51,8 +51,8 @@ dependencies {
 ```diff
 ...
 include ':app'
-+ include ':react-native-music-control'
-+ project(':react-native-music-control').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-music-control/android')
++include ':react-native-music-control'
++project(':react-native-music-control').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-music-control/android')
 ```
 
 **MainActivity.java**
@@ -123,6 +123,7 @@ MusicControl.resetNowPlaying()
 **Enable/disable controls**
 
 iOS: Lockscreen
+
 Android: Notification and external devices (cars, watches)
 
 ```javascript
@@ -187,7 +188,7 @@ componentDidMount() {
     MusicControl.on('disableLanguageOption', ()=> {}); // iOS only
     MusicControl.on('skipForward', ()=> {}); // iOS only
     MusicControl.on('skipBackward', ()=> {}); // iOS only
-  }
+}
 ```
 
 

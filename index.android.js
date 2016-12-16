@@ -1,6 +1,4 @@
 /**
- * Stub of MusicControl for Android.
- *
  * @providesModule MusicControl
  * @flow
  */
@@ -28,7 +26,7 @@ var MusicControl = {
   },
   setPlayback: function(info){
     NativeMusicControl.setPlayback(info)
-  }
+  },
   resetNowPlaying: function(){
     NativeMusicControl.resetNowPlaying()
   },
