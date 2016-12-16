@@ -16,13 +16,14 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.modules.network.OkHttpClientProvider;
+import com.squareup.okhttp.Call;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nullable;
 
 public class MusicControlModule extends ReactContextBaseJavaModule {
 
@@ -52,7 +53,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         return "MusicControl";
     }
 
-    @Nullable
     @Override
     public Map<String, Object> getConstants() {
         Map<String, Object> map = new HashMap<>();
@@ -253,10 +253,10 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         Bitmap bitmap = null;
         try {
             if(url.matches("^(https?|ftp)://.*$")) { // URL
-                URLConnection connection = new URL(url).openConnection();
-                connection.setDoInput(true);
-                connection.connect();
-                InputStream input = connection.getInputStream();
+                // Use OkHttp to take advantage of configured options (such as caching)
+                OkHttpClient client = OkHttpClientProvider.getOkHttpClient();
+                Call call = client.newCall(new Request.Builder().url(url).build());
+                InputStream input = call.execute().body().byteStream();
                 bitmap = BitmapFactory.decodeStream(input);
                 input.close();
             } else { // File

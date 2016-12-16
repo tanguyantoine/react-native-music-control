@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MusicControlPackage implements ReactPackage {
+public class MusicControl implements ReactPackage {
 
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext context) {
