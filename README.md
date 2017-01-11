@@ -22,6 +22,10 @@ npm install react-native-music-control --save
 
 ## iOS
 
+### Automatic
+
+`react-native link react-native-music-control`
+
 ### Manual
 
 In XCode, right click Libraries. Click Add Files to "[Your project]". Navigate to node_modules/react-native-music-control. Add the file MusicControl.xcodeproj.
@@ -199,7 +203,7 @@ componentDidMount() {
 - [ ] Test
 - [x] Publish package
 - [x] React-Native link configuration for Android
-- [ ] React-Native link configuration for iOS
+- [x] React-Native link configuration for iOS
 - [x] Android : Handle remote events
 - [x] Android : Display cover artwork
 
