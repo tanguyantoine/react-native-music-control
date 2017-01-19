@@ -95,9 +95,6 @@ public class MusicControlListener extends MediaSessionCompat.Callback {
 
             setCurrentVolume(volume);
             sendEvent(context, "volume", (double)volume);
-            System.out.println(volume);
-            System.out.println(getCurrentVolume());
-            System.out.println(direction);
         }
 
         public VolumeListener create(Boolean changeable, Integer maxVolume, Integer currentVolume) {
