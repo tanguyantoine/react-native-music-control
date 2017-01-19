@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.tanguyantoine.MusicControl">
+          package="com.tanguyantoine.react">
 
     <application>
-        <service android:stopWithTask="false" android:name="com.tanguyantoine.react.MusicControlNotification$NotificationService" />
+        <service android:stopWithTask="false" android:name=".MusicControlNotification$NotificationService" />
     </application>
 
 </manifest>

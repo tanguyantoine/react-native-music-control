@@ -13,7 +13,8 @@ import com.facebook.react.bridge.ReactApplicationContext;
 
 public class MusicControlNotification {
 
-    protected static final String REMOVE_NOTIFICATION = "remove_notification";
+    protected static final String REMOVE_NOTIFICATION = "music_control_remove_notification";
+    protected static final String MEDIA_BUTTON = "music_control_media_button";
 
     private final ReactApplicationContext context;
 
@@ -50,7 +51,7 @@ public class MusicControlNotification {
         builder.setSmallIcon(smallIcon);
 
         // Open the app when the notification is clicked
-        Intent openApp = new Intent(context, context.getClass());
+        Intent openApp = new Intent(context, getMainActivityClass());
         openApp.setAction(Intent.ACTION_MAIN);
         openApp.addCategory(Intent.CATEGORY_LAUNCHER);
         builder.setContentIntent(PendingIntent.getActivity(context, 0, openApp, 0));
@@ -102,12 +103,25 @@ public class MusicControlNotification {
         int icon = r.getIdentifier(iconName, "drawable", packageName);
 
         // Replace this to MediaButtonReceiver.buildMediaButtonPendingIntent when React Native updates the support library
+        // And don't forget to set the action to MEDIA_BUTTON
         int keyCode = toKeyCode(action);
-        Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        Intent intent = new Intent(MEDIA_BUTTON);
         intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
         PendingIntent i = PendingIntent.getBroadcast(context, keyCode, intent, 0);
 
         return new NotificationCompat.Action(icon, title, i);
+    }
+
+    private Class getMainActivityClass() {
+        String packageName = context.getPackageName();
+        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+        String className = launchIntent.getComponent().getClassName();
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static class NotificationService extends Service {

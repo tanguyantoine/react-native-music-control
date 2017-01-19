@@ -72,8 +72,8 @@ public class MusicControlListener extends MediaSessionCompat.Callback {
     public static class VolumeListener extends VolumeProviderCompat {
 
         private final ReactApplicationContext context;
-        public VolumeListener(ReactApplicationContext context, boolean changeable, int currentVolume) {
-            super(changeable ? VolumeProviderCompat.VOLUME_CONTROL_FIXED : VOLUME_CONTROL_ABSOLUTE, 100, currentVolume);
+        public VolumeListener(ReactApplicationContext context, boolean changeable, int maxVolume, int currentVolume) {
+            super(changeable ? VOLUME_CONTROL_ABSOLUTE : VOLUME_CONTROL_FIXED, maxVolume, currentVolume);
             this.context = context;
         }
 
@@ -83,15 +83,35 @@ public class MusicControlListener extends MediaSessionCompat.Callback {
 
         @Override
         public void onSetVolumeTo(int volume) {
+            setCurrentVolume(volume);
             sendEvent(context, "volume", (double)volume);
         }
 
-        public VolumeListener create(Boolean changeable, Integer currentVolume) {
-            if(changeable == null) changeable = isChangeable();
-            if(currentVolume == null) currentVolume = getCurrentVolume();
-            if(changeable == isChangeable() && currentVolume == getCurrentVolume()) return this;
+        @Override
+        public void onAdjustVolume(int direction) {
+            int maxVolume = getMaxVolume();
+            int tick = direction * (maxVolume / 10);
+            int volume = Math.max(Math.min(getCurrentVolume() + tick, maxVolume), 0);
 
-            return new VolumeListener(context, changeable, currentVolume);
+            setCurrentVolume(volume);
+            sendEvent(context, "volume", (double)volume);
+            System.out.println(volume);
+            System.out.println(getCurrentVolume());
+            System.out.println(direction);
+        }
+
+        public VolumeListener create(Boolean changeable, Integer maxVolume, Integer currentVolume) {
+            if(currentVolume == null) {
+                currentVolume = getCurrentVolume();
+            } else {
+                setCurrentVolume(currentVolume);
+            }
+
+            if(changeable == null) changeable = isChangeable();
+            if(maxVolume == null) maxVolume = getMaxVolume();
+
+            if(changeable == isChangeable() && maxVolume == getMaxVolume()) return this;
+            return new VolumeListener(context, changeable, maxVolume, currentVolume);
         }
     }
 
