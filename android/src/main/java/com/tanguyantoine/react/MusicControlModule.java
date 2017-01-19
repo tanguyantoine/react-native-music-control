@@ -93,8 +93,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MusicControlNotification.REMOVE_NOTIFICATION);
+        filter.addAction(MusicControlNotification.MEDIA_BUTTON);
         filter.addAction(Intent.ACTION_MEDIA_BUTTON);
-        receiver = new MusicControlReceiver(this);
+        receiver = new MusicControlReceiver(this, context.getPackageName());
         context.registerReceiver(receiver, filter);
 
         context.startService(new Intent(context, MusicControlNotification.NotificationService.class));
