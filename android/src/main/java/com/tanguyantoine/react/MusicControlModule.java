@@ -1,94 +1,54 @@
 package com.tanguyantoine.react;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.media.AudioManager;
-import android.media.session.MediaSession;
-import android.os.IBinder;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.RatingCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
-
-import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.ReadableNativeMap;
-import com.facebook.react.bridge.WritableNativeMap;
-import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.ReadableMap;
 
-
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.HashMap;
 import java.util.Map;
 
-
 public class MusicControlModule extends ReactContextBaseJavaModule {
-    private ReactContext reactContext;
-    private MediaSession mediaSession;
-    private Notification.Builder notificationBuilder;
-    private ReadableMap infos;
-    private WritableNativeMap enabledControls;
 
-    public static final String MUSIC_CONTROL_EVENT_NAME = "RNMusicControlEvent";
-    public static final String ACTION_PLAY = "play";
-    public static final String ACTION_PAUSE = "pause";
-    public static final String ACTION_NEXT = "nextTrack";
-    public static final String ACTION_PREVIOUS = "previousTrack";
-    public static final String ACTION_STOP = "STOP";
+    static MusicControlModule INSTANCE;
 
-    public static final String CONTROL_pause = "pause";
-    public static final String CONTROL_play = "play";
-    public static final String CONTROL_stop = "stop";
-    public static final String CONTROL_nextTrack = "nextTrack";
-    public static final String CONTROL_previousTrack = "previousTrack";
-    //public static final String CONTROL_seekForward = "seekForward";
-    //public static final String CONTROL_seekBackward = "seekBackward";
+    private boolean init = false;
+    protected MediaSessionCompat session;
 
-    public static final int NOTIFICATION_ID = 7386298;
+    private MediaMetadataCompat.Builder md;
+    private PlaybackStateCompat.Builder pb;
+    private NotificationCompat.Builder nb;
 
-    public MusicControlModule(ReactApplicationContext reactContext, Activity activity) {
-        super(reactContext);
-        this.reactContext = reactContext;
-        this.mediaSession = new MediaSession(reactContext, reactContext.getPackageName());
-        this.enabledControls = new WritableNativeMap();
-        this.infos = new ReadableNativeMap();
+    private MusicControlNotification notification;
+    private MusicControlListener.VolumeListener volume;
+    private MusicControlReceiver receiver;
 
-        IntentFilter intentFilter = new IntentFilter("nextTrack");
+    private Thread artworkThread;
 
-        reactContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                sendEvent("nextTrack");
-            }
-        }, intentFilter);
-    }
+    private boolean isPlaying = false;
+    private long controls = 0;
 
-    public void handleIntent(Intent intent) {
-        sendEvent("play");
-        new AlertDialog.Builder(reactContext)
-                .setTitle("Delete entry")
-                .setMessage("Are you sure you want to delete this entry?")
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // continue with delete
-                    }
-                })
-                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // do nothing
-                    }
-                })
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .show();
+    public MusicControlModule(ReactApplicationContext context) {
+        super(context);
     }
 
     @Override
@@ -96,99 +56,251 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         return "MusicControlManager";
     }
 
-    @ReactMethod
-    public void enableBackgroundMode(Boolean enable) {
-        WritableMap params = Arguments.createMap();
-        this.mediaSession.setActive(true);
+    @Override
+    public Map<String, Object> getConstants() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("STATE_ERROR", PlaybackStateCompat.STATE_ERROR);
+        map.put("STATE_STOPPED", PlaybackStateCompat.STATE_STOPPED);
+        map.put("STATE_PLAYING", PlaybackStateCompat.STATE_PLAYING);
+        map.put("STATE_PAUSED", PlaybackStateCompat.STATE_PAUSED);
+        map.put("STATE_BUFFERING", PlaybackStateCompat.STATE_BUFFERING);
+        return map;
+    }
+
+    public void init() {
+        INSTANCE = this;
+        ReactApplicationContext context = getReactApplicationContext();
+
+        ComponentName compName = new ComponentName(context, MusicControlReceiver.class);
+
+        session = new MediaSessionCompat(context, "MusicControl", compName, null);
+        session.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
+                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        session.setCallback(new MusicControlListener(context));
+
+        volume = new MusicControlListener.VolumeListener(context, true, 100);
+        session.setPlaybackToRemote(volume);
+
+        md = new MediaMetadataCompat.Builder();
+        pb = new PlaybackStateCompat.Builder();
+        pb.setActions(controls);
+        nb = new NotificationCompat.Builder(context);
+        nb.setStyle(new NotificationCompat.MediaStyle().setMediaSession(session.getSessionToken()));
+
+        notification = new MusicControlNotification(context);
+        notification.updateActions(controls);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(MusicControlNotification.REMOVE_NOTIFICATION);
+        filter.addAction(Intent.ACTION_MEDIA_BUTTON);
+        receiver = new MusicControlReceiver(notification, session);
+        context.registerReceiver(receiver, filter);
+
+        context.startService(new Intent(context, MusicControlNotification.NotificationService.class));
+
+        isPlaying = false;
+        init = true;
+    }
+
+    public void destroy() {
+        notification.hide();
+        session.release();
+        getReactApplicationContext().unregisterReceiver(receiver);
+
+        if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
+        artworkThread = null;
+
+        session = null;
+        notification = null;
+        volume = null;
+        receiver = null;
+        md = null;
+        pb = null;
+        nb = null;
+
+        init = false;
     }
 
     @ReactMethod
-    public void setNowPlaying(ReadableMap newInfos) {
-        this.infos = newInfos;
-        updateNotification();
+    public void enableBackgroundMode(boolean enable) {
+        // Nothing?
+    }
+
+    @ReactMethod
+    public void setNowPlaying(ReadableMap metadata) {
+        if(!init) init();
+        if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
+
+        String title = metadata.hasKey("title") ? metadata.getString("title") : null;
+        String artist = metadata.hasKey("artist") ? metadata.getString("artist") : null;
+        String album = metadata.hasKey("album") ? metadata.getString("album") : null;
+        String genre = metadata.hasKey("genre") ? metadata.getString("genre") : null;
+        String description = metadata.hasKey("description") ? metadata.getString("description") : null;
+        String date = metadata.hasKey("date") ? metadata.getString("date") : null;
+        RatingCompat rating = metadata.hasKey("rating") ? RatingCompat.newPercentageRating(metadata.getInt("rating")) : null;
+        final String artwork = metadata.hasKey("artwork") ? metadata.getString("artwork") : null;
+        long duration = metadata.hasKey("duration") ? (long)(metadata.getDouble("duration") * 1000) : 0;
+        int notificationColor = metadata.hasKey("color") ? metadata.getInt("color") : NotificationCompat.COLOR_DEFAULT;
+
+        md.putText(MediaMetadataCompat.METADATA_KEY_TITLE, title);
+        md.putText(MediaMetadataCompat.METADATA_KEY_ARTIST, artist);
+        md.putText(MediaMetadataCompat.METADATA_KEY_ALBUM, album);
+        md.putText(MediaMetadataCompat.METADATA_KEY_GENRE, genre);
+        md.putText(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, description);
+        md.putText(MediaMetadataCompat.METADATA_KEY_DATE, date);
+        md.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration);
+        md.putRating(MediaMetadataCompat.METADATA_KEY_RATING, rating);
+
+        nb.setContentTitle(title);
+        nb.setContentText(artist);
+        nb.setContentInfo(album);
+        nb.setColor(notificationColor);
+
+        if(artwork != null) {
+            artworkThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Bitmap bitmap = loadArtwork(artwork);
+                    md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap);
+                    nb.setLargeIcon(bitmap);
+
+                    session.setMetadata(md.build());
+                    notification.show(nb, isPlaying);
+                    artworkThread = null;
+                }
+            });
+            artworkThread.start();
+        } else {
+            md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, null);
+            nb.setLargeIcon(null);
+        }
+
+        session.setMetadata(md.build());
+        session.setActive(true);
+        notification.show(nb, isPlaying);
+    }
+
+    @ReactMethod
+    public void setPlayback(ReadableMap info) {
+        if(!init) init();
+
+        long elapsedTime = info.hasKey("elapsedTime") ? (long)(info.getDouble("elapsedTime") * 1000) : 0;
+        long bufferedTime = info.hasKey("bufferedTime") ? (long)(info.getDouble("bufferedTime") * 1000) : 0;
+        float speed = info.hasKey("speed") ? (float)info.getDouble("speed") : 1;
+        int state = info.hasKey("state") ? info.getInt("state") : PlaybackStateCompat.STATE_NONE;
+        int vol = info.hasKey("volume") ? info.getInt("volume") : 100;
+
+        pb.setState(state, elapsedTime, speed);
+        pb.setBufferedPosition(bufferedTime);
+
+        isPlaying = state == PlaybackStateCompat.STATE_PLAYING || state == PlaybackStateCompat.STATE_BUFFERING;
+        notification.show(nb, isPlaying);
+
+        PlaybackStateCompat playbackState = pb.build();
+        session.setPlaybackState(playbackState);
+        session.setPlaybackToRemote(volume.create(null, vol));
     }
 
     @ReactMethod
     public void resetNowPlaying() {
-        infos = new ReadableNativeMap();
-        updateNotification();
+        if(!init) return;
+        if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
+        artworkThread = null;
+
+        md = new MediaMetadataCompat.Builder();
+        pb = new PlaybackStateCompat.Builder();
+
+        notification.hide();
+        session.setActive(false);
     }
 
     @ReactMethod
-    public void enableControl(String controlName, Boolean enabled) {
-        this.enabledControls.putBoolean(controlName, enabled);
-        updateNotification();
-    }
+    public void enableControl(String control, boolean enable) {
+        if(!init) init();
 
-
-    private void sendEvent(String eventName) {
-        WritableMap params = Arguments.createMap();
-        params.putString("name", eventName);
-        reactContext
-                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                .emit(MUSIC_CONTROL_EVENT_NAME, params);
-    }
-
-    private Notification.Action generateAction(int icon, String title, String intentAction) {
-        Intent intent = new Intent(reactContext, MusicControlBroadcastReceiver.class);
-        intent.setAction(intentAction);
-        PendingIntent pendingIntent = PendingIntent.getService(reactContext, 1, intent, 0);
-        return new Notification.Action.Builder(icon, title, pendingIntent).build();
-    }
-
-    private void updateNotification(){
-        initNotificationBuilder();
-
-        this.notificationBuilder
-                .setSmallIcon(android.R.drawable.arrow_up_float);
-        String title = infos.hasKey("title") ? infos.getString("title") : "";
-        String content = infos.hasKey("artist") ? infos.getString("artist") : "";
-        this.notificationBuilder
-                .setContentTitle(title)
-                .setContentText(content);
-
-        if(shouldActivateControl(CONTROL_previousTrack)){
-            this.notificationBuilder
-                    .addAction(generateAction(android.R.drawable.ic_media_previous, "Previous", ACTION_PREVIOUS));
-        }
-        //builder.addAction(generateAction(android.R.drawable.ic_media_rew, "Rewind", ACTION_REWIND));
-        if(shouldActivateControl(CONTROL_play)) {
-            this.notificationBuilder
-                    .addAction(generateAction(android.R.drawable.ic_media_play, "Play", ACTION_PLAY));
-        }
-        if(shouldActivateControl(CONTROL_pause)) {
-            this.notificationBuilder
-                    .addAction(generateAction(android.R.drawable.ic_media_pause, "Pause", ACTION_PAUSE));
-        }
-        //builder.addAction(generateAction(android.R.drawable.ic_media_ff, "Fast Foward", ACTION_FAST_FORWARD));
-        if(shouldActivateControl(CONTROL_nextTrack)) {
-            this.notificationBuilder
-                    .addAction(generateAction(android.R.drawable.ic_media_next, "Next", ACTION_NEXT));
+        long controlValue;
+        switch(control) {
+            case "nextTrack":
+                controlValue = PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
+                break;
+            case "previousTrack":
+                controlValue = PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS;
+                break;
+            case "play":
+                controlValue = PlaybackStateCompat.ACTION_PLAY;
+                break;
+            case "pause":
+                controlValue = PlaybackStateCompat.ACTION_PAUSE;
+                break;
+            case "togglePlayPause":
+                controlValue = PlaybackStateCompat.ACTION_PLAY_PAUSE;
+                break;
+            case "stop":
+                controlValue = PlaybackStateCompat.ACTION_STOP;
+                break;
+            case "seek":
+                controlValue = PlaybackStateCompat.ACTION_SEEK_TO;
+                break;
+            case "seekForward":
+                controlValue = PlaybackStateCompat.ACTION_FAST_FORWARD;
+                break;
+            case "seekBackward":
+                controlValue = PlaybackStateCompat.ACTION_REWIND;
+                break;
+            case "rate":
+                controlValue = PlaybackStateCompat.ACTION_SET_RATING;
+                break;
+            case "volume":
+                session.setPlaybackToRemote(volume.create(enable, null));
+                return;
+            default:
+                // Unknown control type, let's just ignore it
+                return;
         }
 
-        notify(this.notificationBuilder);
-    }
-    private boolean shouldActivateControl(String controlName){
-        return enabledControls.hasKey(controlName) && enabledControls.getBoolean(controlName);
+        if(enable) {
+            controls |= controlValue;
+        } else {
+            controls &= ~controlValue;
+        }
 
+        notification.updateActions(controls);
+        pb.setActions(controls);
+        session.setPlaybackState(pb.build());
     }
-    private void initNotificationBuilder(){
-        if(notificationBuilder == null) {
-            Notification.MediaStyle style = new Notification.MediaStyle();
-            Intent intent = new Intent(reactContext, getClass());
-            intent.setAction(ACTION_STOP);
-            PendingIntent pendingIntent = PendingIntent.getService(reactContext, 1, intent, 0);
-            this.notificationBuilder = new Notification.Builder(reactContext);
-            this.notificationBuilder
-                    .setStyle(style)
-                    .setVisibility(Notification.VISIBILITY_PUBLIC)
-                    .setDeleteIntent(pendingIntent);
+
+    private Bitmap loadArtwork(String url) {
+        Bitmap bitmap = null;
+        try {
+            if(url.matches("^(https?|ftp)://.*$")) { // URL
+                URLConnection con = new URL(url).openConnection();
+                con.connect();
+                InputStream input = con.getInputStream();
+                bitmap = BitmapFactory.decodeStream(input);
+                input.close();
+            } else { // File
+                //bitmap = BitmapFactory.decodeFile(url);
+                bitmap = getBitmapFromLocal(url);
+            }
+        } catch(IOException ex) {
+            Log.w("MusicControl", "Could not load the artwork", ex);
+        }
+        return bitmap;
+    }
+
+    private Bitmap getBitmapFromLocal(String localURL){
+        try {
+            Uri uri = Uri.parse(localURL);
+            File file = new File(uri.getPath());
+            FileInputStream fileStream = new FileInputStream(file);
+            BufferedInputStream buf = new BufferedInputStream(fileStream);
+            Bitmap myBitmap = BitmapFactory.decodeStream(buf);
+            buf.close();
+            return myBitmap;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
         }
     }
 
-    private void notify(Notification.Builder builder){
-        NotificationManager notificationManager = (NotificationManager) reactContext.getSystemService(Context.NOTIFICATION_SERVICE );
-        notificationManager.notify(NOTIFICATION_ID, builder.build());
-        this.notificationBuilder = null;
-    }
 }
