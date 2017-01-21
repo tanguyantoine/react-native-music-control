@@ -13,7 +13,9 @@ import com.facebook.react.bridge.ReactApplicationContext;
 
 public class MusicControlNotification {
 
-    protected static final String REMOVE_NOTIFICATION = "remove_notification";
+    protected static final String REMOVE_NOTIFICATION = "music_control_remove_notification";
+    protected static final String MEDIA_BUTTON = "music_control_media_button";
+    protected static final String PACKAGE_NAME = "music_control_package_name";
 
     private final ReactApplicationContext context;
 
@@ -58,7 +60,8 @@ public class MusicControlNotification {
         if(!isPlaying) {
             // Remove notification
             Intent remove = new Intent(REMOVE_NOTIFICATION);
-            builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, remove, 0));
+            remove.putExtra(PACKAGE_NAME, context.getApplicationInfo().packageName);
+            builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, remove, PendingIntent.FLAG_UPDATE_CURRENT));
         }
 
         NotificationManagerCompat.from(context).notify("MusicControl", 0, builder.build());
@@ -101,13 +104,25 @@ public class MusicControlNotification {
         String packageName = context.getPackageName();
         int icon = r.getIdentifier(iconName, "drawable", packageName);
 
-        // Replace this to MediaButtonReceiver.buildMediaButtonPendingIntent when React Native updates the support library
         int keyCode = toKeyCode(action);
-        Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        Intent intent = new Intent(MEDIA_BUTTON);
         intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
-        PendingIntent i = PendingIntent.getBroadcast(context, keyCode, intent, 0);
+        intent.putExtra(PACKAGE_NAME, packageName);
+        PendingIntent i = PendingIntent.getBroadcast(context, keyCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         return new NotificationCompat.Action(icon, title, i);
+    }
+
+    private Class getMainActivityClass() {
+        String packageName = context.getPackageName();
+        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+        String className = launchIntent.getComponent().getClassName();
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static class NotificationService extends Service {
@@ -129,18 +144,6 @@ public class MusicControlNotification {
             stopSelf();
         }
 
-    }
-    
-    public Class getMainActivityClass() {
-        String packageName = context.getPackageName();
-        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
-        String className = launchIntent.getComponent().getClassName();
-        try {
-            return Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
 }

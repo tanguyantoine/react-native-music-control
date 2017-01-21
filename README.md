@@ -111,7 +111,8 @@ Currently, Android only
 ```javascript
 MusicControl.setPlayback({
   state: MusicControl.STATE_PLAYING, // (STATE_ERROR, STATE_STOPPED, STATE_PLAYING, STATE_PAUSED, STATE_BUFFERING)
-  volume: 100, // (Percentage)
+  volume: 10, // (Number from 0 to maxVolume) - Only used when remoteVolume is enabled
+  maxVolume: 10, // (Number) - Only used when remoteVolume is enabled
   speed: 1, // Playback Rate
   elapsedTime: 103, // (Seconds)
   bufferedTime: 200 // (Seconds)
@@ -140,7 +141,8 @@ MusicControl.enableControl('seekForward', false);
 MusicControl.enableControl('seekBackward', false);
 MusicControl.enableControl('seek', false) // Android only
 MusicControl.enableControl('rate', false) // Android only
-MusicControl.enableControl('volume', true) // Android only
+MusicControl.enableControl('volume', true) // Android only  - Only affected when remoteVolume is enabled
+MusicControl.enableControl('remoteVolume', false) // Android only
 MusicControl.enableControl('enableLanguageOption', false); // iOS only
 MusicControl.enableControl('disableLanguageOption', false); // iOS only
 MusicControl.enableControl('skipForward', false); // iOS only
@@ -185,7 +187,7 @@ componentDidMount() {
     
     MusicControl.on('seek', (pos)=> {}); // Android only (Seconds)
     MusicControl.on('rate', (rating)=> {}); // Android only (Percentage)
-    MusicControl.on('volume', (volume)=> {}); // Android only (Percentage)
+    MusicControl.on('volume', (volume)=> {}); // Android only (0 to maxVolume) - Only fired when remoteVolume is enabled
     
     MusicControl.on('togglePlayPause', ()=> {}); // iOS only
     MusicControl.on('enableLanguageOption', ()=> {}); // iOS only
