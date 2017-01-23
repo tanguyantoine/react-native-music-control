@@ -139,7 +139,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         String genre = metadata.hasKey("genre") ? metadata.getString("genre") : null;
         String description = metadata.hasKey("description") ? metadata.getString("description") : null;
         String date = metadata.hasKey("date") ? metadata.getString("date") : null;
-        RatingCompat rating = metadata.hasKey("rating") ? RatingCompat.newPercentageRating(metadata.getInt("rating")) : null;
+        RatingCompat rating = metadata.hasKey("rating") ? RatingCompat.newPercentageRating(metadata.getInt("rating")) : RatingCompat.newUnratedRating();
         final String artwork = metadata.hasKey("artwork") ? metadata.getString("artwork") : null;
         long duration = metadata.hasKey("duration") ? (long)(metadata.getDouble("duration") * 1000) : 0;
         int notificationColor = metadata.hasKey("color") ? metadata.getInt("color") : NotificationCompat.COLOR_DEFAULT;
