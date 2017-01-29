@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
@@ -38,9 +39,10 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
     private PlaybackStateCompat.Builder pb;
     private NotificationCompat.Builder nb;
 
-    private MusicControlNotification notification;
+    protected MusicControlNotification notification;
     private MusicControlListener.VolumeListener volume;
     private MusicControlReceiver receiver;
+    private boolean remoteVolume = false;
 
     private Thread artworkThread;
 
@@ -78,8 +80,12 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
                 MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
         session.setCallback(new MusicControlListener(context));
 
-        volume = new MusicControlListener.VolumeListener(context, true, 100);
-        session.setPlaybackToRemote(volume);
+        volume = new MusicControlListener.VolumeListener(context, true, 100, 100);
+        if(remoteVolume) {
+            session.setPlaybackToRemote(volume);
+        } else {
+            session.setPlaybackToLocal(AudioManager.STREAM_MUSIC);
+        }
 
         md = new MediaMetadataCompat.Builder();
         pb = new PlaybackStateCompat.Builder();
@@ -92,8 +98,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MusicControlNotification.REMOVE_NOTIFICATION);
+        filter.addAction(MusicControlNotification.MEDIA_BUTTON);
         filter.addAction(Intent.ACTION_MEDIA_BUTTON);
-        receiver = new MusicControlReceiver(notification, session);
+        receiver = new MusicControlReceiver(this, context.getPackageName());
         context.registerReceiver(receiver, filter);
 
         context.startService(new Intent(context, MusicControlNotification.NotificationService.class));
@@ -137,7 +144,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         String genre = metadata.hasKey("genre") ? metadata.getString("genre") : null;
         String description = metadata.hasKey("description") ? metadata.getString("description") : null;
         String date = metadata.hasKey("date") ? metadata.getString("date") : null;
-        RatingCompat rating = metadata.hasKey("rating") ? RatingCompat.newPercentageRating(metadata.getInt("rating")) : null;
+        RatingCompat rating = metadata.hasKey("rating") ? RatingCompat.newPercentageRating(metadata.getInt("rating")) : RatingCompat.newUnratedRating(RatingCompat.RATING_PERCENTAGE);
         final String artwork = metadata.hasKey("artwork") ? metadata.getString("artwork") : null;
         long duration = metadata.hasKey("duration") ? (long)(metadata.getDouble("duration") * 1000) : 0;
         int notificationColor = metadata.hasKey("color") ? metadata.getInt("color") : NotificationCompat.COLOR_DEFAULT;
@@ -160,6 +167,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
             artworkThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
+                    System.out.println("artwork " + artwork);
                     Bitmap bitmap = loadArtwork(artwork);
                     md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap);
                     nb.setLargeIcon(bitmap);
@@ -188,7 +196,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         long bufferedTime = info.hasKey("bufferedTime") ? (long)(info.getDouble("bufferedTime") * 1000) : 0;
         float speed = info.hasKey("speed") ? (float)info.getDouble("speed") : 1;
         int state = info.hasKey("state") ? info.getInt("state") : PlaybackStateCompat.STATE_NONE;
-        int vol = info.hasKey("volume") ? info.getInt("volume") : 100;
+        int maxVol = info.hasKey("maxVolume") ? info.getInt("maxVol") : 100;
+        int vol = info.hasKey("volume") ? info.getInt("volume") : maxVol;
 
         pb.setState(state, elapsedTime, speed);
         pb.setBufferedPosition(bufferedTime);
@@ -198,7 +207,12 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
 
         PlaybackStateCompat playbackState = pb.build();
         session.setPlaybackState(playbackState);
-        session.setPlaybackToRemote(volume.create(null, vol));
+
+        if(remoteVolume) {
+            session.setPlaybackToRemote(volume.create(null, maxVol, vol));
+        } else {
+            session.setPlaybackToLocal(AudioManager.STREAM_MUSIC);
+        }
     }
 
     @ReactMethod
@@ -251,8 +265,20 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
                 controlValue = PlaybackStateCompat.ACTION_SET_RATING;
                 break;
             case "volume":
-                session.setPlaybackToRemote(volume.create(enable, null));
+                volume = volume.create(enable, null, null);
+                if(remoteVolume) {
+                    session.setPlaybackToRemote(volume);
+                } else {
+                    session.setPlaybackToLocal(AudioManager.STREAM_MUSIC);
+                }
                 return;
+            case "remoteVolume":
+                remoteVolume = enable;
+                if(enable) {
+                    session.setPlaybackToRemote(volume);
+                } else {
+                    session.setPlaybackToLocal(AudioManager.STREAM_MUSIC);
+                }
             default:
                 // Unknown control type, let's just ignore it
                 return;
@@ -279,7 +305,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
                 bitmap = BitmapFactory.decodeStream(input);
                 input.close();
             } else { // File
-                //bitmap = BitmapFactory.decodeFile(url);
+                System.out.println("local " + url);
                 bitmap = getBitmapFromLocal(url);
             }
         } catch(IOException ex) {
