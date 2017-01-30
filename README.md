@@ -24,7 +24,7 @@ npm install react-native-music-control --save
 
 ### Automatic
 
-`react-native link react-native-music-control`
+`react-native link`
 
 ### Manual
 
