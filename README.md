@@ -37,7 +37,7 @@ In the Project Navigator, select your project. Click the build target. Click Bui
 
 ### Automatic
 
-`react-native link react-native-music-control`
+`react-native link`
 
 ### Manual
 
@@ -161,34 +161,34 @@ MusicControl.enableControl('skipForward', true, {interval: 30}))
 ```javascript
 componentDidMount() {
     MusicControl.enableBackgroundMode(true);
-    
+
     MusicControl.on('play', ()=> {
       this.props.dispatch(playRemoteControl());
     })
-    
+
     MusicControl.on('pause', ()=> {
       this.props.dispatch(pauseRemoteControl());
     })
-    
+
     MusicControl.on('stop', ()=> {
       this.props.dispatch(stopRemoteControl());
     })
-    
+
     MusicControl.on('nextTrack', ()=> {
       this.props.dispatch(nextRemoteControl());
     })
-    
+
     MusicControl.on('previousTrack', ()=> {
       this.props.dispatch(previousRemoteControl());
     })
-    
+
     MusicControl.on('seekForward', ()=> {});
     MusicControl.on('seekBackward', ()=> {});
-    
+
     MusicControl.on('seek', (pos)=> {}); // Android only (Seconds)
     MusicControl.on('rate', (rating)=> {}); // Android only (Percentage)
     MusicControl.on('volume', (volume)=> {}); // Android only (0 to maxVolume) - Only fired when remoteVolume is enabled
-    
+
     MusicControl.on('togglePlayPause', ()=> {}); // iOS only
     MusicControl.on('enableLanguageOption', ()=> {}); // iOS only
     MusicControl.on('disableLanguageOption', ()=> {}); // iOS only
@@ -213,4 +213,3 @@ componentDidMount() {
 # Contributing
 
 ### Of coursssssseeeeee. I'm waiting your PR :)
- 
