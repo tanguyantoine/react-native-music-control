@@ -11,6 +11,10 @@ Mix between :
 * https://github.com/homerours/cordova-music-controls-plugin (Android)
 * https://github.com/shi11/RemoteControls/pull/32 (Android)
 
+Project using it :
+
+* https://github.com/just-team/react-native-youtube-player
+
 
 # Install
 
