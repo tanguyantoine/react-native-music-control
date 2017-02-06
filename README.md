@@ -15,6 +15,7 @@ Project using it :
 
 * https://github.com/just-team/react-native-youtube-player
 
+![Image of Yaktocat](./docs/ios.png)
 
 # Install
 
