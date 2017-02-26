@@ -23,6 +23,27 @@ RCT_EXPORT_MODULE()
     return dispatch_get_main_queue();
 }
 
+RCT_EXPORT_METHOD(togglePause:(nonnull NSNumber *) elapsed)
+{
+    MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
+    
+    if (center.nowPlayingInfo == nil) {
+        return;
+    }
+    
+    NSMutableDictionary *mediaDict = [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo];
+
+    NSNumber *speed = [[mediaDict objectForKey:MPNowPlayingInfoPropertyPlaybackRate] isEqual:[NSNumber numberWithDouble:0]]
+        ? [NSNumber numberWithDouble:1]
+        : [NSNumber numberWithDouble:0];
+
+    
+    [mediaDict setValue:speed forKey:MPNowPlayingInfoPropertyPlaybackRate];
+    [mediaDict setValue:elapsed forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
+    
+    center.nowPlayingInfo = mediaDict;
+}
+
 RCT_EXPORT_METHOD(setNowPlaying:(NSDictionary *) details)
 {
 

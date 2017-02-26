@@ -14,6 +14,9 @@ var handlers = { };
 var subscription = null;
 
 var MusicControl = {
+  togglePause: function(elapsed) {
+    NativeMusicControl.togglePause(elapsed);
+  },
   enableBackgroundMode: function(enable){
     NativeMusicControl.enableBackgroundMode(enable)
   },
