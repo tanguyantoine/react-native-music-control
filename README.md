@@ -152,6 +152,8 @@ MusicControl.enableControl('enableLanguageOption', false); // iOS only
 MusicControl.enableControl('disableLanguageOption', false); // iOS only
 MusicControl.enableControl('skipForward', false); // iOS only
 MusicControl.enableControl('skipBackward', false); // iOS only
+
+MusicControl.togglePause(45); // Elapsed time in seconds, iOS only
 ```
 
 `skipBackward` and `skipForward` controls on iOS accept additional configuration options with `interval` key:
