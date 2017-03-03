@@ -299,19 +299,19 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         Bitmap bitmap = null;
 
         try {
-            if(artworkReactAsset) {
+            if(url.matches("^(https?|ftp)://.*$")) { // URL
+                URLConnection con = new URL(url).openConnection();
+                con.connect();
+                InputStream input = con.getInputStream();
+                bitmap = BitmapFactory.decodeStream(input);
+                input.close();
+            } else if(artworkReactAsset) {
                 //Artwork passed using require('./image.png);
                 Drawable image = ResourceDrawableIdHelper
                         .getInstance()
                         .getResourceDrawable(this.getReactApplicationContext(), url);
 
                 bitmap = ((BitmapDrawable) image).getBitmap();
-            } else if(url.matches("^(https?|ftp)://.*$")) { // URL
-                URLConnection con = new URL(url).openConnection();
-                con.connect();
-                InputStream input = con.getInputStream();
-                bitmap = BitmapFactory.decodeStream(input);
-                input.close();
             } else { // File
                 bitmap = BitmapFactory.decodeFile(url);
             }
