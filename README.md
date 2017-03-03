@@ -97,7 +97,7 @@ NB: You should call this method after a sound is playing
 ```javascript
 MusicControl.setNowPlaying({
   title: 'Billie Jean',
-  artwork: 'http://lorempixel.com/400/400', // URL or File path
+  artwork: 'http://lorempixel.com/400/400', // URL, File path or require() ('require' support is Android only)
   artist: 'Michael Jackson',
   album: 'Thriller',
   genre: 'Post-disco, Rhythm and Blues, Funk, Dance-pop',
