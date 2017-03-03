@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
@@ -16,6 +18,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.views.imagehelper.ResourceDrawableIdHelper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -43,6 +46,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
 
     private boolean isPlaying = false;
     private long controls = 0;
+    //Flag to check if artwork is passed using react style "require('./image.png)"
+    private boolean fromRequire = false;
 
     public MusicControlModule(ReactApplicationContext context) {
         super(context);
@@ -143,6 +148,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         final String artwork = metadata.hasKey("artwork") ? metadata.getString("artwork") : null;
         long duration = metadata.hasKey("duration") ? (long)(metadata.getDouble("duration") * 1000) : 0;
         int notificationColor = metadata.hasKey("color") ? metadata.getInt("color") : NotificationCompat.COLOR_DEFAULT;
+        fromRequire = metadata.hasKey("fromRequire") ? metadata.getBoolean("fromRequire") : false;
 
         md.putText(MediaMetadataCompat.METADATA_KEY_TITLE, title);
         md.putText(MediaMetadataCompat.METADATA_KEY_ARTIST, artist);
@@ -291,8 +297,16 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
 
     private Bitmap loadArtwork(String url) {
         Bitmap bitmap = null;
+
         try {
-            if(url.matches("^(https?|ftp)://.*$")) { // URL
+            if(fromRequire) {
+                //Artwork passed using require('./image.png);
+                Drawable image = ResourceDrawableIdHelper
+                        .getInstance()
+                        .getResourceDrawable(this.getReactApplicationContext(), url);
+
+                bitmap = ((BitmapDrawable) image).getBitmap();
+            } else if(url.matches("^(https?|ftp)://.*$")) { // URL
                 URLConnection con = new URL(url).openConnection();
                 con.connect();
                 InputStream input = con.getInputStream();
