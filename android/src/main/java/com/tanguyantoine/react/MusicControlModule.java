@@ -18,6 +18,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.views.imagehelper.ResourceDrawableIdHelper;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,7 +48,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
     private boolean isPlaying = false;
     private long controls = 0;
     //Flag to check if artwork is passed using react style "require('./image.png)"
-    private boolean fromRequire = false;
+    private boolean artworkReactAsset = false;
 
     public MusicControlModule(ReactApplicationContext context) {
         super(context);
@@ -145,10 +146,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         String description = metadata.hasKey("description") ? metadata.getString("description") : null;
         String date = metadata.hasKey("date") ? metadata.getString("date") : null;
         RatingCompat rating = metadata.hasKey("rating") ? RatingCompat.newPercentageRating(metadata.getInt("rating")) : RatingCompat.newUnratedRating(RatingCompat.RATING_PERCENTAGE);
-        final String artwork = metadata.hasKey("artwork") ? metadata.getString("artwork") : null;
+        final String artwork = metadata.hasKey("artwork") ? extractArtwork(metadata): null;
         long duration = metadata.hasKey("duration") ? (long)(metadata.getDouble("duration") * 1000) : 0;
         int notificationColor = metadata.hasKey("color") ? metadata.getInt("color") : NotificationCompat.COLOR_DEFAULT;
-        fromRequire = metadata.hasKey("fromRequire") ? metadata.getBoolean("fromRequire") : false;
 
         md.putText(MediaMetadataCompat.METADATA_KEY_TITLE, title);
         md.putText(MediaMetadataCompat.METADATA_KEY_ARTIST, artist);
@@ -299,7 +299,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         Bitmap bitmap = null;
 
         try {
-            if(fromRequire) {
+            if(artworkReactAsset) {
                 //Artwork passed using require('./image.png);
                 Drawable image = ResourceDrawableIdHelper
                         .getInstance()
@@ -319,6 +319,19 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
             Log.w("MusicControl", "Could not load the artwork", ex);
         }
         return bitmap;
+    }
+
+    private String extractArtwork(ReadableMap inputMap) {
+        artworkReactAsset = false;  //Reset flag
+
+        //Check if artwork was passed using require()
+        if (inputMap.getType("artwork") == ReadableType.Map) {
+            artworkReactAsset = true;
+            return inputMap.getMap("artwork").getString("uri");
+        }
+
+        return inputMap.getString("artwork");
+
     }
 
 }

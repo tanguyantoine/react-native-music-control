@@ -25,11 +25,10 @@ var MusicControl = {
   setNowPlaying: function(info){
     //Check if we have an android asset id from react style image "require('./image.png')"
     if (info.artwork && !isNaN(info.artwork)) {
-      info.artwork = resolveAssetSource(info.artwork).uri;
-      info.fromRequire = true;
+      info.artwork = resolveAssetSource(info.artwork);
     }
 
-    NativeMusicControl.setNowPlaying(info)
+    NativeMusicControl.setNowPlaying(info);
   },
   setPlayback: function(info){
     NativeMusicControl.setPlayback(info)
