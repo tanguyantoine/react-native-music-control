@@ -5,8 +5,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
@@ -47,8 +47,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
 
     private boolean isPlaying = false;
     private long controls = 0;
-    //Flag to check if artwork is passed using react style "require('./image.png)"
-    private boolean artworkReactAsset = false;
 
     public MusicControlModule(ReactApplicationContext context) {
         super(context);
@@ -146,9 +144,19 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         String description = metadata.hasKey("description") ? metadata.getString("description") : null;
         String date = metadata.hasKey("date") ? metadata.getString("date") : null;
         RatingCompat rating = metadata.hasKey("rating") ? RatingCompat.newPercentageRating(metadata.getInt("rating")) : RatingCompat.newUnratedRating(RatingCompat.RATING_PERCENTAGE);
-        final String artwork = metadata.hasKey("artwork") ? extractArtwork(metadata): null;
         long duration = metadata.hasKey("duration") ? (long)(metadata.getDouble("duration") * 1000) : 0;
         int notificationColor = metadata.hasKey("color") ? metadata.getInt("color") : NotificationCompat.COLOR_DEFAULT;
+
+        String artwork = null;
+        boolean localArtwork = false;
+        if(metadata.hasKey("artwork")) {
+            if(metadata.getType("artwork") == ReadableType.Map) {
+                artwork = metadata.getMap("artwork").getString("uri");
+                localArtwork = true;
+            } else {
+                artwork = metadata.getString("artwork");
+            }
+        }
 
         md.putText(MediaMetadataCompat.METADATA_KEY_TITLE, title);
         md.putText(MediaMetadataCompat.METADATA_KEY_ARTIST, artist);
@@ -165,10 +173,13 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         nb.setColor(notificationColor);
 
         if(artwork != null) {
+            final String artworkUrl = artwork;
+            final boolean artworkLocal = localArtwork;
+
             artworkThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    Bitmap bitmap = loadArtwork(artwork);
+                    Bitmap bitmap = loadArtwork(artworkUrl, artworkLocal);
                     md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap);
                     nb.setLargeIcon(bitmap);
 
@@ -295,43 +306,35 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         session.setPlaybackState(pb.build());
     }
 
-    private Bitmap loadArtwork(String url) {
+    private Bitmap loadArtwork(String url, boolean local) {
         Bitmap bitmap = null;
 
         try {
-            if(url.matches("^(https?|ftp)://.*$")) { // URL
+            if(local) {
+
+                ResourceDrawableIdHelper helper = ResourceDrawableIdHelper.getInstance();
+                Drawable image = helper.getResourceDrawable(getReactApplicationContext(), url);
+
+                if(image instanceof BitmapDrawable) {
+                    bitmap = ((BitmapDrawable)image).getBitmap();
+                } else {
+                    bitmap = BitmapFactory.decodeFile(url);
+                }
+
+            } else {
+
                 URLConnection con = new URL(url).openConnection();
                 con.connect();
                 InputStream input = con.getInputStream();
                 bitmap = BitmapFactory.decodeStream(input);
                 input.close();
-            } else if(artworkReactAsset) {
-                //Artwork passed using require('./image.png);
-                Drawable image = ResourceDrawableIdHelper
-                        .getInstance()
-                        .getResourceDrawable(this.getReactApplicationContext(), url);
 
-                bitmap = ((BitmapDrawable) image).getBitmap();
-            } else { // File
-                bitmap = BitmapFactory.decodeFile(url);
             }
         } catch(IOException ex) {
             Log.w("MusicControl", "Could not load the artwork", ex);
         }
+
         return bitmap;
-    }
-
-    private String extractArtwork(ReadableMap inputMap) {
-        artworkReactAsset = false;  //Reset flag
-
-        //Check if artwork was passed using require()
-        if (inputMap.getType("artwork") == ReadableType.Map) {
-            artworkReactAsset = true;
-            return inputMap.getMap("artwork").getString("uri");
-        }
-
-        return inputMap.getString("artwork");
-
     }
 
 }
