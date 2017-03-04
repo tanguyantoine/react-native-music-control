@@ -14,8 +14,11 @@ var handlers = { };
 var subscription = null;
 
 var MusicControl = {
-  updatePlaying: function(info) {
-    NativeMusicControl.updatePlaying(info);
+  setPlayback: function (info) {
+    NativeMusicControl.updatePlayback(info);
+  },
+  updatePlayback: function(info) {
+    NativeMusicControl.updatePlayback(info);
   },
   enableBackgroundMode: function(enable){
     NativeMusicControl.enableBackgroundMode(enable)
