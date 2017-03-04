@@ -23,15 +23,17 @@ var MusicControl = {
     NativeMusicControl.enableBackgroundMode(enable)
   },
   setNowPlaying: function(info){
-    //Check if we have an android asset id from react style image "require('./image.png')"
-    if (info.artwork && !isNaN(info.artwork)) {
-      info.artwork = resolveAssetSource(info.artwork);
-    }
+    // Check if we have an android asset from react style image require
+    if(info.artwork) info.artwork = resolveAssetSource(info.artwork);
 
     NativeMusicControl.setNowPlaying(info);
   },
   setPlayback: function(info){
-    NativeMusicControl.setPlayback(info)
+    // Backwards compatibility. Use updatePlayback instead.
+    NativeMusicControl.updatePlayback(info)
+  },
+  updatePlayback: function(info){
+    NativeMusicControl.updatePlayback(info)
   },
   resetNowPlaying: function(){
     NativeMusicControl.resetNowPlaying()
@@ -51,7 +53,6 @@ var MusicControl = {
     subscription = DeviceEventEmitter.addListener(
       'RNMusicControlEvent',
       (event) => {
-        console.log(event);
         MusicControl.handleCommand(event.name, event.value)
       }
     );

@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
+import android.os.SystemClock;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -37,6 +38,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
     private MediaMetadataCompat.Builder md;
     private PlaybackStateCompat.Builder pb;
     private NotificationCompat.Builder nb;
+
+    private PlaybackStateCompat state;
 
     protected MusicControlNotification notification;
     private MusicControlListener.VolumeListener volume;
@@ -91,6 +94,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         pb.setActions(controls);
         nb = new NotificationCompat.Builder(context);
         nb.setStyle(new NotificationCompat.MediaStyle().setMediaSession(session.getSessionToken()));
+
+        state = pb.build();
 
         notification = new MusicControlNotification(context);
         notification.updateActions(controls);
@@ -200,24 +205,33 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setPlayback(ReadableMap info) {
+    public void updatePlayback(ReadableMap info) {
         if(!init) init();
 
-        long elapsedTime = info.hasKey("elapsedTime") ? (long)(info.getDouble("elapsedTime") * 1000) : 0;
-        long bufferedTime = info.hasKey("bufferedTime") ? (long)(info.getDouble("bufferedTime") * 1000) : 0;
-        float speed = info.hasKey("speed") ? (float)info.getDouble("speed") : 1;
-        int state = info.hasKey("state") ? info.getInt("state") : PlaybackStateCompat.STATE_NONE;
-        int maxVol = info.hasKey("maxVolume") ? info.getInt("maxVol") : 100;
-        int vol = info.hasKey("volume") ? info.getInt("volume") : maxVol;
+        long elapsedTime;
+        long bufferedTime = info.hasKey("bufferedTime") ? (long)(info.getDouble("bufferedTime") * 1000) : state.getBufferedPosition();
+        float speed = info.hasKey("speed") ? (float)info.getDouble("speed") : state.getPlaybackSpeed();
+        int pbState = info.hasKey("state") ? info.getInt("state") : state.getState();
+        int maxVol = info.hasKey("maxVolume") ? info.getInt("maxVolume") : volume.getMaxVolume();
+        int vol = info.hasKey("volume") ? info.getInt("volume") : volume.getCurrentVolume();
 
-        pb.setState(state, elapsedTime, speed);
+        if(info.hasKey("elapsedTime")) {
+            elapsedTime = (long)(info.getDouble("elapsedTime") * 1000);
+        } else {
+            // Calculates the new elapsed time based on the state and speed
+            long deltaTime = SystemClock.elapsedRealtime() - state.getLastPositionUpdateTime();
+            if(state.getState() != PlaybackStateCompat.STATE_PLAYING) deltaTime = 0;
+            elapsedTime = state.getPosition() + (long)(deltaTime * speed);
+        }
+
+        pb.setState(pbState, elapsedTime, speed);
         pb.setBufferedPosition(bufferedTime);
 
-        isPlaying = state == PlaybackStateCompat.STATE_PLAYING || state == PlaybackStateCompat.STATE_BUFFERING;
+        isPlaying = pbState == PlaybackStateCompat.STATE_PLAYING || pbState == PlaybackStateCompat.STATE_BUFFERING;
         notification.show(nb, isPlaying);
 
-        PlaybackStateCompat playbackState = pb.build();
-        session.setPlaybackState(playbackState);
+        state = pb.build();
+        session.setPlaybackState(state);
 
         if(remoteVolume) {
             session.setPlaybackToRemote(volume.create(null, maxVol, vol));
@@ -234,6 +248,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
 
         md = new MediaMetadataCompat.Builder();
         pb = new PlaybackStateCompat.Builder();
+        pb.setActions(controls);
+
+        state = pb.build();
 
         notification.hide();
         session.setActive(false);
