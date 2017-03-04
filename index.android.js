@@ -6,6 +6,7 @@
 
 import { NativeModules, DeviceEventEmitter } from 'react-native';
 const NativeMusicControl = NativeModules.MusicControlManager;
+import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 
 var handlers = { };
 var subscription = null;
@@ -22,7 +23,12 @@ var MusicControl = {
     NativeMusicControl.enableBackgroundMode(enable)
   },
   setNowPlaying: function(info){
-    NativeMusicControl.setNowPlaying(info)
+    //Check if we have an android asset id from react style image "require('./image.png')"
+    if (info.artwork && !isNaN(info.artwork)) {
+      info.artwork = resolveAssetSource(info.artwork);
+    }
+
+    NativeMusicControl.setNowPlaying(info);
   },
   setPlayback: function(info){
     NativeMusicControl.setPlayback(info)
