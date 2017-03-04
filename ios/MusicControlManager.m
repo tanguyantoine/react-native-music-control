@@ -12,43 +12,31 @@
 
 @end
 
-NSString * const MEDIA_PLAYBACK_RATE = @"playbackRate";
+#define MEDIA_PLAYBACK_RATE @"speed"
+#define MEDIA_DICT @{@"album": MPMediaItemPropertyAlbumTitle, \
+    @"trackCount": MPMediaItemPropertyAlbumTrackCount, \
+    @"trackNumber": MPMediaItemPropertyAlbumTrackNumber, \
+    @"artist": MPMediaItemPropertyArtist, \
+    @"composer": MPMediaItemPropertyComposer, \
+    @"discCount": MPMediaItemPropertyDiscCount, \
+    @"discNumber": MPMediaItemPropertyDiscNumber, \
+    @"genre": MPMediaItemPropertyGenre, \
+    @"persistentID": MPMediaItemPropertyPersistentID, \
+    @"duration": MPMediaItemPropertyPlaybackDuration, \
+    @"title": MPMediaItemPropertyTitle, \
+    @"elapsedTime": MPNowPlayingInfoPropertyElapsedPlaybackTime, \
+    @"speed": MPNowPlayingInfoPropertyPlaybackRate, \
+    @"playbackQueueIndex": MPNowPlayingInfoPropertyPlaybackQueueIndex, \
+    @"playbackQueueCount": MPNowPlayingInfoPropertyPlaybackQueueCount, \
+    @"chapterNumber": MPNowPlayingInfoPropertyChapterNumber, \
+    @"chapterCount": MPNowPlayingInfoPropertyChapterCount \
+}
 
 @implementation MusicControlManager
 
 @synthesize bridge = _bridge;
 
 RCT_EXPORT_MODULE()
-
-- (NSDictionary *) mediaKeys {
-    static NSDictionary *dict = nil;
-    
-    static dispatch_once_t lock;
-    
-    dispatch_once(&lock, ^{
-        dict = @{
-             @"album": MPMediaItemPropertyAlbumTitle,
-             @"trackCount": MPMediaItemPropertyAlbumTrackCount,
-             @"trackNumber": MPMediaItemPropertyAlbumTrackNumber,
-             @"artist": MPMediaItemPropertyArtist,
-             @"composer": MPMediaItemPropertyComposer,
-             @"discCount": MPMediaItemPropertyDiscCount,
-             @"discNumber": MPMediaItemPropertyDiscNumber,
-             @"genre": MPMediaItemPropertyGenre,
-             @"persistentID": MPMediaItemPropertyPersistentID,
-             @"duration": MPMediaItemPropertyPlaybackDuration,
-             @"title": MPMediaItemPropertyTitle,
-             @"elapsedPlaybackTime": MPNowPlayingInfoPropertyElapsedPlaybackTime,
-             @"playbackRate": MPNowPlayingInfoPropertyPlaybackRate,
-             @"playbackQueueIndex": MPNowPlayingInfoPropertyPlaybackQueueIndex,
-             @"playbackQueueCount": MPNowPlayingInfoPropertyPlaybackQueueCount,
-             @"chapterNumber": MPNowPlayingInfoPropertyChapterNumber,
-             @"chapterCount": MPNowPlayingInfoPropertyChapterCount
-        };
-    });
-    
-    return dict;
-}
 
 - (dispatch_queue_t)methodQueue
 {
@@ -155,15 +143,15 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
 
 - (NSDictionary *) update:(NSMutableDictionary *) mediaDict with:(NSDictionary *) details andSetDefaults:(BOOL) setDefault {
     
-    for (NSString *key in [self mediaKeys]) {
+    for (NSString *key in MEDIA_DICT) {
         if ([details objectForKey:key] != nil) {
-            [mediaDict setValue:[details objectForKey:key] forKey:[[self mediaKeys] objectForKey:key]];
+            [mediaDict setValue:[details objectForKey:key] forKey:[MEDIA_DICT objectForKey:key]];
         }
         
         // In iOS Simulator, always include the MPNowPlayingInfoPropertyPlaybackRate key in your nowPlayingInfo dictionary
         // only if we are creating a new dictionary
         if ([key isEqualToString:MEDIA_PLAYBACK_RATE] && [details objectForKey:key] == nil && setDefault) {
-            [mediaDict setValue:[NSNumber numberWithDouble:1] forKey:[[self mediaKeys] objectForKey:key]];
+            [mediaDict setValue:[NSNumber numberWithDouble:1] forKey:[MEDIA_DICT objectForKey:key]];
         }
     }
         
