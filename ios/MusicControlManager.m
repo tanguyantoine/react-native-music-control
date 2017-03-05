@@ -12,7 +12,10 @@
 
 @end
 
-#define MEDIA_PLAYBACK_RATE @"speed"
+#define MEDIA_STATE_PLAYING @"STATE_PLAYING"
+#define MEDIA_STATE_PAUSED @"STATE_PAUSED"
+#define MEDIA_SPEED @"speed"
+#define MEDIA_STATE @"state"
 #define MEDIA_DICT @{@"album": MPMediaItemPropertyAlbumTitle, \
     @"trackCount": MPMediaItemPropertyAlbumTrackCount, \
     @"trackNumber": MPMediaItemPropertyAlbumTrackNumber, \
@@ -25,7 +28,7 @@
     @"duration": MPMediaItemPropertyPlaybackDuration, \
     @"title": MPMediaItemPropertyTitle, \
     @"elapsedTime": MPNowPlayingInfoPropertyElapsedPlaybackTime, \
-    @"speed": MPNowPlayingInfoPropertyPlaybackRate, \
+    MEDIA_SPEED: MPNowPlayingInfoPropertyPlaybackRate, \
     @"playbackQueueIndex": MPNowPlayingInfoPropertyPlaybackQueueIndex, \
     @"playbackQueueCount": MPNowPlayingInfoPropertyPlaybackQueueCount, \
     @"chapterNumber": MPNowPlayingInfoPropertyChapterNumber, \
@@ -38,17 +41,37 @@
 
 RCT_EXPORT_MODULE()
 
+- (NSDictionary *)constantsToExport
+{
+    return @{
+        @"STATE_PLAYING": MEDIA_STATE_PLAYING,
+        @"STATE_PAUSED": MEDIA_STATE_PAUSED
+    };
+}
+
 - (dispatch_queue_t)methodQueue
 {
     return dispatch_get_main_queue();
 }
 
-RCT_EXPORT_METHOD(updatePlayback:(NSDictionary *) details)
+RCT_EXPORT_METHOD(updatePlayback:(NSDictionary *) originalDetails)
 {
     MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
     
     if (center.nowPlayingInfo == nil) {
         return;
+    }
+    
+    NSMutableDictionary *details = [originalDetails mutableCopy];
+    
+    // Set the playback rate from the state if no speed has been defined
+    // If they provide the speed, then use it
+    if ([details objectForKey:MEDIA_STATE] != nil && [details objectForKey:MEDIA_SPEED] == nil) {
+        NSNumber *speed = [[details objectForKey:MEDIA_STATE] isEqual:MEDIA_STATE_PAUSED]
+        ? [NSNumber numberWithDouble:0]
+        : [NSNumber numberWithDouble:1];
+        
+        [details setValue:speed forKey:MEDIA_SPEED];
     }
     
     NSMutableDictionary *mediaDict = [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo];
@@ -66,7 +89,6 @@ RCT_EXPORT_METHOD(updatePlayback:(NSDictionary *) details)
 
 RCT_EXPORT_METHOD(setNowPlaying:(NSDictionary *) details)
 {
-    
     MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
     NSMutableDictionary *mediaDict = [NSMutableDictionary dictionary];
     
@@ -150,7 +172,7 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
         
         // In iOS Simulator, always include the MPNowPlayingInfoPropertyPlaybackRate key in your nowPlayingInfo dictionary
         // only if we are creating a new dictionary
-        if ([key isEqualToString:MEDIA_PLAYBACK_RATE] && [details objectForKey:key] == nil && setDefault) {
+        if ([key isEqualToString:MEDIA_SPEED] && [details objectForKey:key] == nil && setDefault) {
             [mediaDict setValue:[NSNumber numberWithDouble:1] forKey:[MEDIA_DICT objectForKey:key]];
         }
     }

@@ -135,6 +135,21 @@ MusicControl.updatePlayback({
 
 `setPlayback` will also work.
 
+**Pause/Resume playing**
+```javascript
+# Pause
+MusicControl.updatePlayback({
+  state: MuiscControl.STATE_PAUSED, // Playback Rate
+  elapsedTime: 103 // (Seconds) Current time from your player
+});
+
+# Resume
+MusicControl.updatePlayback({
+  state: MuiscControl.STATE_PLAYING, // Playback Rate
+  elapsedTime: 103 // (Seconds) Current time from your player
+});
+```
+
 **Reset now playing**
 
 ```javascript
