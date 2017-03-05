@@ -16,6 +16,9 @@ var subscription = null;
 var MusicControl = {
   STATE_PLAYING: NativeMusicControl.STATE_PLAYING,
   STATE_PAUSED: NativeMusicControl.STATE_PAUSED,
+  STATE_ERROR: NativeMusicControl.STATE_PAUSED,
+  STATE_STOPPED: NativeMusicControl.STATE_PAUSED,
+  STATE_BUFFERING: NativeMusicControl.STATE_PAUSED
   setPlayback: function (info) {
     NativeMusicControl.updatePlayback(info);
   },
