@@ -14,8 +14,16 @@ var handlers = { };
 var subscription = null;
 
 var MusicControl = {
-  togglePause: function(elapsed) {
-    NativeMusicControl.togglePause(elapsed);
+  STATE_PLAYING: NativeMusicControl.STATE_PLAYING,
+  STATE_PAUSED: NativeMusicControl.STATE_PAUSED,
+  STATE_ERROR: NativeMusicControl.STATE_PAUSED,
+  STATE_STOPPED: NativeMusicControl.STATE_PAUSED,
+  STATE_BUFFERING: NativeMusicControl.STATE_PAUSED,
+  setPlayback: function (info) {
+    NativeMusicControl.updatePlayback(info);
+  },
+  updatePlayback: function(info) {
+    NativeMusicControl.updatePlayback(info);
   },
   enableBackgroundMode: function(enable){
     NativeMusicControl.enableBackgroundMode(enable)

@@ -111,7 +111,7 @@ MusicControl.setNowPlaying({
 
 **Playback**
 
-Currently, Android only
+Android
 
 ```javascript
 MusicControl.setPlayback({
@@ -122,6 +122,32 @@ MusicControl.setPlayback({
   elapsedTime: 103, // (Seconds)
   bufferedTime: 200 // (Seconds)
 })
+```
+
+iOS
+```javascript
+// Any key that exists can be updated using this method
+MusicControl.updatePlayback({
+  speed: 1, // Playback Rate
+  elapsedTime: 103 // (Seconds)
+})
+```
+
+`setPlayback` will also work.
+
+**Pause/Resume playing**
+```javascript
+# Pause
+MusicControl.updatePlayback({
+  state: MuiscControl.STATE_PAUSED, // Playback Rate
+  elapsedTime: 103 // (Seconds) Current time from your player
+});
+
+# Resume
+MusicControl.updatePlayback({
+  state: MuiscControl.STATE_PLAYING, // Playback Rate
+  elapsedTime: 103 // (Seconds) Current time from your player
+});
 ```
 
 **Reset now playing**
@@ -152,8 +178,6 @@ MusicControl.enableControl('enableLanguageOption', false); // iOS only
 MusicControl.enableControl('disableLanguageOption', false); // iOS only
 MusicControl.enableControl('skipForward', false); // iOS only
 MusicControl.enableControl('skipBackward', false); // iOS only
-
-MusicControl.togglePause(45); // Elapsed time in seconds, iOS only
 ```
 
 `skipBackward` and `skipForward` controls on iOS accept additional configuration options with `interval` key:

@@ -12,18 +12,49 @@
 
 @end
 
+#define MEDIA_STATE_PLAYING @"STATE_PLAYING"
+#define MEDIA_STATE_PAUSED @"STATE_PAUSED"
+#define MEDIA_SPEED @"speed"
+#define MEDIA_STATE @"state"
+#define MEDIA_DICT @{@"album": MPMediaItemPropertyAlbumTitle, \
+    @"trackCount": MPMediaItemPropertyAlbumTrackCount, \
+    @"trackNumber": MPMediaItemPropertyAlbumTrackNumber, \
+    @"artist": MPMediaItemPropertyArtist, \
+    @"composer": MPMediaItemPropertyComposer, \
+    @"discCount": MPMediaItemPropertyDiscCount, \
+    @"discNumber": MPMediaItemPropertyDiscNumber, \
+    @"genre": MPMediaItemPropertyGenre, \
+    @"persistentID": MPMediaItemPropertyPersistentID, \
+    @"duration": MPMediaItemPropertyPlaybackDuration, \
+    @"title": MPMediaItemPropertyTitle, \
+    @"elapsedTime": MPNowPlayingInfoPropertyElapsedPlaybackTime, \
+    MEDIA_SPEED: MPNowPlayingInfoPropertyPlaybackRate, \
+    @"playbackQueueIndex": MPNowPlayingInfoPropertyPlaybackQueueIndex, \
+    @"playbackQueueCount": MPNowPlayingInfoPropertyPlaybackQueueCount, \
+    @"chapterNumber": MPNowPlayingInfoPropertyChapterNumber, \
+    @"chapterCount": MPNowPlayingInfoPropertyChapterCount \
+}
+
 @implementation MusicControlManager
 
 @synthesize bridge = _bridge;
 
 RCT_EXPORT_MODULE()
 
+- (NSDictionary *)constantsToExport
+{
+    return @{
+        @"STATE_PLAYING": MEDIA_STATE_PLAYING,
+        @"STATE_PAUSED": MEDIA_STATE_PAUSED
+    };
+}
+
 - (dispatch_queue_t)methodQueue
 {
     return dispatch_get_main_queue();
 }
 
-RCT_EXPORT_METHOD(togglePause:(nonnull NSNumber *) elapsed)
+RCT_EXPORT_METHOD(updatePlayback:(NSDictionary *) originalDetails)
 {
     MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
     
@@ -31,100 +62,39 @@ RCT_EXPORT_METHOD(togglePause:(nonnull NSNumber *) elapsed)
         return;
     }
     
+    NSMutableDictionary *details = [originalDetails mutableCopy];
+    
+    // Set the playback rate from the state if no speed has been defined
+    // If they provide the speed, then use it
+    if ([details objectForKey:MEDIA_STATE] != nil && [details objectForKey:MEDIA_SPEED] == nil) {
+        NSNumber *speed = [[details objectForKey:MEDIA_STATE] isEqual:MEDIA_STATE_PAUSED]
+        ? [NSNumber numberWithDouble:0]
+        : [NSNumber numberWithDouble:1];
+        
+        [details setValue:speed forKey:MEDIA_SPEED];
+    }
+    
     NSMutableDictionary *mediaDict = [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo];
-
-    NSNumber *speed = [[mediaDict objectForKey:MPNowPlayingInfoPropertyPlaybackRate] isEqual:[NSNumber numberWithDouble:0]]
-        ? [NSNumber numberWithDouble:1]
-        : [NSNumber numberWithDouble:0];
-
     
-    [mediaDict setValue:speed forKey:MPNowPlayingInfoPropertyPlaybackRate];
-    [mediaDict setValue:elapsed forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
+    center.nowPlayingInfo = [self update:mediaDict with:details andSetDefaults:false];
     
-    center.nowPlayingInfo = mediaDict;
+    // Update the image if it exists
+    if ([details objectForKey:@"artwork"] != nil) {
+        self.artworkUrl = details[@"artwork"];
+    }
+    
+    [self updateNowPlayingArtwork];
 }
+
 
 RCT_EXPORT_METHOD(setNowPlaying:(NSDictionary *) details)
 {
-
     MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
-
-    // Create media dictionary from existing keys or create a new one, this way we can update single attributes if we want to
-    NSMutableDictionary *mediaDict = (center.nowPlayingInfo != nil) ? [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo] : [NSMutableDictionary dictionary];
-
-    if ([details objectForKey: @"album"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"album"] forKey:MPMediaItemPropertyAlbumTitle];
-    }
-
-    if ([details objectForKey: @"trackCount"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"trackCount"] forKey:MPMediaItemPropertyAlbumTrackCount];
-    }
-
-    if ([details objectForKey: @"trackNumber"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"trackNumber"] forKey:MPMediaItemPropertyAlbumTrackNumber];
-    }
-
-    if ([details objectForKey: @"artist"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"artist"] forKey:MPMediaItemPropertyArtist];
-    }
-
-    if ([details objectForKey: @"composer"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"composer"] forKey:MPMediaItemPropertyComposer];
-    }
-
-    if ([details objectForKey: @"discCount"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"discCount"] forKey:MPMediaItemPropertyDiscCount];
-    }
-
-    if ([details objectForKey: @"discNumber"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"discNumber"] forKey:MPMediaItemPropertyDiscNumber];
-    }
-
-    if ([details objectForKey: @"genre"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"genre"] forKey:MPMediaItemPropertyGenre];
-    }
-
-    if ([details objectForKey: @"persistentID"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"persistentID"] forKey:MPMediaItemPropertyPersistentID];
-    }
-
-    if ([details objectForKey: @"duration"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"duration"] forKey:MPMediaItemPropertyPlaybackDuration];
-    }
-
-    if ([details objectForKey: @"title"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"title"] forKey:MPMediaItemPropertyTitle];
-    }
-
-    if ([details objectForKey: @"elapsedPlaybackTime"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"elapsedPlaybackTime"] forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
-    }
-
-    if ([details objectForKey: @"playbackRate"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"playbackRate"] forKey:MPNowPlayingInfoPropertyPlaybackRate];
-    } else {
-        // In iOS Simulator, always include the MPNowPlayingInfoPropertyPlaybackRate key in your nowPlayingInfo dictionary
-        [mediaDict setValue:[NSNumber numberWithDouble:1] forKey:MPNowPlayingInfoPropertyPlaybackRate];
-    }
-
-    if ([details objectForKey: @"playbackQueueIndex"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"playbackQueueIndex"] forKey:MPNowPlayingInfoPropertyPlaybackQueueIndex];
-    }
-
-    if ([details objectForKey: @"playbackQueueCount"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"playbackQueueCount"] forKey:MPNowPlayingInfoPropertyPlaybackQueueCount];
-    }
-
-    if ([details objectForKey: @"chapterNumber"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"chapterNumber"] forKey:MPNowPlayingInfoPropertyChapterNumber];
-    }
-
-    if ([details objectForKey: @"chapterCount"] != nil) {
-        [mediaDict setValue:[details objectForKey: @"chapterCount"] forKey:MPNowPlayingInfoPropertyChapterCount];
-    }
-
-    center.nowPlayingInfo = mediaDict;
-
+    NSMutableDictionary *mediaDict = [NSMutableDictionary dictionary];
+    
+    
+    center.nowPlayingInfo = [self update:mediaDict with:details andSetDefaults:true];
+    
     // Custom handling of artwork in another thread, will be loaded async
     self.artworkUrl = details[@"artwork"];
     [self updateNowPlayingArtwork];
@@ -141,33 +111,33 @@ RCT_EXPORT_METHOD(resetNowPlaying)
 RCT_EXPORT_METHOD(enableControl:(NSString *) controlName enabled:(BOOL) enabled options:(NSDictionary *)options)
 {
     MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
-
+    
     if ([controlName isEqual: @"pause"]) {
         [self toggleHandler:remoteCenter.pauseCommand withSelector:@selector(onPause:) enabled:enabled];
     } else if ([controlName isEqual: @"play"]) {
         [self toggleHandler:remoteCenter.playCommand withSelector:@selector(onPlay:) enabled:enabled];
-
+        
     } else if ([controlName isEqual: @"stop"]) {
         [self toggleHandler:remoteCenter.stopCommand withSelector:@selector(onStop:) enabled:enabled];
-
+        
     } else if ([controlName isEqual: @"togglePlayPause"]) {
         [self toggleHandler:remoteCenter.togglePlayPauseCommand withSelector:@selector(onTogglePlayPause:) enabled:enabled];
-
+        
     } else if ([controlName isEqual: @"enableLanguageOption"]) {
         [self toggleHandler:remoteCenter.enableLanguageOptionCommand withSelector:@selector(onEnableLanguageOption:) enabled:enabled];
-
+        
     } else if ([controlName isEqual: @"disableLanguageOption"]) {
         [self toggleHandler:remoteCenter.disableLanguageOptionCommand withSelector:@selector(onDisableLanguageOption:) enabled:enabled];
-
+        
     } else if ([controlName isEqual: @"nextTrack"]) {
         [self toggleHandler:remoteCenter.nextTrackCommand withSelector:@selector(onNextTrack:) enabled:enabled];
-
+        
     } else if ([controlName isEqual: @"previousTrack"]) {
         [self toggleHandler:remoteCenter.previousTrackCommand withSelector:@selector(onPreviousTrack:) enabled:enabled];
-
+        
     } else if ([controlName isEqual: @"seekForward"]) {
         [self toggleHandler:remoteCenter.seekForwardCommand withSelector:@selector(onSeekForward:) enabled:enabled];
-
+        
     } else if ([controlName isEqual: @"seekBackward"]) {
         [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onSeekBackward:) enabled:enabled];
     } else if ([controlName isEqual:@"skipBackward"]) {
@@ -193,10 +163,27 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
 
 #pragma mark internal
 
+- (NSDictionary *) update:(NSMutableDictionary *) mediaDict with:(NSDictionary *) details andSetDefaults:(BOOL) setDefault {
+    
+    for (NSString *key in MEDIA_DICT) {
+        if ([details objectForKey:key] != nil) {
+            [mediaDict setValue:[details objectForKey:key] forKey:[MEDIA_DICT objectForKey:key]];
+        }
+        
+        // In iOS Simulator, always include the MPNowPlayingInfoPropertyPlaybackRate key in your nowPlayingInfo dictionary
+        // only if we are creating a new dictionary
+        if ([key isEqualToString:MEDIA_SPEED] && [details objectForKey:key] == nil && setDefault) {
+            [mediaDict setValue:[NSNumber numberWithDouble:1] forKey:[MEDIA_DICT objectForKey:key]];
+        }
+    }
+        
+    return mediaDict;
+}
+
 - (void) toggleHandler:(MPRemoteCommand *) command withSelector:(SEL) selector enabled:(BOOL) enabled {
     [command removeTarget:self action:selector];
     if(enabled){
-        [command addTarget:self action:selector];        
+        [command addTarget:self action:selector];
     }
     command.enabled = enabled;
 }
@@ -233,7 +220,7 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
 
 - (void)sendEvent:(NSString*)event {
     [self.bridge.eventDispatcher sendDeviceEventWithName:@"RNMusicControlEvent"
-                                                 body:@{@"name": event}];
+                                                    body:@{@"name": event}];
 }
 
 - (void)updateNowPlayingArtwork
@@ -256,19 +243,19 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
                 }
             }
         }
-
+        
         // Check if image was available otherwise don't do anything
         if (image == nil) {
             return;
         }
-
+        
         // check whether image is loaded
         CGImageRef cgref = [image CGImage];
         CIImage *cim = [image CIImage];
-
+        
         if (cim != nil || cgref != NULL) {
             dispatch_async(dispatch_get_main_queue(), ^{
-
+                
                 // Check if URL wasn't changed in the meantime
                 if ([url isEqual:self.artworkUrl]) {
                     MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
