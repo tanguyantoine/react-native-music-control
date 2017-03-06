@@ -166,7 +166,7 @@ MusicControl.enableControl('previousTrack', false)
 MusicControl.enableControl('seekForward', false);
 MusicControl.enableControl('seekBackward', false);
 MusicControl.enableControl('seek', false) // Android only
-MusicControl.enableControl('rate', false) // Android only
+MusicControl.enableControl('setRating', false) // Android only
 MusicControl.enableControl('volume', true) // Android only  - Only affected when remoteVolume is enabled
 MusicControl.enableControl('remoteVolume', false) // Android only
 MusicControl.enableControl('enableLanguageOption', false); // iOS only
@@ -212,7 +212,7 @@ componentDidMount() {
     MusicControl.on('seekBackward', ()=> {});
 
     MusicControl.on('seek', (pos)=> {}); // Android only (Seconds)
-    MusicControl.on('rate', (rating)=> {}); // Android only (Percentage)
+    MusicControl.on('setRating', (rating)=> {}); // Android only (Percentage)
     MusicControl.on('volume', (volume)=> {}); // Android only (0 to maxVolume) - Only fired when remoteVolume is enabled
 
     MusicControl.on('togglePlayPause', ()=> {}); // iOS only

@@ -247,10 +247,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         artworkThread = null;
 
         md = new MediaMetadataCompat.Builder();
-        pb = new PlaybackStateCompat.Builder();
-        pb.setActions(controls);
-
-        state = pb.build();
 
         notification.hide();
         session.setActive(false);
@@ -289,16 +285,12 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
             case "seekBackward":
                 controlValue = PlaybackStateCompat.ACTION_REWIND;
                 break;
-            case "rate":
+            case "setRating":
                 controlValue = PlaybackStateCompat.ACTION_SET_RATING;
                 break;
             case "volume":
                 volume = volume.create(enable, null, null);
-                if(remoteVolume) {
-                    session.setPlaybackToRemote(volume);
-                } else {
-                    session.setPlaybackToLocal(AudioManager.STREAM_MUSIC);
-                }
+                if(remoteVolume) session.setPlaybackToRemote(volume);
                 return;
             case "remoteVolume":
                 remoteVolume = enable;
@@ -329,6 +321,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         try {
             if(local) {
 
+                // Gets the drawable from the RN's helper for local resources
                 ResourceDrawableIdHelper helper = ResourceDrawableIdHelper.getInstance();
                 Drawable image = helper.getResourceDrawable(getReactApplicationContext(), url);
 
@@ -340,6 +333,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
 
             } else {
 
+                // Open connection to the URL and decodes the image
                 URLConnection con = new URL(url).openConnection();
                 con.connect();
                 InputStream input = con.getInputStream();

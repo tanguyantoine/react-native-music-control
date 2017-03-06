@@ -66,7 +66,7 @@ public class MusicControlListener extends MediaSessionCompat.Callback {
 
     @Override
     public void onSetRating(RatingCompat rating) {
-        sendEvent(context, "rate", (double)rating.getPercentRating());
+        sendEvent(context, "setRating", (double)rating.getPercentRating());
     }
 
     public static class VolumeListener extends VolumeProviderCompat {

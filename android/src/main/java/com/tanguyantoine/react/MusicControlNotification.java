@@ -27,7 +27,10 @@ public class MusicControlNotification {
 
         Resources r = context.getResources();
         String packageName = context.getPackageName();
-        smallIcon = r.getIdentifier("play", "drawable", packageName);
+
+        // Optional custom icon with fallback to the play icon
+        smallIcon = r.getIdentifier("music-control-icon", "drawable", packageName);
+        if(smallIcon == 0) smallIcon = r.getIdentifier("play", "drawable", packageName);
     }
 
     public void updateActions(long mask) {
@@ -39,7 +42,6 @@ public class MusicControlNotification {
     }
 
     public void show(NotificationCompat.Builder builder, boolean isPlaying) {
-
         // Add the buttons
         builder.mActions.clear();
         if(previous != null) builder.addAction(previous);
@@ -48,13 +50,13 @@ public class MusicControlNotification {
         if(stop != null) builder.addAction(stop);
         if(next != null) builder.addAction(next);
 
+        // Notifications of playing music can't be removed
         builder.setOngoing(isPlaying);
         builder.setSmallIcon(smallIcon);
 
         // Open the app when the notification is clicked
-        Intent openApp = new Intent(context, getMainActivityClass());
-        openApp.setAction(Intent.ACTION_MAIN);
-        openApp.addCategory(Intent.CATEGORY_LAUNCHER);
+        String packageName = context.getPackageName();
+        Intent openApp = context.getPackageManager().getLaunchIntentForPackage(packageName);
         builder.setContentIntent(PendingIntent.getActivity(context, 0, openApp, 0));
 
         if(!isPlaying) {
@@ -64,6 +66,7 @@ public class MusicControlNotification {
             builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, remove, PendingIntent.FLAG_UPDATE_CURRENT));
         }
 
+        // Finally show/update the notification
         NotificationManagerCompat.from(context).notify("MusicControl", 0, builder.build());
     }
 
@@ -72,7 +75,7 @@ public class MusicControlNotification {
     }
 
     /**
-     * Code taken from newer version of PlaybackStateCompat.toKeyCode
+     * Code taken from newer version of the support library located in PlaybackStateCompat.toKeyCode
      * Replace this to PlaybackStateCompat.toKeyCode when React Native updates the support library
      */
     private int toKeyCode(long action) {
@@ -97,13 +100,15 @@ public class MusicControlNotification {
     }
 
     private NotificationCompat.Action createAction(String iconName, String title, long mask, long action, NotificationCompat.Action oldAction) {
-        if((mask & action) == 0) return null;
-        if(oldAction != null) return oldAction;
+        if((mask & action) == 0) return null; // When this action is not enabled, return null
+        if(oldAction != null) return oldAction; // If this action was already created, we won't create another instance
 
+        // Finds the icon with the given name
         Resources r = context.getResources();
         String packageName = context.getPackageName();
         int icon = r.getIdentifier(iconName, "drawable", packageName);
 
+        // Creates the intent based on the action
         int keyCode = toKeyCode(action);
         Intent intent = new Intent(MEDIA_BUTTON);
         intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
@@ -111,18 +116,6 @@ public class MusicControlNotification {
         PendingIntent i = PendingIntent.getBroadcast(context, keyCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         return new NotificationCompat.Action(icon, title, i);
-    }
-
-    private Class getMainActivityClass() {
-        String packageName = context.getPackageName();
-        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
-        String className = launchIntent.getComponent().getClassName();
-        try {
-            return Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     public static class NotificationService extends Service {
@@ -138,10 +131,11 @@ public class MusicControlNotification {
 
         @Override
         public void onTaskRemoved(Intent rootIntent) {
+            // Destroy the notification and sessions when the task is removed (closed, killed, etc)
             if(MusicControlModule.INSTANCE != null) {
                 MusicControlModule.INSTANCE.destroy();
             }
-            stopSelf();
+            stopSelf(); // Stop the service as we won't need it anymore
         }
 
     }
