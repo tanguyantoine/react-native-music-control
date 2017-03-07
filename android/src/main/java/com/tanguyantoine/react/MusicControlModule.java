@@ -74,8 +74,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     public void init() {
-        if(init) return;
-
         INSTANCE = this;
         ReactApplicationContext context = getReactApplicationContext();
 
@@ -120,8 +118,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     public void destroy() {
-        if(!init) return;
-
         notification.hide();
         session.release();
 
@@ -366,7 +362,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         switch(level) {
             case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
-            case ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE:
                 Log.w("MusicControl", "Control resources are being removed due to system's low memory (" + level + ")");
                 destroy();
                 break;
@@ -380,7 +375,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
     @Override
     public void onLowMemory() {
-        Log.w("MusicControl", "Control resources are being removed due to system's low memory");
+        Log.w("MusicControl", "Control resources are being removed due to system's low memory (!)");
         destroy();
     }
 }
