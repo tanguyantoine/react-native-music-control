@@ -1,8 +1,10 @@
 package com.tanguyantoine.react;
 
+import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -28,7 +30,7 @@ import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MusicControlModule extends ReactContextBaseJavaModule {
+public class MusicControlModule extends ReactContextBaseJavaModule implements ComponentCallbacks2 {
 
     static MusicControlModule INSTANCE;
 
@@ -44,10 +46,10 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
     protected MusicControlNotification notification;
     private MusicControlListener.VolumeListener volume;
     private MusicControlReceiver receiver;
-    private boolean remoteVolume = false;
 
     private Thread artworkThread;
 
+    private boolean remoteVolume = false;
     private boolean isPlaying = false;
     private long controls = 0;
 
@@ -72,6 +74,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
     }
 
     public void init() {
+        if(init) return;
+
         INSTANCE = this;
         ReactApplicationContext context = getReactApplicationContext();
 
@@ -109,14 +113,22 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
 
         context.startService(new Intent(context, MusicControlNotification.NotificationService.class));
 
+        context.registerComponentCallbacks(this);
+
         isPlaying = false;
         init = true;
     }
 
     public void destroy() {
+        if(!init) return;
+
         notification.hide();
         session.release();
-        getReactApplicationContext().unregisterReceiver(receiver);
+
+        ReactApplicationContext context = getReactApplicationContext();
+
+        context.unregisterReceiver(receiver);
+        context.unregisterComponentCallbacks(this);
 
         if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
         artworkThread = null;
@@ -125,6 +137,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         notification = null;
         volume = null;
         receiver = null;
+        state = null;
         md = null;
         pb = null;
         nb = null;
@@ -348,4 +361,26 @@ public class MusicControlModule extends ReactContextBaseJavaModule {
         return bitmap;
     }
 
+    @Override
+    public void onTrimMemory(int level) {
+        switch(level) {
+            case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
+            case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
+            case ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE:
+                Log.w("MusicControl", "Control resources are being removed due to system's low memory (" + level + ")");
+                destroy();
+                break;
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+
+    }
+
+    @Override
+    public void onLowMemory() {
+        Log.w("MusicControl", "Control resources are being removed due to system's low memory");
+        destroy();
+    }
 }
