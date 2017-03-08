@@ -14,12 +14,23 @@ var handlers = { };
 var subscription = null;
 
 var MusicControl = {
+
   STATE_PLAYING: NativeMusicControl.STATE_PLAYING,
   STATE_PAUSED: NativeMusicControl.STATE_PAUSED,
   STATE_ERROR: NativeMusicControl.STATE_PAUSED,
   STATE_STOPPED: NativeMusicControl.STATE_PAUSED,
   STATE_BUFFERING: NativeMusicControl.STATE_PAUSED,
+
+  // Rating is not supported on iOS. This is kept here for compatibility
+  RATING_HEART: 0,
+  RATING_THUMBS_UP_DOWN: 0,
+  RATING_3_STARS: 0,
+  RATING_4_STARS: 0,
+  RATING_5_STARS: 0,
+  RATING_PERCENTAGE: 0,
+
   setPlayback: function (info) {
+    // Backwards compatibility. Use updatePlayback instead.
     NativeMusicControl.updatePlayback(info);
   },
   updatePlayback: function(info) {

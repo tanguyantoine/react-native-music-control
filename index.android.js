@@ -19,6 +19,13 @@ var MusicControl = {
   STATE_PAUSED: NativeMusicControl.STATE_PAUSED,
   STATE_BUFFERING: NativeMusicControl.STATE_BUFFERING,
 
+  RATING_HEART: NativeMusicControl.RATING_HEART,
+  RATING_THUMBS_UP_DOWN: NativeMusicControl.RATING_THUMBS_UP_DOWN,
+  RATING_3_STARS: NativeMusicControl.RATING_3_STARS,
+  RATING_4_STARS: NativeMusicControl.RATING_4_STARS,
+  RATING_5_STARS: NativeMusicControl.RATING_5_STARS,
+  RATING_PERCENTAGE: NativeMusicControl.RATING_PERCENTAGE,
+
   enableBackgroundMode: function(enable){
     NativeMusicControl.enableBackgroundMode(enable)
   },

@@ -94,7 +94,9 @@ import MusicControl from 'react-native-music-control';
 
 This method enables the music controls. To disable them, use `resetNowPlaying()`
 
-You should call this method after a sound is playing
+You should call this method after a sound is playing.
+
+For Android's rating system, remove the `rating` value for unrated tracks, use boolean for RATING_HEART or RATING_THUMBS_UP_DOWN and use a number for other types. Note: To use custom types, you have to define the type with `updatePlayback` before calling this function.
 
 ```javascript
 MusicControl.setNowPlaying({
@@ -107,7 +109,7 @@ MusicControl.setNowPlaying({
   description: '', // Android Only
   color: 0xFFFFFF, // Notification Color - Android Only
   date: '1983-01-02T00:00:00Z', // Release Date (RFC 3339) - Android Only
-  rating: 84 // Android Only (Percentage)
+  rating: 84 // Android Only (Boolean or Number depending on the type)
 })
 ```
 
@@ -124,7 +126,8 @@ MusicControl.updatePlayback({
   elapsedTime: 103, // (Seconds)
   bufferedTime: 200, // Android Only (Seconds)
   volume: 10, // Android Only (Number from 0 to maxVolume) - Only used when remoteVolume is enabled
-  maxVolume: 10 // Android Only (Number) - Only used when remoteVolume is enabled
+  maxVolume: 10, // Android Only (Number) - Only used when remoteVolume is enabled
+  rating: MusicControl.RATING_PERCENTAGE // Android Only (RATING_HEART, RATING_THUMBS_UP_DOWN, RATING_3_STARS, RATING_4_STARS, RATING_5_STARS, RATING_PERCENTAGE)
 })
 ```
 
@@ -212,8 +215,10 @@ componentDidMount() {
     MusicControl.on('seekBackward', ()=> {});
 
     MusicControl.on('seek', (pos)=> {}); // Android only (Seconds)
-    MusicControl.on('setRating', (rating)=> {}); // Android only (Percentage)
     MusicControl.on('volume', (volume)=> {}); // Android only (0 to maxVolume) - Only fired when remoteVolume is enabled
+
+    // Android Only (Boolean for RATING_HEART or RATING_THUMBS_UP_DOWN, Number for other types)
+    MusicControl.on('setRating', (rating)=> {});
 
     MusicControl.on('togglePlayPause', ()=> {}); // iOS only
     MusicControl.on('enableLanguageOption', ()=> {}); // iOS only

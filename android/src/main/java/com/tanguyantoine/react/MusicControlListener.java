@@ -10,10 +10,19 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 public class MusicControlListener extends MediaSessionCompat.Callback {
 
-    private static void sendEvent(ReactApplicationContext context, String type, Double value) {
+    private static void sendEvent(ReactApplicationContext context, String type, Object value) {
         WritableMap data = Arguments.createMap();
         data.putString("name", type);
-        if(value != null) data.putDouble("value", value);
+
+        if(value == null) {
+            // NOOP
+        } else if(value instanceof Double || value instanceof Float) {
+            data.putDouble("value", (double)value);
+        } else if(value instanceof Boolean) {
+            data.putBoolean("value", (boolean)value);
+        } else if(value instanceof Integer) {
+            data.putInt("value", (int)value);
+        }
 
         context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("RNMusicControlEvent", data);
     }
@@ -66,7 +75,18 @@ public class MusicControlListener extends MediaSessionCompat.Callback {
 
     @Override
     public void onSetRating(RatingCompat rating) {
-        sendEvent(context, "setRating", (double)rating.getPercentRating());
+        if(MusicControlModule.INSTANCE == null) return;
+        int type = MusicControlModule.INSTANCE.ratingType;
+
+        if(type == RatingCompat.RATING_PERCENTAGE) {
+            sendEvent(context, "setRating", rating.getPercentRating());
+        } else if(type == RatingCompat.RATING_HEART) {
+            sendEvent(context, "setRating", rating.hasHeart());
+        } else if(type == RatingCompat.RATING_THUMB_UP_DOWN) {
+            sendEvent(context, "setRating", rating.isThumbUp());
+        } else {
+            sendEvent(context, "setRating", rating.getStarRating());
+        }
     }
 
     public static class VolumeListener extends VolumeProviderCompat {
@@ -84,7 +104,7 @@ public class MusicControlListener extends MediaSessionCompat.Callback {
         @Override
         public void onSetVolumeTo(int volume) {
             setCurrentVolume(volume);
-            sendEvent(context, "volume", (double)volume);
+            sendEvent(context, "volume", volume);
         }
 
         @Override
@@ -94,7 +114,7 @@ public class MusicControlListener extends MediaSessionCompat.Callback {
             int volume = Math.max(Math.min(getCurrentVolume() + tick, maxVolume), 0);
 
             setCurrentVolume(volume);
-            sendEvent(context, "volume", (double)volume);
+            sendEvent(context, "volume", volume);
         }
 
         public VolumeListener create(Boolean changeable, Integer maxVolume, Integer currentVolume) {

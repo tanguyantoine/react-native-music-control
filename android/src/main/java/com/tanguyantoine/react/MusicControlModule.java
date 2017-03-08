@@ -52,6 +52,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     private boolean remoteVolume = false;
     private boolean isPlaying = false;
     private long controls = 0;
+    protected int ratingType = RatingCompat.RATING_PERCENTAGE;
 
     public MusicControlModule(ReactApplicationContext context) {
         super(context);
@@ -70,6 +71,13 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         map.put("STATE_PLAYING", PlaybackStateCompat.STATE_PLAYING);
         map.put("STATE_PAUSED", PlaybackStateCompat.STATE_PAUSED);
         map.put("STATE_BUFFERING", PlaybackStateCompat.STATE_BUFFERING);
+
+        map.put("RATING_HEART", RatingCompat.RATING_HEART);
+        map.put("RATING_THUMBS_UP_DOWN", RatingCompat.RATING_THUMB_UP_DOWN);
+        map.put("RATING_3_STARS", RatingCompat.RATING_3_STARS);
+        map.put("RATING_4_STARS", RatingCompat.RATING_4_STARS);
+        map.put("RATING_5_STARS", RatingCompat.RATING_5_STARS);
+        map.put("RATING_PERCENTAGE", RatingCompat.RATING_PERCENTAGE);
         return map;
     }
 
@@ -157,9 +165,23 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         String genre = metadata.hasKey("genre") ? metadata.getString("genre") : null;
         String description = metadata.hasKey("description") ? metadata.getString("description") : null;
         String date = metadata.hasKey("date") ? metadata.getString("date") : null;
-        RatingCompat rating = metadata.hasKey("rating") ? RatingCompat.newPercentageRating(metadata.getInt("rating")) : RatingCompat.newUnratedRating(RatingCompat.RATING_PERCENTAGE);
         long duration = metadata.hasKey("duration") ? (long)(metadata.getDouble("duration") * 1000) : 0;
         int notificationColor = metadata.hasKey("color") ? metadata.getInt("color") : NotificationCompat.COLOR_DEFAULT;
+
+        RatingCompat rating;
+        if(metadata.hasKey("rating")) {
+            if(ratingType == RatingCompat.RATING_PERCENTAGE) {
+                rating = RatingCompat.newPercentageRating((float)metadata.getDouble("rating"));
+            } else if(ratingType == RatingCompat.RATING_HEART) {
+                rating = RatingCompat.newHeartRating(metadata.getBoolean("rating"));
+            } else if(ratingType == RatingCompat.RATING_THUMB_UP_DOWN) {
+                rating = RatingCompat.newThumbRating(metadata.getBoolean("rating"));
+            } else {
+                rating = RatingCompat.newStarRating(ratingType, (float)metadata.getDouble("rating"));
+            }
+        } else {
+            rating = RatingCompat.newUnratedRating(ratingType);
+        }
 
         String artwork = null;
         boolean localArtwork = false;
@@ -217,27 +239,29 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     public void updatePlayback(ReadableMap info) {
         if(!init) init();
 
+        long updateTime;
         long elapsedTime;
         long bufferedTime = info.hasKey("bufferedTime") ? (long)(info.getDouble("bufferedTime") * 1000) : state.getBufferedPosition();
         float speed = info.hasKey("speed") ? (float)info.getDouble("speed") : state.getPlaybackSpeed();
         int pbState = info.hasKey("state") ? info.getInt("state") : state.getState();
         int maxVol = info.hasKey("maxVolume") ? info.getInt("maxVolume") : volume.getMaxVolume();
         int vol = info.hasKey("volume") ? info.getInt("volume") : volume.getCurrentVolume();
+        ratingType = info.hasKey("rating") ? info.getInt("rating") : ratingType;
 
         if(info.hasKey("elapsedTime")) {
             elapsedTime = (long)(info.getDouble("elapsedTime") * 1000);
+            updateTime = SystemClock.elapsedRealtime();
         } else {
-            // Calculates the new elapsed time based on the state and speed
-            long deltaTime = SystemClock.elapsedRealtime() - state.getLastPositionUpdateTime();
-            if(state.getState() != PlaybackStateCompat.STATE_PLAYING) deltaTime = 0;
-            elapsedTime = state.getPosition() + (long)(deltaTime * speed);
+            elapsedTime = state.getPosition();
+            updateTime = state.getLastPositionUpdateTime();
         }
 
-        pb.setState(pbState, elapsedTime, speed);
+        pb.setState(pbState, elapsedTime, speed, updateTime);
         pb.setBufferedPosition(bufferedTime);
+        pb.setActions(controls);
 
         isPlaying = pbState == PlaybackStateCompat.STATE_PLAYING || pbState == PlaybackStateCompat.STATE_BUFFERING;
-        notification.show(nb, isPlaying);
+        if(session.isActive()) notification.show(nb, isPlaying);
 
         state = pb.build();
         session.setPlaybackState(state);
@@ -308,6 +332,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                 } else {
                     session.setPlaybackToLocal(AudioManager.STREAM_MUSIC);
                 }
+                return;
             default:
                 // Unknown control type, let's just ignore it
                 return;
@@ -321,7 +346,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         notification.updateActions(controls);
         pb.setActions(controls);
-        session.setPlaybackState(pb.build());
+
+        state = pb.build();
+        session.setPlaybackState(state);
     }
 
     private Bitmap loadArtwork(String url, boolean local) {
@@ -360,9 +387,16 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     @Override
     public void onTrimMemory(int level) {
         switch(level) {
+            // Trims memory when it reaches a moderate level and the session is inactive
+            case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
+            case ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE:
+                if(session.isActive()) break;
+
+            // Trims memory when it reaches a critical level
             case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
-                Log.w("MusicControl", "Control resources are being removed due to system's low memory (" + level + ")");
+
+                Log.w("MusicControl", "Control resources are being removed due to system's low memory (Level: " + level + ")");
                 destroy();
                 break;
         }
@@ -375,7 +409,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
     @Override
     public void onLowMemory() {
-        Log.w("MusicControl", "Control resources are being removed due to system's low memory (!)");
+        Log.w("MusicControl", "Control resources are being removed due to system's low memory (Level: MEMORY_COMPLETE)");
         destroy();
     }
 }
