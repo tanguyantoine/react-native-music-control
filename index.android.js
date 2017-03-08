@@ -31,7 +31,9 @@ var MusicControl = {
   },
   setNowPlaying: function(info){
     // Check if we have an android asset from react style image require
-    if(info.artwork) info.artwork = resolveAssetSource(info.artwork);
+    if(info.artwork) {
+        info.artwork = resolveAssetSource(info.artwork) || info.artwork;
+    }
 
     NativeMusicControl.setNowPlaying(info);
   },
