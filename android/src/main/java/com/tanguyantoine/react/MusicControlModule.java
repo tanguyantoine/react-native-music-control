@@ -266,6 +266,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         state = pb.build();
         session.setPlaybackState(state);
 
+        session.setRatingType(ratingType);
+
         if(remoteVolume) {
             session.setPlaybackToRemote(volume.create(null, maxVol, vol));
         } else {
