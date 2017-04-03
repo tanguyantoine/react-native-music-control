@@ -107,6 +107,14 @@ RCT_EXPORT_METHOD(resetNowPlaying)
     self.artworkUrl = nil;
 }
 
+RCT_EXPORT_METHOD(listenToAudioRouteChange:(BOOL) enabled)
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVAudioSessionRouteChangeNotification object:nil];
+    if (enabled) {
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioHardwareRouteChanged:) name:AVAudioSessionRouteChangeNotification object:nil];
+    }
+}
+
 
 RCT_EXPORT_METHOD(enableControl:(NSString *) controlName enabled:(BOOL) enabled options:(NSDictionary *)options)
 {
@@ -202,6 +210,7 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
     [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onSeekBackward:) enabled:false];
     [self toggleHandler:remoteCenter.skipBackwardCommand withSelector:@selector(onSkipBackward:) enabled:false];
     [self toggleHandler:remoteCenter.skipForwardCommand withSelector:@selector(onSkipForward:) enabled:false];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 
@@ -267,6 +276,14 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
             });
         }
     });
+}
+
+- (void)audioHardwareRouteChanged:(NSNotification *)notification {
+    NSInteger routeChangeReason = [notification.userInfo[AVAudioSessionRouteChangeReasonKey] integerValue];
+    if (routeChangeReason == AVAudioSessionRouteChangeReasonOldDeviceUnavailable) {
+        //headphones unplugged or bluetooth device disconnected, iOS will pause audio
+        [self sendEvent:@"pause"];
+    }
 }
 
 @end

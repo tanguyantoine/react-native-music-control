@@ -29,6 +29,9 @@ var MusicControl = {
   enableBackgroundMode: function(enable){
     NativeMusicControl.enableBackgroundMode(enable)
   },
+  listenToAudioRouteChange: function(enable){
+    // iOS only
+  },
   setNowPlaying: function(info){
     // Check if we have an android asset from react style image require
     if(info.artwork) {
