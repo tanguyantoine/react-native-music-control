@@ -113,7 +113,7 @@ RCT_EXPORT_METHOD(enableControl:(NSString *) controlName enabled:(BOOL) enabled 
     
     if ([controlName isEqual: @"pause"]) {
         [self toggleHandler:remoteCenter.pauseCommand withSelector:@selector(onPause:) enabled:enabled];
-        [self listenToAudioRouteChange:true];
+        [self listenToAudioRouteChange:enabled];
     } else if ([controlName isEqual: @"play"]) {
         [self toggleHandler:remoteCenter.playCommand withSelector:@selector(onPlay:) enabled:enabled];
         
