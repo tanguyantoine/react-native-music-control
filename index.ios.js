@@ -39,9 +39,6 @@ var MusicControl = {
   enableBackgroundMode: function(enable){
     NativeMusicControl.enableBackgroundMode(enable)
   },
-  listenToAudioRouteChange: function(enable){
-    NativeMusicControl.listenToAudioRouteChange(enable)
-  },
   setNowPlaying: function(info){
     NativeMusicControl.setNowPlaying(info)
   },

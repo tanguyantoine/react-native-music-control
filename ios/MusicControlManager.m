@@ -107,21 +107,13 @@ RCT_EXPORT_METHOD(resetNowPlaying)
     self.artworkUrl = nil;
 }
 
-RCT_EXPORT_METHOD(listenToAudioRouteChange:(BOOL) enabled)
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVAudioSessionRouteChangeNotification object:nil];
-    if (enabled) {
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioHardwareRouteChanged:) name:AVAudioSessionRouteChangeNotification object:nil];
-    }
-}
-
-
 RCT_EXPORT_METHOD(enableControl:(NSString *) controlName enabled:(BOOL) enabled options:(NSDictionary *)options)
 {
     MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
     
     if ([controlName isEqual: @"pause"]) {
         [self toggleHandler:remoteCenter.pauseCommand withSelector:@selector(onPause:) enabled:enabled];
+        [self listenToAudioRouteChange:true];
     } else if ([controlName isEqual: @"play"]) {
         [self toggleHandler:remoteCenter.playCommand withSelector:@selector(onPlay:) enabled:enabled];
         
@@ -196,6 +188,14 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
     command.enabled = enabled;
 }
 
+- (void) listenToAudioRouteChange:(BOOL) enabled {
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVAudioSessionRouteChangeNotification object:nil];
+    if (enabled) {
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioHardwareRouteChanged:) name:AVAudioSessionRouteChangeNotification object:nil];
+    }
+}
+
+
 - (void)dealloc {
     MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
     [self toggleHandler:remoteCenter.pauseCommand withSelector:@selector(onPause:) enabled:false];
@@ -210,7 +210,7 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
     [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onSeekBackward:) enabled:false];
     [self toggleHandler:remoteCenter.skipBackwardCommand withSelector:@selector(onSkipBackward:) enabled:false];
     [self toggleHandler:remoteCenter.skipForwardCommand withSelector:@selector(onSkipForward:) enabled:false];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self listenToAudioRouteChange:false];
 }
 
 
