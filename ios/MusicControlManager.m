@@ -57,32 +57,32 @@ RCT_EXPORT_MODULE()
 RCT_EXPORT_METHOD(updatePlayback:(NSDictionary *) originalDetails)
 {
     MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
-    
+
     if (center.nowPlayingInfo == nil) {
         return;
     }
-    
+
     NSMutableDictionary *details = [originalDetails mutableCopy];
-    
+
     // Set the playback rate from the state if no speed has been defined
     // If they provide the speed, then use it
     if ([details objectForKey:MEDIA_STATE] != nil && [details objectForKey:MEDIA_SPEED] == nil) {
         NSNumber *speed = [[details objectForKey:MEDIA_STATE] isEqual:MEDIA_STATE_PAUSED]
         ? [NSNumber numberWithDouble:0]
         : [NSNumber numberWithDouble:1];
-        
+
         [details setValue:speed forKey:MEDIA_SPEED];
     }
-    
+
     NSMutableDictionary *mediaDict = [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo];
-    
+
     center.nowPlayingInfo = [self update:mediaDict with:details andSetDefaults:false];
-    
+
     // Update the image if it exists
     if ([details objectForKey:@"artwork"] != nil) {
         self.artworkUrl = details[@"artwork"];
     }
-    
+
     [self updateNowPlayingArtwork];
 }
 
@@ -91,10 +91,10 @@ RCT_EXPORT_METHOD(setNowPlaying:(NSDictionary *) details)
 {
     MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
     NSMutableDictionary *mediaDict = [NSMutableDictionary dictionary];
-    
-    
+
+
     center.nowPlayingInfo = [self update:mediaDict with:details andSetDefaults:true];
-    
+
     // Custom handling of artwork in another thread, will be loaded async
     self.artworkUrl = details[@"artwork"];
     [self updateNowPlayingArtwork];
@@ -107,37 +107,36 @@ RCT_EXPORT_METHOD(resetNowPlaying)
     self.artworkUrl = nil;
 }
 
-
 RCT_EXPORT_METHOD(enableControl:(NSString *) controlName enabled:(BOOL) enabled options:(NSDictionary *)options)
 {
     MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
-    
+
     if ([controlName isEqual: @"pause"]) {
         [self toggleHandler:remoteCenter.pauseCommand withSelector:@selector(onPause:) enabled:enabled];
     } else if ([controlName isEqual: @"play"]) {
         [self toggleHandler:remoteCenter.playCommand withSelector:@selector(onPlay:) enabled:enabled];
-        
+
     } else if ([controlName isEqual: @"stop"]) {
         [self toggleHandler:remoteCenter.stopCommand withSelector:@selector(onStop:) enabled:enabled];
-        
+
     } else if ([controlName isEqual: @"togglePlayPause"]) {
         [self toggleHandler:remoteCenter.togglePlayPauseCommand withSelector:@selector(onTogglePlayPause:) enabled:enabled];
-        
+
     } else if ([controlName isEqual: @"enableLanguageOption"]) {
         [self toggleHandler:remoteCenter.enableLanguageOptionCommand withSelector:@selector(onEnableLanguageOption:) enabled:enabled];
-        
+
     } else if ([controlName isEqual: @"disableLanguageOption"]) {
         [self toggleHandler:remoteCenter.disableLanguageOptionCommand withSelector:@selector(onDisableLanguageOption:) enabled:enabled];
-        
+
     } else if ([controlName isEqual: @"nextTrack"]) {
         [self toggleHandler:remoteCenter.nextTrackCommand withSelector:@selector(onNextTrack:) enabled:enabled];
-        
+
     } else if ([controlName isEqual: @"previousTrack"]) {
         [self toggleHandler:remoteCenter.previousTrackCommand withSelector:@selector(onPreviousTrack:) enabled:enabled];
-        
+
     } else if ([controlName isEqual: @"seekForward"]) {
         [self toggleHandler:remoteCenter.seekForwardCommand withSelector:@selector(onSeekForward:) enabled:enabled];
-        
+
     } else if ([controlName isEqual: @"seekBackward"]) {
         [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onSeekBackward:) enabled:enabled];
     } else if ([controlName isEqual:@"skipBackward"]) {
@@ -164,19 +163,19 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
 #pragma mark internal
 
 - (NSDictionary *) update:(NSMutableDictionary *) mediaDict with:(NSDictionary *) details andSetDefaults:(BOOL) setDefault {
-    
+
     for (NSString *key in MEDIA_DICT) {
         if ([details objectForKey:key] != nil) {
             [mediaDict setValue:[details objectForKey:key] forKey:[MEDIA_DICT objectForKey:key]];
         }
-        
+
         // In iOS Simulator, always include the MPNowPlayingInfoPropertyPlaybackRate key in your nowPlayingInfo dictionary
         // only if we are creating a new dictionary
         if ([key isEqualToString:MEDIA_SPEED] && [details objectForKey:key] == nil && setDefault) {
             [mediaDict setValue:[NSNumber numberWithDouble:1] forKey:[MEDIA_DICT objectForKey:key]];
         }
     }
-        
+
     return mediaDict;
 }
 
@@ -186,6 +185,11 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
         [command addTarget:self action:selector];
     }
     command.enabled = enabled;
+}
+
+- (id)init {
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioHardwareRouteChanged:) name:AVAudioSessionRouteChangeNotification object:nil];
+  return self;
 }
 
 - (void)dealloc {
@@ -202,6 +206,7 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
     [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onSeekBackward:) enabled:false];
     [self toggleHandler:remoteCenter.skipBackwardCommand withSelector:@selector(onSkipBackward:) enabled:false];
     [self toggleHandler:remoteCenter.skipForwardCommand withSelector:@selector(onSkipForward:) enabled:false];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVAudioSessionRouteChangeNotification object:nil];
 }
 
 
@@ -243,19 +248,19 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
                 }
             }
         }
-        
+
         // Check if image was available otherwise don't do anything
         if (image == nil) {
             return;
         }
-        
+
         // check whether image is loaded
         CGImageRef cgref = [image CGImage];
         CIImage *cim = [image CIImage];
-        
+
         if (cim != nil || cgref != NULL) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                
+
                 // Check if URL wasn't changed in the meantime
                 if ([url isEqual:self.artworkUrl]) {
                     MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
@@ -267,6 +272,14 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
             });
         }
     });
+}
+
+- (void)audioHardwareRouteChanged:(NSNotification *)notification {
+    NSInteger routeChangeReason = [notification.userInfo[AVAudioSessionRouteChangeReasonKey] integerValue];
+    if (routeChangeReason == AVAudioSessionRouteChangeReasonOldDeviceUnavailable) {
+        //headphones unplugged or bluetooth device disconnected, iOS will pause audio
+        [self sendEvent:@"pause"];
+    }
 }
 
 @end
