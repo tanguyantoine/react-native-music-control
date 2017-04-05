@@ -185,6 +185,8 @@ MusicControl.enableControl('skipBackward', true, {interval: 15}))
 MusicControl.enableControl('skipForward', true, {interval: 30}))
 ```
 
+`pause` control on iOS also enables listening to the audio router change event, which will trigger the pause event when headphones are unplugged or a bluetooth audio peripheral disconnects from the device
+
 ### Register to events
 
 ```javascript
