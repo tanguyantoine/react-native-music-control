@@ -4,7 +4,7 @@
  */
 'use strict';
 
-import { NativeModules, DeviceEventEmitter } from 'react-native';
+import { NativeModules, NativeEventEmitter } from 'react-native';
 const NativeMusicControl = NativeModules.MusicControlManager;
 
 /**
@@ -57,7 +57,7 @@ var MusicControl = {
     if(subscription){
       subscription.remove();
     }
-    subscription = DeviceEventEmitter.addListener(
+    subscription = new NativeEventEmitter(NativeMusicControl).addListener(
       'RNMusicControlEvent',
       (event) => {
         MusicControl.handleCommand(event.name)

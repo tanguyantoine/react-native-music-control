@@ -2,7 +2,7 @@
 #import <React/RCTConvert.h>
 #import <React/RCTBridge.h>
 #import <React/RCTEventDispatcher.h>
-#import <AVFoundation/AVAudioSession.h>
+#import <AVFoundation/AVFoundation.h>
 
 @import MediaPlayer;
 
@@ -188,6 +188,7 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
 }
 
 - (id)init {
+  self = [super init];
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioHardwareRouteChanged:) name:AVAudioSessionRouteChangeNotification object:nil];
   return self;
 }
@@ -223,9 +224,13 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
 - (void)onSkipBackward:(MPRemoteCommandEvent*)event { [self sendEvent:@"skipBackward"]; }
 - (void)onSkipForward:(MPRemoteCommandEvent*)event { [self sendEvent:@"skipForward"]; }
 
+- (NSArray<NSString *> *)supportedEvents {
+    return @[@"RNMusicControlEvent"];
+}
+
 - (void)sendEvent:(NSString*)event {
-    [self.bridge.eventDispatcher sendDeviceEventWithName:@"RNMusicControlEvent"
-                                                    body:@{@"name": event}];
+    [self sendEventWithName:@"RNMusicControlEvent"
+                       body:@{@"name": event}];
 }
 
 - (void)updateNowPlayingArtwork

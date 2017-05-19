@@ -1,6 +1,7 @@
 #import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
 #import <MediaPlayer/MediaPlayer.h>
 
-@interface MusicControlManager : NSObject <RCTBridgeModule>
+@interface MusicControlManager : RCTEventEmitter <RCTBridgeModule>
 
 @end
