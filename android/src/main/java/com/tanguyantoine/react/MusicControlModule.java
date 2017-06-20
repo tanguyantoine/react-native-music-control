@@ -127,8 +127,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
     public void destroy() {
         if(!init) return;
-        
-        notification.hide();
+
+        if (notification != null) notification.hide();
         session.release();
 
         ReactApplicationContext context = getReactApplicationContext();
