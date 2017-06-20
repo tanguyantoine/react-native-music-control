@@ -6,6 +6,7 @@
 
 import { NativeModules, DeviceEventEmitter } from 'react-native';
 const NativeMusicControl = NativeModules.MusicControlManager;
+import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 
 var handlers = { };
 var subscription = null;
@@ -18,14 +19,30 @@ var MusicControl = {
   STATE_PAUSED: NativeMusicControl.STATE_PAUSED,
   STATE_BUFFERING: NativeMusicControl.STATE_BUFFERING,
 
+  RATING_HEART: NativeMusicControl.RATING_HEART,
+  RATING_THUMBS_UP_DOWN: NativeMusicControl.RATING_THUMBS_UP_DOWN,
+  RATING_3_STARS: NativeMusicControl.RATING_3_STARS,
+  RATING_4_STARS: NativeMusicControl.RATING_4_STARS,
+  RATING_5_STARS: NativeMusicControl.RATING_5_STARS,
+  RATING_PERCENTAGE: NativeMusicControl.RATING_PERCENTAGE,
+
   enableBackgroundMode: function(enable){
     NativeMusicControl.enableBackgroundMode(enable)
   },
   setNowPlaying: function(info){
-    NativeMusicControl.setNowPlaying(info)
+    // Check if we have an android asset from react style image require
+    if(info.artwork) {
+        info.artwork = resolveAssetSource(info.artwork) || info.artwork;
+    }
+
+    NativeMusicControl.setNowPlaying(info);
   },
   setPlayback: function(info){
-    NativeMusicControl.setPlayback(info)
+    // Backwards compatibility. Use updatePlayback instead.
+    NativeMusicControl.updatePlayback(info)
+  },
+  updatePlayback: function(info){
+    NativeMusicControl.updatePlayback(info)
   },
   resetNowPlaying: function(){
     NativeMusicControl.resetNowPlaying()
@@ -45,7 +62,6 @@ var MusicControl = {
     subscription = DeviceEventEmitter.addListener(
       'RNMusicControlEvent',
       (event) => {
-        console.log(event);
         MusicControl.handleCommand(event.name, event.value)
       }
     );

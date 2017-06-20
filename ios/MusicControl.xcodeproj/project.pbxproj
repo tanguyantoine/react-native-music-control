@@ -8,10 +8,20 @@
 
 /* Begin PBXBuildFile section */
 		13BE3DEE1AC21097009241FE /* MusicControlManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 13BE3DED1AC21097009241FE /* MusicControlManager.m */; };
+		A3FC28581EA7A8350097B6A9 /* MusicControlManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 13BE3DED1AC21097009241FE /* MusicControlManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		58B511D91A9E6C8500147676 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A3FC285A1EA7A8350097B6A9 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "include/$(PRODUCT_NAME)";
@@ -26,10 +36,18 @@
 		134814201AA4EA6300B7C361 /* libMusicControl.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMusicControl.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		13BE3DEC1AC21097009241FE /* MusicControlManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MusicControlManager.h; sourceTree = "<group>"; };
 		13BE3DED1AC21097009241FE /* MusicControlManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MusicControlManager.m; sourceTree = "<group>"; };
+		A3FC285E1EA7A8350097B6A9 /* libMusicControl-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libMusicControl-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		58B511D81A9E6C8500147676 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A3FC28591EA7A8350097B6A9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -53,6 +71,7 @@
 				13BE3DEC1AC21097009241FE /* MusicControlManager.h */,
 				13BE3DED1AC21097009241FE /* MusicControlManager.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
+				A3FC285E1EA7A8350097B6A9 /* libMusicControl-tvOS.a */,
 			);
 			sourceTree = "<group>";
 		};
@@ -74,6 +93,23 @@
 			name = MusicControl;
 			productName = RCTDataManager;
 			productReference = 134814201AA4EA6300B7C361 /* libMusicControl.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		A3FC28561EA7A8350097B6A9 /* MusicControl-tvOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A3FC285B1EA7A8350097B6A9 /* Build configuration list for PBXNativeTarget "MusicControl-tvOS" */;
+			buildPhases = (
+				A3FC28571EA7A8350097B6A9 /* Sources */,
+				A3FC28591EA7A8350097B6A9 /* Frameworks */,
+				A3FC285A1EA7A8350097B6A9 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "MusicControl-tvOS";
+			productName = RCTDataManager;
+			productReference = A3FC285E1EA7A8350097B6A9 /* libMusicControl-tvOS.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -103,6 +139,7 @@
 			projectRoot = "";
 			targets = (
 				58B511DA1A9E6C8500147676 /* MusicControl */,
+				A3FC28561EA7A8350097B6A9 /* MusicControl-tvOS */,
 			);
 		};
 /* End PBXProject section */
@@ -113,6 +150,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				13BE3DEE1AC21097009241FE /* MusicControlManager.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A3FC28571EA7A8350097B6A9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A3FC28581EA7A8350097B6A9 /* MusicControlManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -222,6 +267,37 @@
 			};
 			name = Release;
 		};
+		A3FC285C1EA7A8350097B6A9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				"LIBRARY_SEARCH_PATHS[arch=*]" = "$(inherited)";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		A3FC285D1EA7A8350097B6A9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -239,6 +315,15 @@
 			buildConfigurations = (
 				58B511F01A9E6C8500147676 /* Debug */,
 				58B511F11A9E6C8500147676 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A3FC285B1EA7A8350097B6A9 /* Build configuration list for PBXNativeTarget "MusicControl-tvOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A3FC285C1EA7A8350097B6A9 /* Debug */,
+				A3FC285D1EA7A8350097B6A9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

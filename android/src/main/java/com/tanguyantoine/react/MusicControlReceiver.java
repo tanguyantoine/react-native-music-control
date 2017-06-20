@@ -24,6 +24,7 @@ public class MusicControlReceiver extends BroadcastReceiver {
 
             if(!checkApp(intent)) return;
 
+            // Removes the notification and deactivates the media session
             module.notification.hide();
             module.session.setActive(false);
 
@@ -32,7 +33,8 @@ public class MusicControlReceiver extends BroadcastReceiver {
             if(!intent.hasExtra(Intent.EXTRA_KEY_EVENT)) return;
             if(!checkApp(intent)) return;
 
-            // Replace this to MediaButtonReceiver.handleIntent when React Native updates the support library
+            // Dispatch media buttons to MusicControlListener
+            // Copy of MediaButtonReceiver.handleIntent without action check
             KeyEvent ke = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
             module.session.getController().dispatchMediaButtonEvent(ke);
 

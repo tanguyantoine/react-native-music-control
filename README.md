@@ -90,14 +90,18 @@ public class MainApplication extends Application implements ReactApplication {
 import MusicControl from 'react-native-music-control';
 ```
 
-**Now Playing**
+### Now Playing
 
-NB: You should call this method after a sound is playing
+This method enables the music controls. To disable them, use `resetNowPlaying()`
+
+You should call this method after a sound is playing.
+
+For Android's rating system, remove the `rating` value for unrated tracks, use boolean for RATING_HEART or RATING_THUMBS_UP_DOWN and use a number for other types. Note: To use custom types, you have to define the type with `updatePlayback` before calling this function.
 
 ```javascript
 MusicControl.setNowPlaying({
   title: 'Billie Jean',
-  artwork: 'http://lorempixel.com/400/400', // URL or File path
+  artwork: 'https://i.imgur.com/e1cpwdo.png', // URL or RN's image require()
   artist: 'Michael Jackson',
   album: 'Thriller',
   genre: 'Post-disco, Rhythm and Blues, Funk, Dance-pop',
@@ -105,36 +109,56 @@ MusicControl.setNowPlaying({
   description: '', // Android Only
   color: 0xFFFFFF, // Notification Color - Android Only
   date: '1983-01-02T00:00:00Z', // Release Date (RFC 3339) - Android Only
-  rating: 84 // Android Only (Percentage)
+  rating: 84 // Android Only (Boolean or Number depending on the type)
 })
 ```
 
-**Playback**
+### Playback
 
-Currently, Android only
+You don't need to call this method filling all properties, but you should always fill `elapsedTime` for iOS support and better performance on Android.
+
+You also don't need to call this method repeatedly to update the `elapsedTime`, only call it when you need to update any other property
 
 ```javascript
-MusicControl.setPlayback({
+MusicControl.updatePlayback({
   state: MusicControl.STATE_PLAYING, // (STATE_ERROR, STATE_STOPPED, STATE_PLAYING, STATE_PAUSED, STATE_BUFFERING)
-  volume: 10, // (Number from 0 to maxVolume) - Only used when remoteVolume is enabled
-  maxVolume: 10, // (Number) - Only used when remoteVolume is enabled
   speed: 1, // Playback Rate
   elapsedTime: 103, // (Seconds)
-  bufferedTime: 200 // (Seconds)
+  bufferedTime: 200, // Android Only (Seconds)
+  volume: 10, // Android Only (Number from 0 to maxVolume) - Only used when remoteVolume is enabled
+  maxVolume: 10, // Android Only (Number) - Only used when remoteVolume is enabled
+  rating: MusicControl.RATING_PERCENTAGE // Android Only (RATING_HEART, RATING_THUMBS_UP_DOWN, RATING_3_STARS, RATING_4_STARS, RATING_5_STARS, RATING_PERCENTAGE)
 })
 ```
 
-**Reset now playing**
+**Examples**
+```javascript
+// Changes the state to paused
+MusicControl.updatePlayback({
+  state: MusicControl.STATE_PAUSED,
+  elapsedTime: 135
+})
+
+// Changes the volume
+MusicControl.updatePlayback({
+  volume: 9, // Android Only
+  elapsedTime: 167
+})
+```
+
+### Reset now playing
+
+Resets and hides the music controls
 
 ```javascript
 MusicControl.resetNowPlaying()
 ```
 
-**Enable/disable controls**
+### Enable/disable controls
 
-iOS: Lockscreen
+**iOS**: Lockscreen
 
-Android: Notification and external devices (cars, watches)
+**Android**: Notification and external devices (smartwatches, cars)
 
 ```javascript
 MusicControl.enableControl('play', true)
@@ -145,7 +169,7 @@ MusicControl.enableControl('previousTrack', false)
 MusicControl.enableControl('seekForward', false);
 MusicControl.enableControl('seekBackward', false);
 MusicControl.enableControl('seek', false) // Android only
-MusicControl.enableControl('rate', false) // Android only
+MusicControl.enableControl('setRating', false) // Android only
 MusicControl.enableControl('volume', true) // Android only  - Only affected when remoteVolume is enabled
 MusicControl.enableControl('remoteVolume', false) // Android only
 MusicControl.enableControl('enableLanguageOption', false); // iOS only
@@ -161,7 +185,7 @@ MusicControl.enableControl('skipBackward', true, {interval: 15}))
 MusicControl.enableControl('skipForward', true, {interval: 30}))
 ```
 
-**Register to events**
+### Register to events
 
 ```javascript
 componentDidMount() {
@@ -171,6 +195,8 @@ componentDidMount() {
       this.props.dispatch(playRemoteControl());
     })
 
+    // on iOS this event will also be triggered by the audio router change event.
+    // This happens when headphones are unplugged or a bluetooth audio peripheral disconnects from the device
     MusicControl.on('pause', ()=> {
       this.props.dispatch(pauseRemoteControl());
     })
@@ -191,8 +217,10 @@ componentDidMount() {
     MusicControl.on('seekBackward', ()=> {});
 
     MusicControl.on('seek', (pos)=> {}); // Android only (Seconds)
-    MusicControl.on('rate', (rating)=> {}); // Android only (Percentage)
     MusicControl.on('volume', (volume)=> {}); // Android only (0 to maxVolume) - Only fired when remoteVolume is enabled
+
+    // Android Only (Boolean for RATING_HEART or RATING_THUMBS_UP_DOWN, Number for other types)
+    MusicControl.on('setRating', (rating)=> {});
 
     MusicControl.on('togglePlayPause', ()=> {}); // iOS only
     MusicControl.on('enableLanguageOption', ()=> {}); // iOS only
