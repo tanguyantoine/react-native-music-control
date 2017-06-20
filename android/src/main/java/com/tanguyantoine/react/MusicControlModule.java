@@ -285,7 +285,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         md = new MediaMetadataCompat.Builder();
 
-        notification.hide();
+        if (notification != null) notification.hide();
         session.setActive(false);
     }
 
