@@ -82,6 +82,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     public void init() {
+        if (init) return;
+
         INSTANCE = this;
         ReactApplicationContext context = getReactApplicationContext();
 
@@ -125,7 +127,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         init = true;
     }
 
-    public void destroy() {
+    synchronized public void destroy() {
         if(!init) return;
 
         if (notification != null) notification.hide();
@@ -157,8 +159,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     @ReactMethod
-    public void setNowPlaying(ReadableMap metadata) {
-        if(!init) init();
+    synchronized public void setNowPlaying(ReadableMap metadata) {
+        init();
         if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
 
         String title = metadata.hasKey("title") ? metadata.getString("title") : null;
@@ -238,8 +240,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     @ReactMethod
-    public void updatePlayback(ReadableMap info) {
-        if(!init) init();
+    synchronized public void updatePlayback(ReadableMap info) {
+        init();
 
         long updateTime;
         long elapsedTime;
@@ -278,7 +280,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     @ReactMethod
-    public void resetNowPlaying() {
+    synchronized public void resetNowPlaying() {
         if(!init) return;
         if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
         artworkThread = null;
@@ -290,8 +292,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     @ReactMethod
-    public void enableControl(String control, boolean enable) {
-        if(!init) init();
+    synchronized public void enableControl(String control, boolean enable) {
+        init();
 
         long controlValue;
         switch(control) {
