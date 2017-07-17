@@ -81,7 +81,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         return map;
     }
 
-    public void init() {
+    synchronized public void init() {
+        if (init) return;
+
         INSTANCE = this;
         ReactApplicationContext context = getReactApplicationContext();
 
@@ -125,7 +127,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         init = true;
     }
 
-    public void destroy() {
+    synchronized public void destroy() {
         if(!init) return;
 
         if (notification != null) notification.hide();
@@ -158,7 +160,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
     @ReactMethod
     public void setNowPlaying(ReadableMap metadata) {
-        if(!init) init();
+        init();
         if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
 
         String title = metadata.hasKey("title") ? metadata.getString("title") : null;
@@ -239,7 +241,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
     @ReactMethod
     public void updatePlayback(ReadableMap info) {
-        if(!init) init();
+        init();
 
         long updateTime;
         long elapsedTime;
@@ -291,7 +293,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
     @ReactMethod
     public void enableControl(String control, boolean enable) {
-        if(!init) init();
+        init();
 
         long controlValue;
         switch(control) {
