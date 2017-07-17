@@ -81,7 +81,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         return map;
     }
 
-    synchronized public void init() {
+    public void init() {
         if (init) return;
 
         INSTANCE = this;
@@ -159,7 +159,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     @ReactMethod
-    public void setNowPlaying(ReadableMap metadata) {
+    synchronized public void setNowPlaying(ReadableMap metadata) {
         init();
         if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
 
@@ -240,7 +240,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     @ReactMethod
-    public void updatePlayback(ReadableMap info) {
+    synchronized public void updatePlayback(ReadableMap info) {
         init();
 
         long updateTime;
@@ -280,7 +280,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     @ReactMethod
-    public void resetNowPlaying() {
+    synchronized public void resetNowPlaying() {
         if(!init) return;
         if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
         artworkThread = null;
@@ -292,7 +292,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     @ReactMethod
-    public void enableControl(String control, boolean enable) {
+    synchronized public void enableControl(String control, boolean enable) {
         init();
 
         long controlValue;
