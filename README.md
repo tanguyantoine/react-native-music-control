@@ -15,7 +15,7 @@ Project using it :
 
 * https://github.com/just-team/react-native-youtube-player
 
-![Image of Yaktocat](./docs/ios.png)
+![iOS lockscreen](./docs/ios.png)
 
 # Install
 
@@ -30,6 +30,12 @@ npm install react-native-music-control --save
 ### Automatic
 
 `react-native link`
+
+:warning: You must enable Audio Background mode in XCode project settings :
+
+![XCode bqckground mode enabled](https://user-images.githubusercontent.com/263097/28630866-beb84094-722b-11e7-8ed2-b495c9f37956.png)
+
+
 
 ### Manual
 
