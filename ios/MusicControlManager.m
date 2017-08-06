@@ -78,12 +78,17 @@ RCT_EXPORT_METHOD(updatePlayback:(NSDictionary *) originalDetails)
 
     center.nowPlayingInfo = [self update:mediaDict with:details andSetDefaults:false];
 
-    // Update the image if it exists
-    if ([details objectForKey:@"artwork"] != nil) {
+    // Custom handling of artwork in another thread, will be loaded async
+    if ([details objectForKey: @"artwork"]) {
+      if ([details[@"artwork"] isKindOfClass:[NSString class]]) {
         self.artworkUrl = details[@"artwork"];
-    }
+      } else {
+        self.artworkUrl = [details[@"artwork"] valueForKey: @"uri"];
+      }
 
-    [self updateNowPlayingArtwork];
+      if (self.artworkUrl != nil)
+        [self updateNowPlayingArtwork];
+    }
 }
 
 
@@ -96,8 +101,16 @@ RCT_EXPORT_METHOD(setNowPlaying:(NSDictionary *) details)
     center.nowPlayingInfo = [self update:mediaDict with:details andSetDefaults:true];
 
     // Custom handling of artwork in another thread, will be loaded async
-    self.artworkUrl = details[@"artwork"];
-    [self updateNowPlayingArtwork];
+    if ([details objectForKey: @"artwork"]) {
+      if ([details[@"artwork"] isKindOfClass:[NSString class]]) {
+        self.artworkUrl = details[@"artwork"];
+      } else {
+        self.artworkUrl = [details[@"artwork"] valueForKey: @"uri"];
+      }
+
+      if (self.artworkUrl != nil)
+        [self updateNowPlayingArtwork];
+    }
 }
 
 RCT_EXPORT_METHOD(resetNowPlaying)
@@ -238,20 +251,23 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         NSString *url = self.artworkUrl;
         UIImage *image = nil;
+
         // check whether artwork path is present
         if (![url isEqual: @""]) {
-            // artwork is url download from the interwebs
-            if ([url hasPrefix: @"http://"] || [url hasPrefix: @"https://"]) {
-                NSURL *imageURL = [NSURL URLWithString:url];
-                NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
-                image = [UIImage imageWithData:imageData];
-            } else {
-                // artwork is local. so create it from a UIImage
-                BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:url];
-                if (fileExists) {
-                    image = [UIImage imageNamed:url];
-                }
-            }
+
+          // artwork is url download from the interwebs
+          if ([url hasPrefix: @"http://"] || [url hasPrefix: @"https://"]) {
+              NSURL *imageURL = [NSURL URLWithString:url];
+              NSData *imageData = [NSData dataWithContentsOfURL: imageURL];
+              image = [UIImage imageWithData: imageData];
+
+          // artwork is local, so create it from a UIImage
+          } else {
+              BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath: url];
+              if (fileExists) {
+                  image = [UIImage imageNamed: url];
+              }
+          }
         }
 
         // Check if image was available otherwise don't do anything
