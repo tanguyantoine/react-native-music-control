@@ -187,16 +187,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             rating = RatingCompat.newUnratedRating(ratingType);
         }
 
-        String artwork = null;
-        boolean localArtwork = false;
-        if(metadata.hasKey("artwork")) {
-            if(metadata.getType("artwork") == ReadableType.Map) {
-                artwork = metadata.getMap("artwork").getString("uri");
-                localArtwork = true;
-            } else {
-                artwork = metadata.getString("artwork");
-            }
-        }
+
 
         md.putText(MediaMetadataCompat.METADATA_KEY_TITLE, title);
         md.putText(MediaMetadataCompat.METADATA_KEY_ARTIST, artist);
@@ -212,31 +203,45 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         nb.setContentInfo(album);
         nb.setColor(notificationColor);
 
-        if(artwork != null) {
-            final String artworkUrl = artwork;
-            final boolean artworkLocal = localArtwork;
-
-            artworkThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Bitmap bitmap = loadArtwork(artworkUrl, artworkLocal);
-                    md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap);
-                    nb.setLargeIcon(bitmap);
-
-                    session.setMetadata(md.build());
-                    notification.show(nb, isPlaying);
-                    artworkThread = null;
-                }
-            });
-            artworkThread.start();
+        if (metadata.hasKey("artwork")) {
+          setArtwork(metadata);
         } else {
-            md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, null);
-            nb.setLargeIcon(null);
+          md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, null);
+          nb.setLargeIcon(null);
         }
 
         session.setMetadata(md.build());
         session.setActive(true);
         notification.show(nb, isPlaying);
+    }
+
+    private void setArtwork(ReadableMap metadata) {
+      String artwork = null;
+      boolean localArtwork = false;
+
+      if(metadata.getType("artwork") == ReadableType.Map) {
+          artwork = metadata.getMap("artwork").getString("uri");
+          localArtwork = true;
+      } else {
+          artwork = metadata.getString("artwork");
+      }
+
+      final String artworkUrl = artwork;
+      final boolean artworkLocal = localArtwork;
+
+      artworkThread = new Thread(new Runnable() {
+          @Override
+          public void run() {
+              Bitmap bitmap = loadArtwork(artworkUrl, artworkLocal);
+              md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap);
+              nb.setLargeIcon(bitmap);
+
+              session.setMetadata(md.build());
+              notification.show(nb, isPlaying);
+              artworkThread = null;
+          }
+      });
+      artworkThread.start();
     }
 
     @ReactMethod
@@ -270,6 +275,10 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         state = pb.build();
         session.setPlaybackState(state);
 
+        if (info.hasKey("artwork")) {
+          setArtwork(info);
+        }
+
         session.setRatingType(ratingType);
 
         if(remoteVolume) {
@@ -292,11 +301,17 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     @ReactMethod
-    synchronized public void enableControl(String control, boolean enable) {
-        init();
+    synchronized public void enableControl(String control, boolean enable, ReadableMap options) {
+        if(!init) init();
 
         long controlValue;
         switch(control) {
+            case "skipForward":
+                controlValue = PlaybackStateCompat.ACTION_FAST_FORWARD;
+                break;
+            case "skipBackward":
+                controlValue = PlaybackStateCompat.ACTION_REWIND;
+                break;
             case "nextTrack":
                 controlValue = PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
                 break;
@@ -361,7 +376,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         Bitmap bitmap = null;
 
         try {
-            if(local) {
+            // If we are running the app in debug mode, the "local" image will be served from htt://localhost:8080, so we need to check for this case and load those images from URL
+            if(local && !url.startsWith("http")) {
 
                 // Gets the drawable from the RN's helper for local resources
                 ResourceDrawableIdHelper helper = ResourceDrawableIdHelper.getInstance();
