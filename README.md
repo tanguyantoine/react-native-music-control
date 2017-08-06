@@ -164,8 +164,6 @@ MusicControl.resetNowPlaying()
 MusicControl.enableControl('play', true)
 MusicControl.enableControl('pause', true)
 MusicControl.enableControl('stop', false)
-MusicControl.enableControl('nextTrack', true)
-MusicControl.enableControl('previousTrack', false)
 MusicControl.enableControl('seekForward', false);
 MusicControl.enableControl('seekBackward', false);
 MusicControl.enableControl('seek', false) // Android only
@@ -174,8 +172,10 @@ MusicControl.enableControl('volume', true) // Android only  - Only affected when
 MusicControl.enableControl('remoteVolume', false) // Android only
 MusicControl.enableControl('enableLanguageOption', false); // iOS only
 MusicControl.enableControl('disableLanguageOption', false); // iOS only
-MusicControl.enableControl('skipForward', false); // iOS only
-MusicControl.enableControl('skipBackward', false); // iOS only
+MusicControl.enableControl('nextTrack', true)
+MusicControl.enableControl('previousTrack', false)
+MusicControl.enableControl('skipForward', false);
+MusicControl.enableControl('skipBackward', false);
 ```
 
 `skipBackward` and `skipForward` controls on iOS accept additional configuration options with `interval` key:
@@ -184,6 +184,8 @@ MusicControl.enableControl('skipBackward', false); // iOS only
 MusicControl.enableControl('skipBackward', true, {interval: 15}))
 MusicControl.enableControl('skipForward', true, {interval: 30}))
 ```
+
+Note: the seekForward and seekBackward controls won't show on the Android notification controller, but will still show on the lock screen and other control locations where available.
 
 ### Register to events
 
@@ -225,8 +227,8 @@ componentDidMount() {
     MusicControl.on('togglePlayPause', ()=> {}); // iOS only
     MusicControl.on('enableLanguageOption', ()=> {}); // iOS only
     MusicControl.on('disableLanguageOption', ()=> {}); // iOS only
-    MusicControl.on('skipForward', ()=> {}); // iOS only
-    MusicControl.on('skipBackward', ()=> {}); // iOS only
+    MusicControl.on('skipForward', ()=> {});
+    MusicControl.on('skipBackward', ()=> {});
 }
 ```
 

@@ -306,6 +306,12 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         long controlValue;
         switch(control) {
+            case "skipForward":
+                controlValue = PlaybackStateCompat.ACTION_FAST_FORWARD;
+                break;
+            case "skipBackward":
+                controlValue = PlaybackStateCompat.ACTION_REWIND;
+                break;
             case "nextTrack":
                 controlValue = PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
                 break;

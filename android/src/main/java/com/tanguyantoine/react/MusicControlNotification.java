@@ -20,7 +20,7 @@ public class MusicControlNotification {
     private final ReactApplicationContext context;
 
     private int smallIcon;
-    private NotificationCompat.Action play, pause, stop, next, previous;
+    private NotificationCompat.Action play, pause, stop, next, previous, skipForward, skipBackward;
 
     public MusicControlNotification(ReactApplicationContext context) {
         this.context = context;
@@ -39,16 +39,20 @@ public class MusicControlNotification {
         stop = createAction("stop", "Stop", mask, PlaybackStateCompat.ACTION_STOP, stop);
         next = createAction("next", "Next", mask, PlaybackStateCompat.ACTION_SKIP_TO_NEXT, next);
         previous = createAction("previous", "Previous", mask, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS, previous);
+        skipForward = createAction("skip_forward", "Skip Forward", mask, PlaybackStateCompat.ACTION_FAST_FORWARD, skipForward);
+        skipBackward = createAction("skip_backward", "Skip Backward", mask, PlaybackStateCompat.ACTION_REWIND, skipBackward);
     }
 
     public void show(NotificationCompat.Builder builder, boolean isPlaying) {
         // Add the buttons
         builder.mActions.clear();
         if(previous != null) builder.addAction(previous);
+        if(skipBackward != null) builder.addAction(skipBackward);
         if(play != null && !isPlaying) builder.addAction(play);
         if(pause != null && isPlaying) builder.addAction(pause);
         if(stop != null) builder.addAction(stop);
         if(next != null) builder.addAction(next);
+        if(skipForward != null) builder.addAction(skipForward);
 
         // Notifications of playing music can't be removed
         builder.setOngoing(isPlaying);
