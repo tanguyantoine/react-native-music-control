@@ -292,7 +292,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     @ReactMethod
-    synchronized public void enableControl(String control, boolean enable) {
+    synchronized public void enableControl(String control, boolean enable, ReadableMap options) {
         init();
 
         long controlValue;
