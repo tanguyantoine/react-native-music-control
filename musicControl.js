@@ -4,27 +4,29 @@
  */
 'use strict';
 
-import { NativeModules, DeviceEventEmitter } from 'react-native';
+import { NativeModules, DeviceEventEmitter, Platform } from 'react-native';
 const NativeMusicControl = NativeModules.MusicControlManager;
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 
 var handlers = { };
 var subscription = null;
 
+var ios = Platform.OS === 'ios';
+
 var MusicControl = {
 
-  STATE_ERROR: NativeMusicControl.STATE_ERROR,
-  STATE_STOPPED: NativeMusicControl.STATE_STOPPED,
+  STATE_ERROR: ios ? NativeMusicControl.STATE_PAUSED : NativeMusicControl.STATE_ERROR,
   STATE_PLAYING: NativeMusicControl.STATE_PLAYING,
   STATE_PAUSED: NativeMusicControl.STATE_PAUSED,
-  STATE_BUFFERING: NativeMusicControl.STATE_BUFFERING,
+  STATE_STOPPED: ios ? NativeMusicControl.STATE_PAUSED : NativeMusicControl.STATE_STOPPED,
+  STATE_BUFFERING: ios ? NativeMusicControl.STATE_PAUSED : NativeMusicControl.STATE_BUFFERING,
 
-  RATING_HEART: NativeMusicControl.RATING_HEART,
-  RATING_THUMBS_UP_DOWN: NativeMusicControl.RATING_THUMBS_UP_DOWN,
-  RATING_3_STARS: NativeMusicControl.RATING_3_STARS,
-  RATING_4_STARS: NativeMusicControl.RATING_4_STARS,
-  RATING_5_STARS: NativeMusicControl.RATING_5_STARS,
-  RATING_PERCENTAGE: NativeMusicControl.RATING_PERCENTAGE,
+  RATING_HEART: ios ? 0 : NativeMusicControl.RATING_HEART,
+  RATING_THUMBS_UP_DOWN: ios ? 0 : NativeMusicControl.RATING_THUMBS_UP_DOWN,
+  RATING_3_STARS: ios ? 0 : NativeMusicControl.RATING_3_STARS,
+  RATING_4_STARS: ios ? 0 : NativeMusicControl.RATING_4_STARS,
+  RATING_5_STARS: ios ? 0 : NativeMusicControl.RATING_5_STARS,
+  RATING_PERCENTAGE: ios ? 0 : NativeMusicControl.RATING_PERCENTAGE,
 
   enableBackgroundMode: function(enable){
     NativeMusicControl.enableBackgroundMode(enable)
@@ -47,8 +49,8 @@ var MusicControl = {
   resetNowPlaying: function(){
     NativeMusicControl.resetNowPlaying()
   },
-  enableControl: function(controlName, enable){
-    NativeMusicControl.enableControl(controlName, enable)
+  enableControl: function(controlName, bool, options = {}){
+    NativeMusicControl.enableControl(controlName, bool, options || {})
   },
   handleCommand: function(commandName, value){
     if(handlers[commandName]){
