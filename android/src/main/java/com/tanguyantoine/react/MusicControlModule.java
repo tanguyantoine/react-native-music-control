@@ -187,16 +187,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             rating = RatingCompat.newUnratedRating(ratingType);
         }
 
-        String artwork = null;
-        boolean localArtwork = false;
-        if(metadata.hasKey("artwork")) {
-            if(metadata.getType("artwork") == ReadableType.Map) {
-                artwork = metadata.getMap("artwork").getString("uri");
-                localArtwork = true;
-            } else {
-                artwork = metadata.getString("artwork");
-            }
-        }
+
 
         md.putText(MediaMetadataCompat.METADATA_KEY_TITLE, title);
         md.putText(MediaMetadataCompat.METADATA_KEY_ARTIST, artist);
@@ -212,7 +203,17 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         nb.setContentInfo(album);
         nb.setColor(notificationColor);
 
-        if(artwork != null) {
+        if(metadata.hasKey("artwork")) {
+            String artwork = null;
+            boolean localArtwork = false;
+
+            if(metadata.getType("artwork") == ReadableType.Map) {
+                artwork = metadata.getMap("artwork").getString("uri");
+                localArtwork = true;
+            } else {
+                artwork = metadata.getString("artwork");
+            }
+
             final String artworkUrl = artwork;
             final boolean artworkLocal = localArtwork;
 
@@ -361,7 +362,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         Bitmap bitmap = null;
 
         try {
-            if(local) {
+            // If we are running the app in debug mode, the "local" image will be served from htt://localhost:8080, so we need to check for this case and load those images from URL
+            if(local && !url.startsWith("http")) {
 
                 // Gets the drawable from the RN's helper for local resources
                 ResourceDrawableIdHelper helper = ResourceDrawableIdHelper.getInstance();
