@@ -77,13 +77,13 @@ RCT_EXPORT_METHOD(updatePlayback:(NSDictionary *) originalDetails)
     NSMutableDictionary *mediaDict = [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo];
 
     center.nowPlayingInfo = [self update:mediaDict with:details andSetDefaults:false];
-
-    // Update the image if it doesn't exists
-    if ([details objectForKey:@"artwork"] == nil) {
+    
+    // Update the image if only it it differs from the previous image
+    
+    if ([details objectForKey:@"artwork"] != self.artworkUrl) {
         self.artworkUrl = details[@"artwork"];
+        [self updateNowPlayingArtwork];
     }
-      [self updateNowPlayingArtwork];
-
 
 }
 
