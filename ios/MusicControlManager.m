@@ -77,12 +77,11 @@ RCT_EXPORT_METHOD(updatePlayback:(NSDictionary *) originalDetails)
     NSMutableDictionary *mediaDict = [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo];
 
     center.nowPlayingInfo = [self update:mediaDict with:details andSetDefaults:false];
-    
-    // Update the image if only it it differs from the previous image
-    
+
+
     if ([details objectForKey:@"artwork"] != self.artworkUrl) {
         self.artworkUrl = details[@"artwork"];
-        [self updateNowPlayingArtwork];
+        [self updateArtworkIfNeeded:[details objectForKey:@"artwork"]];
     }
 
 }
@@ -96,9 +95,7 @@ RCT_EXPORT_METHOD(setNowPlaying:(NSDictionary *) details)
 
     center.nowPlayingInfo = [self update:mediaDict with:details andSetDefaults:true];
 
-    // Custom handling of artwork in another thread, will be loaded async
-    self.artworkUrl = details[@"artwork"];
-    [self updateNowPlayingArtwork];
+  [self updateArtworkIfNeeded:[details objectForKey:@"artwork"]];
 }
 
 RCT_EXPORT_METHOD(resetNowPlaying)
@@ -234,50 +231,64 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
                        body:@{@"name": event}];
 }
 
-- (void)updateNowPlayingArtwork
+- (void)updateArtworkIfNeeded:(id)artwork
 {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        NSString *url = self.artworkUrl;
-        UIImage *image = nil;
-        // check whether artwork path is present
-        if (![url isEqual: @""]) {
-            // artwork is url download from the interwebs
-            if ([url hasPrefix: @"http://"] || [url hasPrefix: @"https://"]) {
-                NSURL *imageURL = [NSURL URLWithString:url];
-                NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
-                image = [UIImage imageWithData:imageData];
-            } else {
-                // artwork is local. so create it from a UIImage
-                BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:url];
-                if (fileExists) {
-                    image = [UIImage imageNamed:url];
+    NSString *url = nil;
+    if (artwork) {
+        if ([artwork isKindOfClass:[NSString class]]) {
+             url = artwork;
+        } else if ([[artwork valueForKey: @"uri"] isKindOfClass:[NSString class]]) {
+             url = [artwork valueForKey: @"uri"];
+        }
+    }
+
+    if (url != nil) {
+        self.artworkUrl = url;
+
+        // Custom handling of artwork in another thread, will be loaded async
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            UIImage *image = nil;
+
+            // check whether artwork path is present
+            if (![url isEqual: @""]) {
+                // artwork is url download from the interwebs
+                if ([url hasPrefix: @"http://"] || [url hasPrefix: @"https://"]) {
+                    NSURL *imageURL = [NSURL URLWithString:url];
+                    NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
+                    image = [UIImage imageWithData:imageData];
+                } else {
+                    // artwork is local. so create it from a UIImage
+                    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:url];
+                    if (fileExists) {
+                        image = [UIImage imageNamed:url];
+                    }
                 }
             }
-        }
 
-        // Check if image was available otherwise don't do anything
-        if (image == nil) {
-            return;
-        }
+            // Check if image was available otherwise don't do anything
+            if (image == nil) {
+                return;
+            }
 
-        // check whether image is loaded
-        CGImageRef cgref = [image CGImage];
-        CIImage *cim = [image CIImage];
+            // check whether image is loaded
+            CGImageRef cgref = [image CGImage];
+            CIImage *cim = [image CIImage];
 
-        if (cim != nil || cgref != NULL) {
-            dispatch_async(dispatch_get_main_queue(), ^{
+            if (cim != nil || cgref != NULL) {
+                dispatch_async(dispatch_get_main_queue(), ^{
 
-                // Check if URL wasn't changed in the meantime
-                if ([url isEqual:self.artworkUrl]) {
-                    MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
-                    MPMediaItemArtwork *artwork = [[MPMediaItemArtwork alloc] initWithImage: image];
-                    NSMutableDictionary *mediaDict = (center.nowPlayingInfo != nil) ? [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo] : [NSMutableDictionary dictionary];
-                    [mediaDict setValue:artwork forKey:MPMediaItemPropertyArtwork];
-                    center.nowPlayingInfo = mediaDict;
-                }
-            });
-        }
-    });
+                    // Check if URL wasn't changed in the meantime
+                    if ([url isEqual:self.artworkUrl]) {
+                        MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
+                        MPMediaItemArtwork *artwork = [[MPMediaItemArtwork alloc] initWithImage: image];
+                        NSMutableDictionary *mediaDict = (center.nowPlayingInfo != nil) ? [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo] : [NSMutableDictionary dictionary];
+                        [mediaDict setValue:artwork forKey:MPMediaItemPropertyArtwork];
+                        center.nowPlayingInfo = mediaDict;
+                    }
+                });
+            }
+        });
+    }
 }
 
 - (void)audioHardwareRouteChanged:(NSNotification *)notification {

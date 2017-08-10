@@ -6,6 +6,7 @@
 
 import { NativeModules, NativeEventEmitter } from 'react-native';
 const NativeMusicControl = NativeModules.MusicControlManager;
+import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 
 /**
  * High-level docs for the MusicControl iOS API can be written here.
@@ -40,7 +41,12 @@ var MusicControl = {
     NativeMusicControl.enableBackgroundMode(enable)
   },
   setNowPlaying: function(info){
-    NativeMusicControl.setNowPlaying(info)
+    // Check if we have an ios asset from react style image require
+    if(info.artwork) {
+        info.artwork = resolveAssetSource(info.artwork) || info.artwork;
+    }
+
+    NativeMusicControl.setNowPlaying(info);
   },
   resetNowPlaying: function(){
     NativeMusicControl.resetNowPlaying()
