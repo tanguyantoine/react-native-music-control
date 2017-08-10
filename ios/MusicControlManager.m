@@ -78,7 +78,12 @@ RCT_EXPORT_METHOD(updatePlayback:(NSDictionary *) originalDetails)
 
     center.nowPlayingInfo = [self update:mediaDict with:details andSetDefaults:false];
 
-  [self updateArtworkIfNeeded:[details objectForKey:@"artwork"]];
+
+    if ([details objectForKey:@"artwork"] != self.artworkUrl) {
+        self.artworkUrl = details[@"artwork"];
+        [self updateArtworkIfNeeded:[details objectForKey:@"artwork"]];
+    }
+
 }
 
 
