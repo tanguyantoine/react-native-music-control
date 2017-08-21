@@ -221,11 +221,16 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                 @Override
                 public void run() {
                     Bitmap bitmap = loadArtwork(artworkUrl, artworkLocal);
-                    md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap);
-                    nb.setLargeIcon(bitmap);
-
-                    session.setMetadata(md.build());
-                    notification.show(nb, isPlaying);
+                    
+                    if(md != null) {
+                        md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap);
+                        session.setMetadata(md.build());
+                    }
+                    if(nb != null) {
+                        nb.setLargeIcon(bitmap);
+                        notification.show(nb, isPlaying);
+                    }
+                    
                     artworkThread = null;
                 }
             });
