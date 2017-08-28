@@ -161,21 +161,28 @@ MusicControl.resetNowPlaying()
 **Android**: Notification and external devices (smartwatches, cars)
 
 ```javascript
+// Basic Controls
 MusicControl.enableControl('play', true)
 MusicControl.enableControl('pause', true)
 MusicControl.enableControl('stop', false)
-MusicControl.enableControl('seekForward', false);
-MusicControl.enableControl('seekBackward', false);
-MusicControl.enableControl('seek', false) // Android only
-MusicControl.enableControl('setRating', false) // Android only
-MusicControl.enableControl('volume', true) // Android only  - Only affected when remoteVolume is enabled
-MusicControl.enableControl('remoteVolume', false) // Android only
-MusicControl.enableControl('enableLanguageOption', false); // iOS only
-MusicControl.enableControl('disableLanguageOption', false); // iOS only
 MusicControl.enableControl('nextTrack', true)
 MusicControl.enableControl('previousTrack', false)
-MusicControl.enableControl('skipForward', false);
-MusicControl.enableControl('skipBackward', false);
+
+// Seeking
+MusicControl.enableControl('seekForward', false) // iOS only
+MusicControl.enableControl('seekBackward', false) // iOS only
+MusicControl.enableControl('seek', false) // Android only
+MusicControl.enableControl('skipForward', false)
+MusicControl.enableControl('skipBackward', false)
+
+// Android Specific Options
+MusicControl.enableControl('setRating', false)
+MusicControl.enableControl('volume', true) // Only affected when remoteVolume is enabled
+MusicControl.enableControl('remoteVolume', false)
+
+// iOS Specific Options
+MusicControl.enableControl('enableLanguageOption', false)
+MusicControl.enableControl('disableLanguageOption', false)
 ```
 
 `skipBackward` and `skipForward` controls on iOS accept additional configuration options with `interval` key:
@@ -184,8 +191,6 @@ MusicControl.enableControl('skipBackward', false);
 MusicControl.enableControl('skipBackward', true, {interval: 15}))
 MusicControl.enableControl('skipForward', true, {interval: 30}))
 ```
-
-Note: the seekForward and seekBackward controls won't show on the Android notification controller, but will still show on the lock screen and other control locations where available.
 
 ### Register to events
 

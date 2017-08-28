@@ -325,12 +325,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             case "seek":
                 controlValue = PlaybackStateCompat.ACTION_SEEK_TO;
                 break;
-            case "seekForward":
-                controlValue = PlaybackStateCompat.ACTION_FAST_FORWARD;
-                break;
-            case "seekBackward":
-                controlValue = PlaybackStateCompat.ACTION_REWIND;
-                break;
             case "setRating":
                 controlValue = PlaybackStateCompat.ACTION_SET_RATING;
                 break;
