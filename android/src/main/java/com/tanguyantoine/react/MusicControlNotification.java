@@ -10,6 +10,9 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.NotificationCompat;
 import android.view.KeyEvent;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReadableMap;
+
+import java.util.Map;
 
 public class MusicControlNotification {
 
@@ -33,14 +36,24 @@ public class MusicControlNotification {
         if(smallIcon == 0) smallIcon = r.getIdentifier("play", "drawable", packageName);
     }
 
-    public void updateActions(long mask) {
+    public void updateActions(long mask, Map<String, Integer> options) {
         play = createAction("play", "Play", mask, PlaybackStateCompat.ACTION_PLAY, play);
         pause = createAction("pause", "Pause", mask, PlaybackStateCompat.ACTION_PAUSE, pause);
         stop = createAction("stop", "Stop", mask, PlaybackStateCompat.ACTION_STOP, stop);
         next = createAction("next", "Next", mask, PlaybackStateCompat.ACTION_SKIP_TO_NEXT, next);
         previous = createAction("previous", "Previous", mask, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS, previous);
-        skipForward = createAction("skip_forward", "Skip Forward", mask, PlaybackStateCompat.ACTION_FAST_FORWARD, skipForward);
-        skipBackward = createAction("skip_backward", "Skip Backward", mask, PlaybackStateCompat.ACTION_REWIND, skipBackward);
+
+        if (options != null && options.containsKey("skipForward") && (options.get("skipForward") == 10 || options.get("skipForward") == 5 || options.get("skipForward") == 30)) {
+            skipForward = createAction("skip_forward_" + options.get("skipForward").toString(), "Skip Forward", mask, PlaybackStateCompat.ACTION_FAST_FORWARD, skipForward);
+        } else {
+            skipForward = createAction("skip_forward_10", "Skip Forward", mask, PlaybackStateCompat.ACTION_FAST_FORWARD, skipForward);
+        }
+
+        if (options != null && options.containsKey("skipBackward") && (options.get("skipBackward") == 10 || options.get("skipBackward") == 5 || options.get("skipBackward") == 30)) {
+            skipBackward = createAction("skip_backward_" + options.get("skipBackward").toString(), "Skip Backward", mask, PlaybackStateCompat.ACTION_REWIND, skipBackward);
+        } else {
+            skipBackward = createAction("skip_backward_", "Skip Backward", mask, PlaybackStateCompat.ACTION_REWIND, skipBackward);
+        }
     }
 
     public void show(NotificationCompat.Builder builder, boolean isPlaying) {
