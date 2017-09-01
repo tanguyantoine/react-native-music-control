@@ -110,7 +110,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         state = pb.build();
 
         notification = new MusicControlNotification(context);
-        notification.updateActions(controls);
+        notification.updateActions(controls, null);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MusicControlNotification.REMOVE_NOTIFICATION);
@@ -298,11 +298,23 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     @ReactMethod
-    synchronized public void enableControl(String control, boolean enable) {
+    synchronized public void enableControl(String control, boolean enable, ReadableMap options) {
         init();
+
+        Map<String, Integer> skipOptions = new HashMap<String, Integer>();
 
         long controlValue;
         switch(control) {
+            case "skipForward":
+                if (options.hasKey("interval"))
+                    skipOptions.put("skipForward", options.getInt("interval"));
+                controlValue = PlaybackStateCompat.ACTION_FAST_FORWARD;
+                break;
+            case "skipBackward":
+                if (options.hasKey("interval"))
+                    skipOptions.put("skipBackward", options.getInt("interval"));
+                controlValue = PlaybackStateCompat.ACTION_REWIND;
+                break;
             case "nextTrack":
                 controlValue = PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
                 break;
@@ -323,12 +335,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                 break;
             case "seek":
                 controlValue = PlaybackStateCompat.ACTION_SEEK_TO;
-                break;
-            case "seekForward":
-                controlValue = PlaybackStateCompat.ACTION_FAST_FORWARD;
-                break;
-            case "seekBackward":
-                controlValue = PlaybackStateCompat.ACTION_REWIND;
                 break;
             case "setRating":
                 controlValue = PlaybackStateCompat.ACTION_SET_RATING;
@@ -356,7 +362,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             controls &= ~controlValue;
         }
 
-        notification.updateActions(controls);
+        notification.updateActions(controls, skipOptions);
         pb.setActions(controls);
 
         state = pb.build();

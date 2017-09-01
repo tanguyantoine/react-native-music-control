@@ -65,12 +65,12 @@ public class MusicControlListener extends MediaSessionCompat.Callback {
 
     @Override
     public void onFastForward() {
-        sendEvent(context, "seekForward", null);
+        sendEvent(context, "skipForward", null);
     }
 
     @Override
     public void onRewind() {
-        sendEvent(context, "seekBackward", null);
+        sendEvent(context, "skipBackward", null);
     }
 
     @Override

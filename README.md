@@ -161,29 +161,40 @@ MusicControl.resetNowPlaying()
 **Android**: Notification and external devices (smartwatches, cars)
 
 ```javascript
+// Basic Controls
 MusicControl.enableControl('play', true)
 MusicControl.enableControl('pause', true)
 MusicControl.enableControl('stop', false)
 MusicControl.enableControl('nextTrack', true)
 MusicControl.enableControl('previousTrack', false)
-MusicControl.enableControl('seekForward', false);
-MusicControl.enableControl('seekBackward', false);
+
+// Seeking
+MusicControl.enableControl('seekForward', false) // iOS only
+MusicControl.enableControl('seekBackward', false) // iOS only
 MusicControl.enableControl('seek', false) // Android only
-MusicControl.enableControl('setRating', false) // Android only
-MusicControl.enableControl('volume', true) // Android only  - Only affected when remoteVolume is enabled
-MusicControl.enableControl('remoteVolume', false) // Android only
-MusicControl.enableControl('enableLanguageOption', false); // iOS only
-MusicControl.enableControl('disableLanguageOption', false); // iOS only
-MusicControl.enableControl('skipForward', false); // iOS only
-MusicControl.enableControl('skipBackward', false); // iOS only
+MusicControl.enableControl('skipForward', false)
+MusicControl.enableControl('skipBackward', false)
+
+// Android Specific Options
+MusicControl.enableControl('setRating', false)
+MusicControl.enableControl('volume', true) // Only affected when remoteVolume is enabled
+MusicControl.enableControl('remoteVolume', false)
+
+// iOS Specific Options
+MusicControl.enableControl('enableLanguageOption', false)
+MusicControl.enableControl('disableLanguageOption', false)
 ```
 
-`skipBackward` and `skipForward` controls on iOS accept additional configuration options with `interval` key:
+`skipBackward` and `skipForward` controls on accept additional configuration options with `interval` key:
 
 ```javascript
 MusicControl.enableControl('skipBackward', true, {interval: 15}))
 MusicControl.enableControl('skipForward', true, {interval: 30}))
 ```
+
+Important Notes: 
+* Android only supports the intervals 5, 10, & 30, while iOS supports any number
+* The interval value only changes what number displays in the UI, the actual logic to skip forward or backward by a given amount must be implemented in the appropriate callbacks
 
 ### Register to events
 
@@ -225,8 +236,8 @@ componentDidMount() {
     MusicControl.on('togglePlayPause', ()=> {}); // iOS only
     MusicControl.on('enableLanguageOption', ()=> {}); // iOS only
     MusicControl.on('disableLanguageOption', ()=> {}); // iOS only
-    MusicControl.on('skipForward', ()=> {}); // iOS only
-    MusicControl.on('skipBackward', ()=> {}); // iOS only
+    MusicControl.on('skipForward', ()=> {});
+    MusicControl.on('skipBackward', ()=> {});
 }
 ```
 
