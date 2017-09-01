@@ -195,6 +195,7 @@ MusicControl.enableControl('skipForward', true, {interval: 30}))
 Important Notes: 
 * Android only supports the intervals 5, 10, & 30, while iOS supports any number
 * The interval value only changes what number displays in the UI, the actual logic to skip forward or backward by a given amount must be implemented in the appropriate callbacks
+* When using [react-native-sound](https://github.com/zmxv/react-native-sound) for audio playback, make sure that on iOS `mixWithOthers` is set to `false` in [`Sound.setCategory(value, mixWithOthers)`](https://github.com/zmxv/react-native-sound#soundsetcategoryvalue-mixwithothers-ios-only). MusicControl will not work on a real device when this is set to `true`.
 
 ### Register to events
 
