@@ -203,6 +203,19 @@ Important Notes:
 * The interval value only changes what number displays in the UI, the actual logic to skip forward or backward by a given amount must be implemented in the appropriate callbacks
 * When using [react-native-sound](https://github.com/zmxv/react-native-sound) for audio playback, make sure that on iOS `mixWithOthers` is set to `false` in [`Sound.setCategory(value, mixWithOthers)`](https://github.com/zmxv/react-native-sound#soundsetcategoryvalue-mixwithothers-ios-only). MusicControl will not work on a real device when this is set to `true`.
 
+There is also a `closeNotification` control on Android controls the swipe behavior of the audio playing notification, and accepts additional configuration options with the `when` key:
+
+```javascript
+// Always allow user to close notification on swipe
+MusicControl.enableControl('closeNotification', true, {when: 'always'})
+
+// Default - Allow user to close notification on swipe when audio is paused
+MusicControl.enableControl('closeNotification', true, {when: 'paused'})
+
+// Never allow user to close notification on swipe
+MusicControl.enableControl('closeNotification', true, {when: 'never'})
+```
+
 ### Register to events
 
 ```javascript
@@ -245,6 +258,11 @@ componentDidMount() {
     MusicControl.on('disableLanguageOption', ()=> {}); // iOS only
     MusicControl.on('skipForward', ()=> {});
     MusicControl.on('skipBackward', ()=> {});
+
+    // Android Only
+    MusicControl.on('closeNotification', ()=> {
+      this.props.dispatch(onAudioEnd());
+    })
 }
 ```
 

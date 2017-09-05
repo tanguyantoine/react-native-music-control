@@ -54,6 +54,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     private long controls = 0;
     protected int ratingType = RatingCompat.RATING_PERCENTAGE;
 
+    public NotificationClose notificationClose = NotificationClose.PAUSED;
+
     public MusicControlModule(ReactApplicationContext context) {
         super(context);
     }
@@ -109,14 +111,14 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         state = pb.build();
 
-        notification = new MusicControlNotification(context);
+        notification = new MusicControlNotification(this, context);
         notification.updateActions(controls, null);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MusicControlNotification.REMOVE_NOTIFICATION);
         filter.addAction(MusicControlNotification.MEDIA_BUTTON);
         filter.addAction(Intent.ACTION_MEDIA_BUTTON);
-        receiver = new MusicControlReceiver(this, context.getPackageName());
+        receiver = new MusicControlReceiver(this, context);
         context.registerReceiver(receiver, filter);
 
         context.startService(new Intent(context, MusicControlNotification.NotificationService.class));
@@ -351,6 +353,17 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                     session.setPlaybackToLocal(AudioManager.STREAM_MUSIC);
                 }
                 return;
+            case "closeNotification":
+                if(enable) {
+                    if(options.getString("when").equals("always")) {
+                        this.notificationClose = notificationClose.ALWAYS;
+                    } else if(options.getString("when").equals("paused")) {
+                        this.notificationClose = notificationClose.PAUSED;
+                    } else {
+                        this.notificationClose = notificationClose.NEVER;
+                    }
+                    return;
+                }
             default:
                 // Unknown control type, let's just ignore it
                 return;
@@ -430,5 +443,11 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     public void onLowMemory() {
         Log.w("MusicControl", "Control resources are being removed due to system's low memory (Level: MEMORY_COMPLETE)");
         destroy();
+    }
+
+    public enum NotificationClose {
+        ALWAYS,
+        PAUSED,
+        NEVER
     }
 }

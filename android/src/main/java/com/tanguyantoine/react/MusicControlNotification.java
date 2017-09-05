@@ -21,12 +21,14 @@ public class MusicControlNotification {
     protected static final String PACKAGE_NAME = "music_control_package_name";
 
     private final ReactApplicationContext context;
+    private final MusicControlModule module;
 
     private int smallIcon;
     private NotificationCompat.Action play, pause, stop, next, previous, skipForward, skipBackward;
 
-    public MusicControlNotification(ReactApplicationContext context) {
+    public MusicControlNotification(MusicControlModule module, ReactApplicationContext context) {
         this.context = context;
+        this.module = module;
 
         Resources r = context.getResources();
         String packageName = context.getPackageName();
@@ -67,8 +69,15 @@ public class MusicControlNotification {
         if(next != null) builder.addAction(next);
         if(skipForward != null) builder.addAction(skipForward);
 
-        // Notifications of playing music can't be removed
-        builder.setOngoing(isPlaying);
+        // Set whether notification can be closed based on closeNotification control (default PAUSED)
+        if(module.notificationClose == MusicControlModule.NotificationClose.ALWAYS) {
+            builder.setOngoing(false);
+        } else if(module.notificationClose == MusicControlModule.NotificationClose.PAUSED) {
+            builder.setOngoing(isPlaying);
+        } else { // NotificationClose.NEVER
+            builder.setOngoing(true); 
+        }
+
         builder.setSmallIcon(smallIcon);
 
         // Open the app when the notification is clicked
@@ -76,12 +85,10 @@ public class MusicControlNotification {
         Intent openApp = context.getPackageManager().getLaunchIntentForPackage(packageName);
         builder.setContentIntent(PendingIntent.getActivity(context, 0, openApp, 0));
 
-        if(!isPlaying) {
-            // Remove notification
-            Intent remove = new Intent(REMOVE_NOTIFICATION);
-            remove.putExtra(PACKAGE_NAME, context.getApplicationInfo().packageName);
-            builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, remove, PendingIntent.FLAG_UPDATE_CURRENT));
-        }
+        // Remove notification
+        Intent remove = new Intent(REMOVE_NOTIFICATION);
+        remove.putExtra(PACKAGE_NAME, context.getApplicationInfo().packageName);
+        builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, remove, PendingIntent.FLAG_UPDATE_CURRENT));
 
         // Finally show/update the notification
         NotificationManagerCompat.from(context).notify("MusicControl", 0, builder.build());

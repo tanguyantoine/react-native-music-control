@@ -4,15 +4,21 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.view.KeyEvent;
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 public class MusicControlReceiver extends BroadcastReceiver {
 
     private final MusicControlModule module;
     private final String packageName;
+    private final ReactApplicationContext reactContext;
 
-    public MusicControlReceiver(MusicControlModule module, String packageName) {
+    public MusicControlReceiver(MusicControlModule module, ReactApplicationContext context) {
         this.module = module;
-        this.packageName = packageName;
+        this.packageName = context.getPackageName();
+        this.reactContext = context;
     }
 
     @Override
@@ -27,6 +33,11 @@ public class MusicControlReceiver extends BroadcastReceiver {
             // Removes the notification and deactivates the media session
             module.notification.hide();
             module.session.setActive(false);
+
+            // Notify react native
+            WritableMap data = Arguments.createMap();
+            data.putString("name", "closeNotification");
+            reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("RNMusicControlEvent", data);
 
         } else if(MusicControlNotification.MEDIA_BUTTON.equals(action) || Intent.ACTION_MEDIA_BUTTON.equals(action)) {
 
