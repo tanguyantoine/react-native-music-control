@@ -38,6 +38,14 @@ public class MusicControlNotification {
         if(smallIcon == 0) smallIcon = r.getIdentifier("play", "drawable", packageName);
     }
 
+    public void setCustomNotificationIcon(String resourceName) {
+      Resources r = this.context.getResources();
+      String packageName = this.context.getPackageName();
+
+      int customIcon = r.getIdentifier(resourceName, "drawable", packageName);
+      if(customIcon != 0) smallIcon = customIcon;
+    }
+
     public void updateActions(long mask, Map<String, Integer> options) {
         play = createAction("play", "Play", mask, PlaybackStateCompat.ACTION_PLAY, play);
         pause = createAction("pause", "Pause", mask, PlaybackStateCompat.ACTION_PAUSE, pause);

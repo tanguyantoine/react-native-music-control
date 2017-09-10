@@ -161,6 +161,12 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     @ReactMethod
+    public void setCustomNotificationIcon(String resourceName) {
+        init();
+        notification.setCustomNotificationIcon(resourceName);
+    }
+
+    @ReactMethod
     synchronized public void setNowPlaying(ReadableMap metadata) {
         init();
         if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
