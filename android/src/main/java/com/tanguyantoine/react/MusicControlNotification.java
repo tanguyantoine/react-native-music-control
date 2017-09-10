@@ -34,7 +34,7 @@ public class MusicControlNotification {
         String packageName = context.getPackageName();
 
         // Optional custom icon with fallback to the play icon
-        smallIcon = r.getIdentifier("music-control-icon", "drawable", packageName);
+        smallIcon = r.getIdentifier("music_control_icon", "drawable", packageName);
         if(smallIcon == 0) smallIcon = r.getIdentifier("play", "drawable", packageName);
     }
 
