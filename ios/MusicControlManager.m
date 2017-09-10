@@ -158,7 +158,7 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
     [session setActive: enabled error: nil];
 }
 
-RCT_EXPORT_METHOD(setCustomNotificationIcon:(NSString) resourceName){
+RCT_EXPORT_METHOD(setCustomNotificationIcon:(NSString *) resourceName){
     //NO OP
 }
 
