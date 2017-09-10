@@ -266,7 +266,17 @@ componentDidMount() {
 }
 ```
 
+### Customization
 
+It is possible to customize the icon used in the notification on Android.
+By default you can add a drawable resource to your package with the file name `music_control_icon` and the notification will use your custom icon. If you
+would like to use a custom icon name, you can use the `setCustomNotificationIcon`
+function and pass in your drawable resource name in as a string. Keep in mind
+that the resource must be in the drawable sub-package in your app.
+
+```javascript
+  MusicControl.setCustomNotificationIcon('my_custom_icon');
+```
 
 # TODOS
 
