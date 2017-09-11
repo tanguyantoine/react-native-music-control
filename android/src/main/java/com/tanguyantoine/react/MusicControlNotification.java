@@ -40,10 +40,10 @@ public class MusicControlNotification {
     }
     
     public void setCustomNotificationIcon(String resourceName) {
-      Resources r = this.context.getResources();
-      String packageName = this.context.getPackageName();
+        Resources r = context.getResources();
+        String packageName = context.getPackageName();
 
-      customIcon = r.getIdentifier(resourceName, "drawable", packageName);
+        customIcon = r.getIdentifier(resourceName, "drawable", packageName);
     }
 
     public void updateActions(long mask, Map<String, Integer> options) {
