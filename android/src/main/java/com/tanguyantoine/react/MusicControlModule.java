@@ -214,9 +214,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                 localArtwork = true;
             } else {
                 artwork = metadata.getString("artwork");
-                if(!(artwork.startsWith("http://") || artwork.startsWith("https://"))){
-                    localArtwork = true;
-                }
+                localArtwork = !artwork.startsWith("http://") && !artwork.startsWith("https://");
             }
 
             final String artworkUrl = artwork;
