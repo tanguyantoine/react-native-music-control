@@ -4,6 +4,7 @@ import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -53,7 +54,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     private boolean isPlaying = false;
     private long controls = 0;
     protected int ratingType = RatingCompat.RATING_PERCENTAGE;
-
+    
     public NotificationClose notificationClose = NotificationClose.PAUSED;
 
     public MusicControlModule(ReactApplicationContext context) {
@@ -173,6 +174,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         String date = metadata.hasKey("date") ? metadata.getString("date") : null;
         long duration = metadata.hasKey("duration") ? (long)(metadata.getDouble("duration") * 1000) : 0;
         int notificationColor = metadata.hasKey("color") ? metadata.getInt("color") : NotificationCompat.COLOR_DEFAULT;
+        String notificationIcon = metadata.hasKey("notificationIcon") ? metadata.getString("notificationIcon") : null;
 
         RatingCompat rating;
         if(metadata.hasKey("rating")) {
@@ -204,6 +206,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         nb.setContentText(artist);
         nb.setContentInfo(album);
         nb.setColor(notificationColor);
+        
+        notification.setCustomNotificationIcon(notificationIcon);
 
         if(metadata.hasKey("artwork")) {
             String artwork = null;

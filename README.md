@@ -115,7 +115,8 @@ MusicControl.setNowPlaying({
   description: '', // Android Only
   color: 0xFFFFFF, // Notification Color - Android Only
   date: '1983-01-02T00:00:00Z', // Release Date (RFC 3339) - Android Only
-  rating: 84 // Android Only (Boolean or Number depending on the type)
+  rating: 84, // Android Only (Boolean or Number depending on the type)
+  notificationIcon: 'my_custom_icon' // Android Only (String), Android Drawable resource name for a custom notification icon
 })
 ```
 
@@ -266,7 +267,17 @@ componentDidMount() {
 }
 ```
 
+### Customization
 
+It is possible to customize the icon used in the notification on Android.
+By default you can add a drawable resource to your package with the file name `music_control_icon` and the notification will use your custom icon.
+If you need to specify a custom icon name, or change your notification icon during runtime, the `setNowPlaying` function accepts a string 
+for an Android drawable resource name in the `notificationIcon` prop. Keep in mind that just like with `music_control_icon` the resource specified has
+to be in the drawable package of your Android app.
+
+```javascript
+  MusicControl.setCustomNotificationIcon('my_custom_icon');
+```
 
 # TODOS
 

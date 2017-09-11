@@ -24,6 +24,7 @@ public class MusicControlNotification {
     private final MusicControlModule module;
 
     private int smallIcon;
+    private int customIcon;
     private NotificationCompat.Action play, pause, stop, next, previous, skipForward, skipBackward;
 
     public MusicControlNotification(MusicControlModule module, ReactApplicationContext context) {
@@ -34,8 +35,15 @@ public class MusicControlNotification {
         String packageName = context.getPackageName();
 
         // Optional custom icon with fallback to the play icon
-        smallIcon = r.getIdentifier("music-control-icon", "drawable", packageName);
+        smallIcon = r.getIdentifier("music_control_icon", "drawable", packageName);
         if(smallIcon == 0) smallIcon = r.getIdentifier("play", "drawable", packageName);
+    }
+    
+    public void setCustomNotificationIcon(String resourceName) {
+        Resources r = context.getResources();
+        String packageName = context.getPackageName();
+
+        customIcon = r.getIdentifier(resourceName, "drawable", packageName);
     }
 
     public void updateActions(long mask, Map<String, Integer> options) {
@@ -77,8 +85,8 @@ public class MusicControlNotification {
         } else { // NotificationClose.NEVER
             builder.setOngoing(true); 
         }
-
-        builder.setSmallIcon(smallIcon);
+        
+        builder.setSmallIcon(customIcon != 0 ? customIcon : smallIcon);
 
         // Open the app when the notification is clicked
         String packageName = context.getPackageName();
