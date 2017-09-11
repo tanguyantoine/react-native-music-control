@@ -54,8 +54,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     private boolean isPlaying = false;
     private long controls = 0;
     protected int ratingType = RatingCompat.RATING_PERCENTAGE;
-
-    private boolean hasCustomIcon = false;
     
     public NotificationClose notificationClose = NotificationClose.PAUSED;
 
@@ -128,7 +126,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         context.registerComponentCallbacks(this);
 
-        hasCustomIcon = false;
         isPlaying = false;
         init = true;
     }
@@ -156,7 +153,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         pb = null;
         nb = null;
 
-        hasCustomIcon = false;
         init = false;
     }
 
@@ -210,16 +206,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         nb.setContentText(artist);
         nb.setContentInfo(album);
         nb.setColor(notificationColor);
-
-        hasCustomIcon = notificationIcon != null ? true : false;
-        if (hasCustomIcon) {
-          int smallIcon = loadIconResource(notificationIcon);
-          if (smallIcon != 0) {
-            nb.setSmallIcon(smallIcon);
-          } else {
-            hasCustomIcon = false;
-          }
-        }
+        
+        notification.setCustomNotificationIcon(notificationIcon);
 
         if(metadata.hasKey("artwork")) {
             String artwork = null;
@@ -246,7 +234,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                     }
                     if(nb != null) {
                         nb.setLargeIcon(bitmap);
-                        notification.show(nb, isPlaying, hasCustomIcon);
+                        notification.show(nb, isPlaying);
                     }
                     
                     artworkThread = null;
@@ -260,7 +248,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         session.setMetadata(md.build());
         session.setActive(true);
-        notification.show(nb, isPlaying, hasCustomIcon);
+        notification.show(nb, isPlaying);
     }
 
     @ReactMethod
@@ -289,7 +277,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         pb.setActions(controls);
 
         isPlaying = pbState == PlaybackStateCompat.STATE_PLAYING || pbState == PlaybackStateCompat.STATE_BUFFERING;
-        if(session.isActive()) notification.show(nb, isPlaying, hasCustomIcon);
+        if(session.isActive()) notification.show(nb, isPlaying);
 
         state = pb.build();
         session.setPlaybackState(state);
@@ -430,19 +418,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         }
 
         return bitmap;
-    }
-
-    private int loadIconResource(String resourceName) {
-      int smallIcon;
-
-      ReactApplicationContext context = getReactApplicationContext();
-
-      Resources r = context.getResources();
-      String packageName = context.getPackageName();
-
-      smallIcon = r.getIdentifier(resourceName, "drawable", packageName);
-
-      return smallIcon;
     }
 
     @Override
