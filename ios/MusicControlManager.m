@@ -158,10 +158,6 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
     [session setActive: enabled error: nil];
 }
 
-RCT_EXPORT_METHOD(setCustomNotificationIcon:(NSString *) resourceName){
-    //NO OP
-}
-
 #pragma mark internal
 
 - (NSDictionary *) update:(NSMutableDictionary *) mediaDict with:(NSDictionary *) details andSetDefaults:(BOOL) setDefault {

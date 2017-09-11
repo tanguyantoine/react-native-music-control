@@ -4,6 +4,7 @@ import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -54,6 +55,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     private long controls = 0;
     protected int ratingType = RatingCompat.RATING_PERCENTAGE;
 
+    private boolean hasCustomIcon = false;
+    
     public NotificationClose notificationClose = NotificationClose.PAUSED;
 
     public MusicControlModule(ReactApplicationContext context) {
@@ -125,6 +128,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         context.registerComponentCallbacks(this);
 
+        hasCustomIcon = false;
         isPlaying = false;
         init = true;
     }
@@ -152,18 +156,13 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         pb = null;
         nb = null;
 
+        hasCustomIcon = false;
         init = false;
     }
 
     @ReactMethod
     public void enableBackgroundMode(boolean enable) {
         // Nothing?
-    }
-
-    @ReactMethod
-    public void setCustomNotificationIcon(String resourceName) {
-        init();
-        notification.setCustomNotificationIcon(resourceName);
     }
 
     @ReactMethod
@@ -179,6 +178,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         String date = metadata.hasKey("date") ? metadata.getString("date") : null;
         long duration = metadata.hasKey("duration") ? (long)(metadata.getDouble("duration") * 1000) : 0;
         int notificationColor = metadata.hasKey("color") ? metadata.getInt("color") : NotificationCompat.COLOR_DEFAULT;
+        String notificationIcon = metadata.hasKey("notificationIcon") ? metadata.getString("notificationIcon") : null;
 
         RatingCompat rating;
         if(metadata.hasKey("rating")) {
@@ -211,6 +211,16 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         nb.setContentInfo(album);
         nb.setColor(notificationColor);
 
+        hasCustomIcon = notificationIcon != null ? true : false;
+        if (hasCustomIcon) {
+          int smallIcon = loadIconResource(notificationIcon);
+          if (smallIcon != 0) {
+            nb.setSmallIcon(smallIcon);
+          } else {
+            hasCustomIcon = false;
+          }
+        }
+
         if(metadata.hasKey("artwork")) {
             String artwork = null;
             boolean localArtwork = false;
@@ -236,7 +246,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                     }
                     if(nb != null) {
                         nb.setLargeIcon(bitmap);
-                        notification.show(nb, isPlaying);
+                        notification.show(nb, isPlaying, hasCustomIcon);
                     }
                     
                     artworkThread = null;
@@ -250,7 +260,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         session.setMetadata(md.build());
         session.setActive(true);
-        notification.show(nb, isPlaying);
+        notification.show(nb, isPlaying, hasCustomIcon);
     }
 
     @ReactMethod
@@ -279,7 +289,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         pb.setActions(controls);
 
         isPlaying = pbState == PlaybackStateCompat.STATE_PLAYING || pbState == PlaybackStateCompat.STATE_BUFFERING;
-        if(session.isActive()) notification.show(nb, isPlaying);
+        if(session.isActive()) notification.show(nb, isPlaying, hasCustomIcon);
 
         state = pb.build();
         session.setPlaybackState(state);
@@ -420,6 +430,19 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         }
 
         return bitmap;
+    }
+
+    private int loadIconResource(String resourceName) {
+      int smallIcon;
+
+      ReactApplicationContext context = getReactApplicationContext();
+
+      Resources r = context.getResources();
+      String packageName = context.getPackageName();
+
+      smallIcon = r.getIdentifier(resourceName, "drawable", packageName);
+
+      return smallIcon;
     }
 
     @Override

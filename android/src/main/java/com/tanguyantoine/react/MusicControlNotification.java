@@ -38,14 +38,6 @@ public class MusicControlNotification {
         if(smallIcon == 0) smallIcon = r.getIdentifier("play", "drawable", packageName);
     }
 
-    public void setCustomNotificationIcon(String resourceName) {
-      Resources r = this.context.getResources();
-      String packageName = this.context.getPackageName();
-
-      int customIcon = r.getIdentifier(resourceName, "drawable", packageName);
-      if(customIcon != 0) smallIcon = customIcon;
-    }
-
     public void updateActions(long mask, Map<String, Integer> options) {
         play = createAction("play", "Play", mask, PlaybackStateCompat.ACTION_PLAY, play);
         pause = createAction("pause", "Pause", mask, PlaybackStateCompat.ACTION_PAUSE, pause);
@@ -66,7 +58,7 @@ public class MusicControlNotification {
         }
     }
 
-    public void show(NotificationCompat.Builder builder, boolean isPlaying) {
+    public void show(NotificationCompat.Builder builder, boolean isPlaying, boolean hasCustomIcon) {
         // Add the buttons
         builder.mActions.clear();
         if(previous != null) builder.addAction(previous);
@@ -86,7 +78,9 @@ public class MusicControlNotification {
             builder.setOngoing(true); 
         }
 
-        builder.setSmallIcon(smallIcon);
+        if (!hasCustomIcon) {
+          builder.setSmallIcon(smallIcon);
+        }
 
         // Open the app when the notification is clicked
         String packageName = context.getPackageName();
