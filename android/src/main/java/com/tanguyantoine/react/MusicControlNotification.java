@@ -40,6 +40,11 @@ public class MusicControlNotification {
     }
     
     public void setCustomNotificationIcon(String resourceName) {
+        if(resourceName == null) {
+            customIcon = 0;
+            return;
+        }
+        
         Resources r = context.getResources();
         String packageName = context.getPackageName();
 
