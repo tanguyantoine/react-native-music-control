@@ -39,7 +39,7 @@ public class MusicControlNotification {
         if(smallIcon == 0) smallIcon = r.getIdentifier("play", "drawable", packageName);
     }
     
-    public void setCustomNotificationIcon(String resourceName) {
+    public synchronized void setCustomNotificationIcon(String resourceName) {
         if(resourceName == null) {
             customIcon = 0;
             return;
@@ -51,7 +51,7 @@ public class MusicControlNotification {
         customIcon = r.getIdentifier(resourceName, "drawable", packageName);
     }
 
-    public void updateActions(long mask, Map<String, Integer> options) {
+    public synchronized void updateActions(long mask, Map<String, Integer> options) {
         play = createAction("play", "Play", mask, PlaybackStateCompat.ACTION_PLAY, play);
         pause = createAction("pause", "Pause", mask, PlaybackStateCompat.ACTION_PAUSE, pause);
         stop = createAction("stop", "Stop", mask, PlaybackStateCompat.ACTION_STOP, stop);
@@ -71,7 +71,7 @@ public class MusicControlNotification {
         }
     }
 
-    public void show(NotificationCompat.Builder builder, boolean isPlaying) {
+    public synchronized void show(NotificationCompat.Builder builder, boolean isPlaying) {
         // Add the buttons
         builder.mActions.clear();
         if(previous != null) builder.addAction(previous);
