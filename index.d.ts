@@ -5,14 +5,16 @@
 
 type PlayingInfo = {
     title: string,
-    artwork: string, // url
     artist: string,
-    album: string,
-    genre: string,
-    duration: number,
-    description: string,
-    date: Date,
-    rating: number
+    artwork?: string, // url
+    album?: string,
+    genre?: string,
+    duration?: number,
+    description?: string,
+    date?: Date,
+    rating?: number,
+    color?: any,
+    notificationIcon?: string
 }
 
 type PlaybackInfo = {
@@ -20,25 +22,7 @@ type PlaybackInfo = {
     elapsedTime: number
 }
 
-type ControlEvent = { 
-    // Default false for all.
-    play: string,
-    pause: string,
-    stop: string,
-    nextTrack: string,
-    previousTrack: string,
-    seek: string, 
-    skipForward: string, // options: { interval: number}
-    skipBackward: string, // options: { interval: number}
-    seekForward: string, // iOS only. -- Try Sound.setCurrentTime(time: number) react-native-sound
-    seekBackward: string, // iOS only.
-    enableLanguageOption: string, // iOS only
-    disableLanguageOption: string, // iOS only
-    setRating: string, // Android only.
-    volume: string, // Android only. Only affected when remoteVolume is enabled
-    remoteVolume: string // Android only.
-    closeNotification: string // Android only, options: {when: 'always'||'paused'||'never'}
-}
+type ControlEvent = "play" | "pause" | "stop" | "nextTrack" | "previousTrack" | "seek" | "skipForward" | "skipBackward" | "seekForward" | "seekBackward" | "enableLanguageOption" | "disableLanguageOption" | "setRating" | "volume" | "remoteVolume" | "closeNotification";
 
 export default class MusicControl {
 
@@ -97,7 +81,7 @@ export default class MusicControl {
      * The interval value only changes what number displays in the UI, 
      * the actual logic to skip forward or backward by a given amount must be implemented in the appropriate callbacks
      */
-    static enableControl(eventName: ControlEvent, bool: boolean, options: object ): void
+    static enableControl(eventName: ControlEvent, bool: boolean, options?: object): void
 
     static handleCommand(commandName): void
 
@@ -106,14 +90,14 @@ export default class MusicControl {
      * @param eventName 
      * @param callback 
      */
-    static on(eventName: ControlEvent, callback: function): void
-    
+    static on(eventName: ControlEvent, callback: Function): void
+
     /**
      * Set disable event audio control.
      * @param eventName 
      * @param callback 
      */
-    static off(eventName: ControlEvent, callback: function): void
+    static off(eventName: ControlEvent, callback: Function): void
 
     /**
      * It is possible to customize the icon used in the notification on Android. 
