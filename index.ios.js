@@ -80,4 +80,4 @@ var MusicControl = {
   }
 };
 
-module.exports = MusicControl;
+export default MusicControl;
