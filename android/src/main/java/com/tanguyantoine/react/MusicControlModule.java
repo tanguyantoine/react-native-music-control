@@ -47,6 +47,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     protected MusicControlNotification notification;
     private MusicControlListener.VolumeListener volume;
     private MusicControlReceiver receiver;
+    private HeadsetPlugReceiver headsetPlugReceiver;
 
     private Thread artworkThread;
 
@@ -54,7 +55,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     private boolean isPlaying = false;
     private long controls = 0;
     protected int ratingType = RatingCompat.RATING_PERCENTAGE;
-    
+
     public NotificationClose notificationClose = NotificationClose.PAUSED;
 
     public MusicControlModule(ReactApplicationContext context) {
@@ -122,6 +123,11 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         receiver = new MusicControlReceiver(this, context);
         context.registerReceiver(receiver, filter);
 
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("android.intent.action.HEADSET_PLUG");
+        headsetPlugReceiver = new HeadsetPlugReceiver(this, context);
+        context.registerReceiver(headsetPlugReceiver, intentFilter);
+
         context.startService(new Intent(context, MusicControlNotification.NotificationService.class));
 
         context.registerComponentCallbacks(this);
@@ -139,6 +145,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         ReactApplicationContext context = getReactApplicationContext();
 
         context.unregisterReceiver(receiver);
+        context.unregisterReceiver(headsetPlugReceiver);
         context.unregisterComponentCallbacks(this);
 
         if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
@@ -148,6 +155,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         notification = null;
         volume = null;
         receiver = null;
+        headsetPlugReceiver = null;
         state = null;
         md = null;
         pb = null;
@@ -206,7 +214,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         nb.setContentText(artist);
         nb.setContentInfo(album);
         nb.setColor(notificationColor);
-        
+
         notification.setCustomNotificationIcon(notificationIcon);
 
         if(metadata.hasKey("artwork")) {
@@ -227,7 +235,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                 @Override
                 public void run() {
                     Bitmap bitmap = loadArtwork(artworkUrl, artworkLocal);
-                    
+
                     if(md != null) {
                         md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap);
                         session.setMetadata(md.build());
@@ -236,7 +244,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                         nb.setLargeIcon(bitmap);
                         notification.show(nb, isPlaying);
                     }
-                    
+
                     artworkThread = null;
                 }
             });
