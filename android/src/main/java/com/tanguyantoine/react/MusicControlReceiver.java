@@ -50,14 +50,14 @@ public class MusicControlReceiver extends BroadcastReceiver {
             module.session.getController().dispatchMediaButtonEvent(ke);
 
         } else if (Intent.ACTION_HEADSET_PLUG.equals(action)) {
-					boolean connectedHeadphones = (intent.getIntExtra("state", 0) == 1);
-					if (!connectedHeadphones) {
-						// Dispatch pause to MusicControlListener
-			      // Copy of MediaButtonReceiver.handleIntent without action check
-			      KeyEvent ke = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE);
-			      module.session.getController().dispatchMediaButtonEvent(ke);
-					}
-				}
+          boolean connectedHeadphones = (intent.getIntExtra("state", 0) == 1);
+          if (!connectedHeadphones) {
+            // Dispatch pause to MusicControlListener
+            // Copy of MediaButtonReceiver.handleIntent without action check
+            KeyEvent ke = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE);
+            module.session.getController().dispatchMediaButtonEvent(ke);
+          }
+        }
     }
 
     private boolean checkApp(Intent intent) {
