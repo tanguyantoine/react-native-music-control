@@ -49,9 +49,9 @@ public class MusicControlReceiver extends BroadcastReceiver {
             KeyEvent ke = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
             module.session.getController().dispatchMediaButtonEvent(ke);
 
-        } else if (Intent.ACTION_HEADSET_PLUG.equals(action)) {
+        } else if(Intent.ACTION_HEADSET_PLUG.equals(action)) {
           boolean connectedHeadphones = (intent.getIntExtra("state", 0) == 1);
-          if (!connectedHeadphones) {
+          if(!connectedHeadphones) {
             // Dispatch pause to MusicControlListener
             // Copy of MediaButtonReceiver.handleIntent without action check
             KeyEvent ke = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE);
