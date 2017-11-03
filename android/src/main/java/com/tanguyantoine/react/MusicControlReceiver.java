@@ -3,6 +3,7 @@ package com.tanguyantoine.react;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.view.KeyEvent;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -48,6 +49,10 @@ public class MusicControlReceiver extends BroadcastReceiver {
             // Copy of MediaButtonReceiver.handleIntent without action check
             KeyEvent ke = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
             module.session.getController().dispatchMediaButtonEvent(ke);
+
+        } else if(AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(action)) {
+
+            module.session.getController().getTransportControls().pause();
 
         }
     }
