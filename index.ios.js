@@ -11,8 +11,16 @@ import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource'
 /**
  * High-level docs for the MusicControl iOS API can be written here.
  */
-var handlers = { };
-var subscription = null;
+var handlers = {};
+var listenerOfNativeMusicControl = null;
+
+var formatInfo = function(info){
+  // NOTE: CHECK IF WE HAVE AN IOS ASSET FROM REACT STYLE IMAGE REQUIRE
+  if(info.artwork) {
+    info.artwork = resolveAssetSource(info.artwork) || info.artwork;
+  }
+  return info
+}
 
 var MusicControl = {
 
@@ -30,22 +38,20 @@ var MusicControl = {
   RATING_5_STARS: 0,
   RATING_PERCENTAGE: 0,
 
+  // NOTE: BACKWARDS COMPATIBILITY. USE "updatePlayback" INSTEAD.
   setPlayback: function (info) {
-    // Backwards compatibility. Use updatePlayback instead.
+    info = formatInfo(info)
     NativeMusicControl.updatePlayback(info);
   },
   updatePlayback: function(info) {
+    info = formatInfo(info)
     NativeMusicControl.updatePlayback(info);
   },
   enableBackgroundMode: function(enable){
     NativeMusicControl.enableBackgroundMode(enable)
   },
   setNowPlaying: function(info){
-    // Check if we have an ios asset from react style image require
-    if(info.artwork) {
-        info.artwork = resolveAssetSource(info.artwork) || info.artwork;
-    }
-
+    info = formatInfo(info)
     NativeMusicControl.setNowPlaying(info);
   },
   resetNowPlaying: function(){
@@ -60,22 +66,21 @@ var MusicControl = {
     }
   },
   on: function(actionName, cb){
-    if(subscription){
-      subscription.remove();
+    if ( listenerOfNativeMusicControl == null ) {
+      listenerOfNativeMusicControl = new NativeEventEmitter(NativeMusicControl).addListener(
+        'RNMusicControlEvent',
+        (event) => {
+          MusicControl.handleCommand(event.name)
+        }
+      );
     }
-    subscription = new NativeEventEmitter(NativeMusicControl).addListener(
-      'RNMusicControlEvent',
-      (event) => {
-        MusicControl.handleCommand(event.name)
-      }
-    );
     handlers[actionName] = cb
   },
-  off: function(actionName, cb){
-    delete(handlers[actionName])
-    if(!Object.keys(handlers).length && subscription){
-      subscription.remove()
-      subscription = null;
+  off: function(actionName){
+    delete( handlers[actionName] )
+    if ( !Object.keys(handlers).length > 0 && listenerOfNativeMusicControl != null ) {
+      listenerOfNativeMusicControl.remove()
+      listenerOfNativeMusicControl = null
     }
   }
 };
