@@ -80,7 +80,6 @@ RCT_EXPORT_METHOD(updatePlayback:(NSDictionary *) originalDetails)
 
 
     if ([details objectForKey:@"artwork"] != self.artworkUrl) {
-        self.artworkUrl = details[@"artwork"];
         [self updateArtworkIfNeeded:[details objectForKey:@"artwork"]];
     }
 
