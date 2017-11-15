@@ -60,9 +60,9 @@ var MusicControl = {
   enableControl: function(controlName, bool, options = {}){
     NativeMusicControl.enableControl(controlName, bool, options || {})
   },
-  handleCommand: function(commandName){
+  handleCommand: function(commandName, value){
     if(handlers[commandName]){
-      handlers[commandName]()
+      handlers[commandName](value)
     }
   },
   on: function(actionName, cb){
@@ -70,7 +70,7 @@ var MusicControl = {
       listenerOfNativeMusicControl = new NativeEventEmitter(NativeMusicControl).addListener(
         'RNMusicControlEvent',
         (event) => {
-          MusicControl.handleCommand(event.name)
+          MusicControl.handleCommand(event.name, event.value)
         }
       );
     }
