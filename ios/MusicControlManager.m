@@ -113,6 +113,9 @@ RCT_EXPORT_METHOD(enableControl:(NSString *) controlName enabled:(BOOL) enabled 
     } else if ([controlName isEqual: @"play"]) {
         [self toggleHandler:remoteCenter.playCommand withSelector:@selector(onPlay:) enabled:enabled];
 
+    } else if ([controlName isEqual: @"changePlaybackPosition"]) {
+        [self toggleHandler:remoteCenter.changePlaybackPositionCommand withSelector:@selector(onChangePlaybackPosition:) enabled:enabled];
+
     } else if ([controlName isEqual: @"stop"]) {
         [self toggleHandler:remoteCenter.stopCommand withSelector:@selector(onStop:) enabled:enabled];
 
@@ -194,6 +197,7 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
     MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
     [self toggleHandler:remoteCenter.pauseCommand withSelector:@selector(onPause:) enabled:false];
     [self toggleHandler:remoteCenter.playCommand withSelector:@selector(onPlay:) enabled:false];
+    [self toggleHandler:remoteCenter.changePlaybackPositionCommand withSelector:@selector(onChangePlaybackPosition:) enabled:false];
     [self toggleHandler:remoteCenter.stopCommand withSelector:@selector(onStop:) enabled:false];
     [self toggleHandler:remoteCenter.togglePlayPauseCommand withSelector:@selector(onTogglePlayPause:) enabled:false];
     [self toggleHandler:remoteCenter.enableLanguageOptionCommand withSelector:@selector(onEnableLanguageOption:) enabled:false];
@@ -210,6 +214,7 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
 
 - (void)onPause:(MPRemoteCommandEvent*)event { [self sendEvent:@"pause"]; }
 - (void)onPlay:(MPRemoteCommandEvent*)event { [self sendEvent:@"play"]; }
+- (void)onChangePlaybackPosition:(MPChangePlaybackPositionCommandEvent*)event { [self sendEventWithValue:@"changePlaybackPosition" withValue:[NSString stringWithFormat:@"%.15f", event.positionTime]]; }
 - (void)onStop:(MPRemoteCommandEvent*)event { [self sendEvent:@"stop"]; }
 - (void)onTogglePlayPause:(MPRemoteCommandEvent*)event { [self sendEvent:@"togglePlayPause"]; }
 - (void)onEnableLanguageOption:(MPRemoteCommandEvent*)event { [self sendEvent:@"enableLanguageOption"]; }
@@ -228,6 +233,10 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
 - (void)sendEvent:(NSString*)event {
     [self sendEventWithName:@"RNMusicControlEvent"
                        body:@{@"name": event}];
+}
+
+- (void)sendEventWithValue:(NSString*)event withValue:(NSString*)value{
+   [self sendEventWithName:@"RNMusicControlEvent" body:@{@"name": event, @"value":value}];
 }
 
 - (void)updateArtworkIfNeeded:(id)artwork
