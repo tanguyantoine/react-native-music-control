@@ -40,18 +40,18 @@ var MusicControl = {
 
   // NOTE: BACKWARDS COMPATIBILITY. USE "updatePlayback" INSTEAD.
   setPlayback: function (info) {
-    info = formatInfo(info)
+    info = formatInfo(info);
     NativeMusicControl.updatePlayback(info);
   },
   updatePlayback: function(info) {
-    info = formatInfo(info)
+    info = formatInfo(info);
     NativeMusicControl.updatePlayback(info);
   },
   enableBackgroundMode: function(enable){
     NativeMusicControl.enableBackgroundMode(enable)
   },
   setNowPlaying: function(info){
-    info = formatInfo(info)
+    info = formatInfo(info);
     NativeMusicControl.setNowPlaying(info);
   },
   resetNowPlaying: function(){
