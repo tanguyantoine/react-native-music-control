@@ -36,10 +36,10 @@ var handleRNMusicControlEvent = function(event){
 var MusicControl = {
 
   STATE_PLAYING: NativeMusicControl.STATE_PLAYING,
-  STATE_PAUSED: NativeMusicControl.STATE_PAUSED,
-  STATE_ERROR: NativeMusicControl.STATE_PAUSED,
-  STATE_STOPPED: NativeMusicControl.STATE_PAUSED,
-  STATE_BUFFERING: NativeMusicControl.STATE_PAUSED,
+  STATE_PAUSED: IS_ANDROID ? NativeMusicControl.STATE_PAUSED : NativeMusicControl.STATE_PAUSED,
+  STATE_ERROR: IS_ANDROID ? NativeMusicControl.STATE_ERROR : NativeMusicControl.STATE_PAUSED,
+  STATE_STOPPED: IS_ANDROID ? NativeMusicControl.STATE_STOPPED : NativeMusicControl.STATE_PAUSED,
+  STATE_BUFFERING: IS_ANDROID ? NativeMusicControl.STATE_BUFFERING : NativeMusicControl.STATE_PAUSED,
 
   // Rating is not supported on iOS. This is kept here for compatibility
   RATING_HEART: IS_ANDROID ? NativeMusicControl.RATING_HEART : 0,
