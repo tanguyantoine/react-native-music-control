@@ -252,8 +252,6 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
       }
   }
 
-  return artworkUrl;
-}
 - (void)sendEventWithValue:(NSString*)event withValue:(NSString*)value{
    [self sendEventWithName:@"RNMusicControlEvent" body:@{@"name": event, @"value":value}];
 }
