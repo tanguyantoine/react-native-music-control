@@ -77,7 +77,15 @@ var MusicControl = {
       subscription.remove()
       subscription = null;
     }
-  }
+  },
+  stopControl: function(){
+    if (subscription){
+      subscription.remove();
+    }
+    subscription = null;
+    handlers = {};
+    NativeMusicControl.stopControl();
+  } 
 };
 
 export default MusicControl;

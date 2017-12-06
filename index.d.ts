@@ -100,6 +100,11 @@ export default class MusicControl {
     static off(eventName: ControlEvent, callback: Function): void
 
     /**
+     * Disable every audio controls.
+     */
+    static stopControl(): void
+
+    /**
      * It is possible to customize the icon used in the notification on Android. 
      * By default you can add a drawable resource to your package with the file name music_control_icon 
      * And the notification will use your custom icon. 
