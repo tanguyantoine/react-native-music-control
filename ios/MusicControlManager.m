@@ -190,6 +190,7 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
 - (id)init {
   self = [super init];
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioHardwareRouteChanged:) name:AVAudioSessionRouteChangeNotification object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioInterrupted:) name:AVAudioSessionInterruptionNotification object:nil];
   return self;
 }
 
@@ -209,6 +210,7 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
     [self toggleHandler:remoteCenter.skipBackwardCommand withSelector:@selector(onSkipBackward:) enabled:false];
     [self toggleHandler:remoteCenter.skipForwardCommand withSelector:@selector(onSkipForward:) enabled:false];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:AVAudioSessionRouteChangeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVAudioSessionInterruptionNotification object:nil];
 }
 
 
@@ -303,6 +305,14 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
     NSInteger routeChangeReason = [notification.userInfo[AVAudioSessionRouteChangeReasonKey] integerValue];
     if (routeChangeReason == AVAudioSessionRouteChangeReasonOldDeviceUnavailable) {
         //headphones unplugged or bluetooth device disconnected, iOS will pause audio
+        [self sendEvent:@"pause"];
+    }
+}
+
+- (void)audioInterrupted:(NSNotification *)notification {
+    NSInteger interuptionType = [notification.userInfo[AVAudioSessionInterruptionTypeKey] integerValue];
+    if (interuptionType == AVAudioSessionInterruptionTypeBegan) {
+        // Playback interrupted by an incoming phone call.
         [self sendEvent:@"pause"];
     }
 }
