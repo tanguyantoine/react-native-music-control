@@ -227,8 +227,8 @@ componentDidMount() {
       this.props.dispatch(playRemoteControl());
     })
 
-    // on iOS this event will also be triggered by the audio router change event.
-    // This happens when headphones are unplugged or a bluetooth audio peripheral disconnects from the device
+    // on iOS this event will also be triggered by interruptions (incoming calls) and audio router change events
+    // happening when headphones are unplugged or a bluetooth audio peripheral disconnects from the device
     MusicControl.on('pause', ()=> {
       this.props.dispatch(pauseRemoteControl());
     })
