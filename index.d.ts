@@ -113,4 +113,11 @@ export default class MusicControl {
      * Keep in mind that just like with music_control_icon the resource specified has to be in the drawable package of your Android app.
      */
     // static setCustomNotificationIcon(path: string): void
+
+    /**
+     * Switch audio interruption handling.
+     * When handling is enabled, playback will be paused when application gets interrupted, and resumed after the interruption.
+     * @param enable
+     */
+    static handleAudioInterruptions(enable: boolean): void
 }
