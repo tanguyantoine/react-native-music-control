@@ -315,6 +315,13 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
         // Playback interrupted by an incoming phone call.
         [self sendEvent:@"pause"];
     }
+    if (interruptionType == AVAudioSessionInterruptionTypeEnded) {
+        // if 
+        NSInteger shouldResume = [notification.userInfo[AVAudioSessionInterruptionOptionKey] unsignedIntegerValue];
+        if (shouldResume == AVAudioSessionInterruptionOptionShouldResume) {
+          [self sendEvent:@"play"];
+        }
+    }
 }
 
 @end
