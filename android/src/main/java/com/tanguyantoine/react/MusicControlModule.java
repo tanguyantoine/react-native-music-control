@@ -131,10 +131,13 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         init = true;
     }
 
-    synchronized public void destroy() {
-        if(!init) return;
+    @ReactMethod
+    public void stopControl() {
+        if (!init)
+            return;
 
-        if (notification != null) notification.hide();
+        if (notification != null)
+            notification.hide();
         session.release();
 
         ReactApplicationContext context = getReactApplicationContext();
@@ -142,7 +145,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         context.unregisterReceiver(receiver);
         context.unregisterComponentCallbacks(this);
 
-        if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
+        if (artworkThread != null && artworkThread.isAlive())
+            artworkThread.interrupt();
         artworkThread = null;
 
         session = null;
@@ -155,6 +159,10 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         nb = null;
 
         init = false;
+    }
+
+    synchronized public void destroy() {
+        stopControl();
     }
 
     @ReactMethod
