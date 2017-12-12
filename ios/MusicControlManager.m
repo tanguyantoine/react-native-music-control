@@ -160,6 +160,10 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
     [session setActive: enabled error: nil];
 }
 
+RCT_EXPORT_METHOD(stopControl){
+    [self stop];
+}
+
 #pragma mark internal
 
 - (NSDictionary *) update:(NSMutableDictionary *) mediaDict with:(NSDictionary *) details andSetDefaults:(BOOL) setDefault {
@@ -195,7 +199,13 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
 }
 
 - (void)dealloc {
+    [self stop];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVAudioSessionRouteChangeNotification object:nil];
+}
+
+- (void)stop {
     MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
+    [self resetNowPlaying];
     [self toggleHandler:remoteCenter.pauseCommand withSelector:@selector(onPause:) enabled:false];
     [self toggleHandler:remoteCenter.playCommand withSelector:@selector(onPlay:) enabled:false];
     [self toggleHandler:remoteCenter.changePlaybackPositionCommand withSelector:@selector(onChangePlaybackPosition:) enabled:false];
@@ -212,7 +222,6 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
     [[NSNotificationCenter defaultCenter] removeObserver:self name:AVAudioSessionRouteChangeNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:AVAudioSessionInterruptionNotification object:nil];
 }
-
 
 - (void)onPause:(MPRemoteCommandEvent*)event { [self sendEvent:@"pause"]; }
 - (void)onPlay:(MPRemoteCommandEvent*)event { [self sendEvent:@"play"]; }
