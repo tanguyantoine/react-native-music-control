@@ -7,7 +7,7 @@
 import { NativeModules, DeviceEventEmitter, NativeEventEmitter, Platform } from 'react-native';
 const NativeMusicControl = NativeModules.MusicControlManager;
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
-import constants from "./constants";
+import constants from './constants';
 
 let handlers = { };
 let subscription = null;
@@ -20,7 +20,7 @@ const MusicControl = {
   STATE_ERROR: constants.STATE_ERROR,
   STATE_STOPPED: constants.STATE_STOPPED,
   STATE_BUFFERING: constants.STATE_BUFFERING,
-  
+
   RATING_HEART: constants.RATING_HEART,
   RATING_THUMBS_UP_DOWN: constants.RATING_THUMBS_UP_DOWN,
   RATING_3_STARS: constants.RATING_3_STARS,
