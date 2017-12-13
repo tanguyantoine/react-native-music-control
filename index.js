@@ -7,25 +7,26 @@
 import { NativeModules, DeviceEventEmitter, NativeEventEmitter, Platform } from 'react-native';
 const NativeMusicControl = NativeModules.MusicControlManager;
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
+import constants from "./constants";
 
-var handlers = { };
-var subscription = null;
-var IS_ANDROID = Platform.OS === 'android';
+let handlers = { };
+let subscription = null;
+const IS_ANDROID = Platform.OS === 'android';
 
-var MusicControl = {
+const MusicControl = {
 
-  STATE_PLAYING: NativeMusicControl.STATE_PLAYING,
-  STATE_PAUSED: NativeMusicControl.STATE_PAUSED,
-  STATE_ERROR: IS_ANDROID ? NativeMusicControl.STATE_ERROR : NativeMusicControl.STATE_PAUSED,
-  STATE_STOPPED: IS_ANDROID ? NativeMusicControl.STATE_STOPPED : NativeMusicControl.STATE_PAUSED,
-  STATE_BUFFERING: IS_ANDROID ? NativeMusicControl.STATE_BUFFERING : NativeMusicControl.STATE_PAUSED,
-
-  RATING_HEART: IS_ANDROID ? NativeMusicControl.RATING_HEART : 0,
-  RATING_THUMBS_UP_DOWN: IS_ANDROID ? NativeMusicControl.RATING_THUMBS_UP_DOWN : 0,
-  RATING_3_STARS: IS_ANDROID ? NativeMusicControl.RATING_3_STARS : 0,
-  RATING_4_STARS: IS_ANDROID ? NativeMusicControl.RATING_4_STARS : 0,
-  RATING_5_STARS: IS_ANDROID ? NativeMusicControl.RATING_5_STARS : 0,
-  RATING_PERCENTAGE: IS_ANDROID ? NativeMusicControl.RATING_PERCENTAGE : 0,
+  STATE_PLAYING: constants.STATE_PLAYING,
+  STATE_PAUSED: constants.STATE_PAUSED,
+  STATE_ERROR: constants.STATE_ERROR,
+  STATE_STOPPED: constants.STATE_STOPPED,
+  STATE_BUFFERING: constants.STATE_BUFFERING,
+  
+  RATING_HEART: constants.RATING_HEART,
+  RATING_THUMBS_UP_DOWN: constants.RATING_THUMBS_UP_DOWN,
+  RATING_3_STARS: constants.RATING_3_STARS,
+  RATING_4_STARS: constants.RATING_4_STARS,
+  RATING_5_STARS: constants.RATING_5_STARS,
+  RATING_PERCENTAGE: constants.RATING_PERCENTAGE,
 
   enableBackgroundMode: function(enable){
     NativeMusicControl.enableBackgroundMode(enable)
