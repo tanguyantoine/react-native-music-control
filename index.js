@@ -10,21 +10,22 @@ import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource'
 
 var handlers = { };
 var subscription = null;
+var IS_ANDROID = Platform.OS === 'android';
 
 var MusicControl = {
 
   STATE_PLAYING: NativeMusicControl.STATE_PLAYING,
   STATE_PAUSED: NativeMusicControl.STATE_PAUSED,
-  STATE_ERROR: Platform === 'android' ? NativeMusicControl.STATE_ERROR : NativeMusicControl.STATE_PAUSED,
-  STATE_STOPPED: Platform === 'android' ? NativeMusicControl.STATE_STOPPED : NativeMusicControl.STATE_PAUSED,
-  STATE_BUFFERING: Platform === 'android' ? NativeMusicControl.STATE_BUFFERING : NativeMusicControl.STATE_PAUSED,
+  STATE_ERROR: IS_ANDROID ? NativeMusicControl.STATE_ERROR : NativeMusicControl.STATE_PAUSED,
+  STATE_STOPPED: IS_ANDROID ? NativeMusicControl.STATE_STOPPED : NativeMusicControl.STATE_PAUSED,
+  STATE_BUFFERING: IS_ANDROID ? NativeMusicControl.STATE_BUFFERING : NativeMusicControl.STATE_PAUSED,
 
-  RATING_HEART: Platform === 'android' ? NativeMusicControl.RATING_HEART : 0,
-  RATING_THUMBS_UP_DOWN: Platform === 'android' ? NativeMusicControl.RATING_THUMBS_UP_DOWN : 0,
-  RATING_3_STARS: Platform === 'android' ? NativeMusicControl.RATING_3_STARS : 0,
-  RATING_4_STARS: Platform === 'android' ? NativeMusicControl.RATING_4_STARS : 0,
-  RATING_5_STARS: Platform === 'android' ? NativeMusicControl.RATING_5_STARS : 0,
-  RATING_PERCENTAGE: Platform === 'android' ? NativeMusicControl.RATING_PERCENTAGE : 0,
+  RATING_HEART: IS_ANDROID ? NativeMusicControl.RATING_HEART : 0,
+  RATING_THUMBS_UP_DOWN: IS_ANDROID ? NativeMusicControl.RATING_THUMBS_UP_DOWN : 0,
+  RATING_3_STARS: IS_ANDROID ? NativeMusicControl.RATING_3_STARS : 0,
+  RATING_4_STARS: IS_ANDROID ? NativeMusicControl.RATING_4_STARS : 0,
+  RATING_5_STARS: IS_ANDROID ? NativeMusicControl.RATING_5_STARS : 0,
+  RATING_PERCENTAGE: IS_ANDROID ? NativeMusicControl.RATING_PERCENTAGE : 0,
 
   enableBackgroundMode: function(enable){
     NativeMusicControl.enableBackgroundMode(enable)
@@ -59,7 +60,7 @@ var MusicControl = {
     if(subscription){
       subscription.remove();
     }
-    subscription = (Platform === 'android' ? DeviceEventEmitter : new NativeEventEmitter(NativeMusicControl))
+    subscription = (IS_ANDROID ? DeviceEventEmitter : new NativeEventEmitter(NativeMusicControl))
       .addListener(
         'RNMusicControlEvent',
         (event) => {
