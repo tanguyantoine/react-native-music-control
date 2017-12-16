@@ -4,27 +4,29 @@
  */
 'use strict';
 
-import { NativeModules, DeviceEventEmitter } from 'react-native';
+import { NativeModules, DeviceEventEmitter, NativeEventEmitter, Platform } from 'react-native';
 const NativeMusicControl = NativeModules.MusicControlManager;
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
+import constants from './constants';
 
-var handlers = { };
-var subscription = null;
+let handlers = { };
+let subscription = null;
+const IS_ANDROID = Platform.OS === 'android';
 
-var MusicControl = {
+const MusicControl = {
 
-  STATE_ERROR: NativeMusicControl.STATE_ERROR,
-  STATE_STOPPED: NativeMusicControl.STATE_STOPPED,
-  STATE_PLAYING: NativeMusicControl.STATE_PLAYING,
-  STATE_PAUSED: NativeMusicControl.STATE_PAUSED,
-  STATE_BUFFERING: NativeMusicControl.STATE_BUFFERING,
+  STATE_PLAYING: constants.STATE_PLAYING,
+  STATE_PAUSED: constants.STATE_PAUSED,
+  STATE_ERROR: constants.STATE_ERROR,
+  STATE_STOPPED: constants.STATE_STOPPED,
+  STATE_BUFFERING: constants.STATE_BUFFERING,
 
-  RATING_HEART: NativeMusicControl.RATING_HEART,
-  RATING_THUMBS_UP_DOWN: NativeMusicControl.RATING_THUMBS_UP_DOWN,
-  RATING_3_STARS: NativeMusicControl.RATING_3_STARS,
-  RATING_4_STARS: NativeMusicControl.RATING_4_STARS,
-  RATING_5_STARS: NativeMusicControl.RATING_5_STARS,
-  RATING_PERCENTAGE: NativeMusicControl.RATING_PERCENTAGE,
+  RATING_HEART: constants.RATING_HEART,
+  RATING_THUMBS_UP_DOWN: constants.RATING_THUMBS_UP_DOWN,
+  RATING_3_STARS: constants.RATING_3_STARS,
+  RATING_4_STARS: constants.RATING_4_STARS,
+  RATING_5_STARS: constants.RATING_5_STARS,
+  RATING_PERCENTAGE: constants.RATING_PERCENTAGE,
 
   enableBackgroundMode: function(enable){
     NativeMusicControl.enableBackgroundMode(enable)
@@ -48,7 +50,7 @@ var MusicControl = {
     NativeMusicControl.resetNowPlaying()
   },
   enableControl: function(controlName, enable, options = {}){
-    NativeMusicControl.enableControl(controlName, enable, options)
+    NativeMusicControl.enableControl(controlName, enable, options || {})
   },
   handleCommand: function(commandName, value){
     if(handlers[commandName]){
@@ -59,12 +61,13 @@ var MusicControl = {
     if(subscription){
       subscription.remove();
     }
-    subscription = DeviceEventEmitter.addListener(
-      'RNMusicControlEvent',
-      (event) => {
-        MusicControl.handleCommand(event.name, event.value)
-      }
-    );
+    subscription = (IS_ANDROID ? DeviceEventEmitter : new NativeEventEmitter(NativeMusicControl))
+      .addListener(
+        'RNMusicControlEvent',
+        (event) => {
+          MusicControl.handleCommand(event.name, event.value)
+        }
+      );
     handlers[actionName] = cb
   },
   off: function(actionName, cb){
