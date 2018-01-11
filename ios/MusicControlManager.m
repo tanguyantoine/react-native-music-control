@@ -9,6 +9,7 @@
 @interface MusicControlManager ()
 
 @property (nonatomic, copy) NSString *artworkUrl;
+@property (nonatomic, assign) BOOL audioInterruptionsObserved;
 
 @end
 
@@ -166,6 +167,22 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
     [session setActive: enabled error: nil];
 }
 
+RCT_EXPORT_METHOD(stopControl){
+    [self stop];
+}
+
+RCT_EXPORT_METHOD(observeAudioInterruptions:(BOOL) observe){
+    if (self.audioInterruptionsObserved == observe) {
+        return;
+    }
+    if (observe) {
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioInterrupted:) name:AVAudioSessionInterruptionNotification object:nil];
+    } else {
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:AVAudioSessionInterruptionNotification object:nil];
+    }
+    self.audioInterruptionsObserved = observe;
+}
+
 #pragma mark internal
 
 - (NSDictionary *) update:(NSMutableDictionary *) mediaDict with:(NSDictionary *) details andSetDefaults:(BOOL) setDefault {
@@ -194,13 +211,25 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
 }
 
 - (id)init {
-  self = [super init];
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioHardwareRouteChanged:) name:AVAudioSessionRouteChangeNotification object:nil];
-  return self;
+    self = [super init];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioHardwareRouteChanged:) name:AVAudioSessionRouteChangeNotification object:nil];
+    self.audioInterruptionsObserved = false;
+    return self;
+}
+
++ (BOOL)requiresMainQueueSetup
+{
+    return YES;
 }
 
 - (void)dealloc {
+    [self stop];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVAudioSessionRouteChangeNotification object:nil];
+}
+
+- (void)stop {
     MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
+    [self resetNowPlaying];
     [self toggleHandler:remoteCenter.pauseCommand withSelector:@selector(onPause:) enabled:false];
     [self toggleHandler:remoteCenter.playCommand withSelector:@selector(onPlay:) enabled:false];
     [self toggleHandler:remoteCenter.changePlaybackPositionCommand withSelector:@selector(onChangePlaybackPosition:) enabled:false];
@@ -214,9 +243,9 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
     [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onSeekBackward:) enabled:false];
     [self toggleHandler:remoteCenter.skipBackwardCommand withSelector:@selector(onSkipBackward:) enabled:false];
     [self toggleHandler:remoteCenter.skipForwardCommand withSelector:@selector(onSkipForward:) enabled:false];
+    [self observeAudioInterruptions:false];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:AVAudioSessionRouteChangeNotification object:nil];
 }
-
 
 - (void)onPause:(MPRemoteCommandEvent*)event { [self sendEvent:@"pause"]; }
 - (void)onPlay:(MPRemoteCommandEvent*)event { [self sendEvent:@"play"]; }
@@ -316,6 +345,23 @@ RCT_EXPORT_METHOD(enableBackgroundMode:(BOOL) enabled){
     if (routeChangeReason == AVAudioSessionRouteChangeReasonOldDeviceUnavailable) {
         //headphones unplugged or bluetooth device disconnected, iOS will pause audio
         [self sendEvent:@"pause"];
+    }
+}
+
+- (void)audioInterrupted:(NSNotification *)notification {
+    if (!self.audioInterruptionsObserved) {
+        return;
+    }
+    NSInteger interruptionType = [notification.userInfo[AVAudioSessionInterruptionTypeKey] integerValue];
+    NSInteger interruptionOption = [notification.userInfo[AVAudioSessionInterruptionOptionKey] integerValue];
+
+    if (interruptionType == AVAudioSessionInterruptionTypeBegan) {
+        // Playback interrupted by an incoming phone call.
+        [self sendEvent:@"pause"];
+    }
+    if (interruptionType == AVAudioSessionInterruptionTypeEnded &&
+           interruptionOption == AVAudioSessionInterruptionOptionShouldResume) {
+        [self sendEvent:@"play"];
     }
 }
 

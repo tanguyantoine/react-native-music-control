@@ -223,12 +223,15 @@ MusicControl.enableControl('closeNotification', true, {when: 'never'})
 componentDidMount() {
     MusicControl.enableBackgroundMode(true);
 
+    // on iOS, pause playback during audio interruptions (incoming calls) and resume afterwards.
+    MusicControl.handleAudioInterruptions(true);
+
     MusicControl.on('play', ()=> {
       this.props.dispatch(playRemoteControl());
     })
 
-    // on iOS this event will also be triggered by the audio router change event.
-    // This happens when headphones are unplugged or a bluetooth audio peripheral disconnects from the device
+    // on iOS this event will also be triggered by audio router change events
+    // happening when headphones are unplugged or a bluetooth audio peripheral disconnects from the device
     MusicControl.on('pause', ()=> {
       this.props.dispatch(pauseRemoteControl());
     })
