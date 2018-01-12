@@ -1,6 +1,5 @@
 /**
  * @providesModule MusicControl
- * @flow
  */
 'use strict';
 
