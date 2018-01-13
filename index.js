@@ -58,7 +58,7 @@ const MusicControl = {
     }
   },
   on: function(actionName, cb){
-    if(listenerOfNativeMusicControl == null){
+    if( !listenerOfNativeMusicControl ){
       listenerOfNativeMusicControl = (IS_ANDROID ? DeviceEventEmitter : new NativeEventEmitter(NativeMusicControl))
         .addListener(
           'RNMusicControlEvent',
@@ -77,7 +77,7 @@ const MusicControl = {
     }
   },
   stopControl: function() {
-    if (listenerOfNativeMusicControl != null) {
+    if ( listenerOfNativeMusicControl ) {
       listenerOfNativeMusicControl.remove();
       listenerOfNativeMusicControl = null;
     }
