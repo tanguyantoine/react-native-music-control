@@ -54,7 +54,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     private boolean isPlaying = false;
     private long controls = 0;
     protected int ratingType = RatingCompat.RATING_PERCENTAGE;
-    
+
     public NotificationClose notificationClose = NotificationClose.PAUSED;
 
     public MusicControlModule(ReactApplicationContext context) {
@@ -209,13 +209,15 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         md.putText(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, description);
         md.putText(MediaMetadataCompat.METADATA_KEY_DATE, date);
         md.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration);
-        md.putRating(MediaMetadataCompat.METADATA_KEY_RATING, rating);
+        if (android.os.Build.VERSION.SDK_INT > 19) {
+          md.putRating(MediaMetadataCompat.METADATA_KEY_RATING, rating);
+        }
 
         nb.setContentTitle(title);
         nb.setContentText(artist);
         nb.setContentInfo(album);
         nb.setColor(notificationColor);
-        
+
         notification.setCustomNotificationIcon(notificationIcon);
 
         if(metadata.hasKey("artwork")) {
@@ -236,7 +238,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                 @Override
                 public void run() {
                     Bitmap bitmap = loadArtwork(artworkUrl, artworkLocal);
-                    
+
                     if(md != null) {
                         md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap);
                         session.setMetadata(md.build());
@@ -245,7 +247,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                         nb.setLargeIcon(bitmap);
                         notification.show(nb, isPlaying);
                     }
-                    
+
                     artworkThread = null;
                 }
             });
