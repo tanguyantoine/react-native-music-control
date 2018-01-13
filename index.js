@@ -71,7 +71,7 @@ const MusicControl = {
   },
   off: function(actionName, cb){
     delete(handlers[actionName])
-    if(!Object.keys(handlers).length && listenerOfNativeMusicControl != null){
+    if( !Object.keys(handlers).length && listenerOfNativeMusicControl ){
       listenerOfNativeMusicControl.remove()
       listenerOfNativeMusicControl = null;
     }
