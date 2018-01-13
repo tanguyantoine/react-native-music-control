@@ -1,4 +1,3 @@
-
 package com.tanguyantoine.react;
 
 import com.facebook.react.ReactPackage;
