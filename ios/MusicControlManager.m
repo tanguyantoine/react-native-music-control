@@ -79,11 +79,11 @@ RCT_EXPORT_METHOD(updatePlayback:(NSDictionary *) originalDetails)
 
     center.nowPlayingInfo = [self update:mediaDict with:details andSetDefaults:false];
 
-
-    if ([details objectForKey:@"artwork"] != self.artworkUrl) {
-        [self updateArtworkIfNeeded:[details objectForKey:@"artwork"]];
+    NSString *artworkUrl = [self getArtworkUrl:[originalDetails objectForKey:@"artwork"]];
+    if (artworkUrl != self.artworkUrl) {
+        self.artworkUrl = artworkUrl;
+        [self updateArtworkIfNeeded:artworkUrl];
     }
-
 }
 
 
@@ -95,7 +95,8 @@ RCT_EXPORT_METHOD(setNowPlaying:(NSDictionary *) details)
 
     center.nowPlayingInfo = [self update:mediaDict with:details andSetDefaults:true];
 
-  [self updateArtworkIfNeeded:[details objectForKey:@"artwork"]];
+    NSString *artworkUrl = [self getArtworkUrl:[details objectForKey:@"artwork"]];
+    [self updateArtworkIfNeeded:artworkUrl];
 }
 
 RCT_EXPORT_METHOD(resetNowPlaying)
@@ -264,40 +265,45 @@ RCT_EXPORT_METHOD(observeAudioInterruptions:(BOOL) observe){
                        body:@{@"name": event}];
 }
 
+- (NSString*)getArtworkUrl:(NSString*)artwork {
+  NSString *artworkUrl = nil;
+
+  if (artwork) {
+      if ([artwork isKindOfClass:[NSString class]]) {
+           artworkUrl = artwork;
+      } else if ([[artwork valueForKey: @"uri"] isKindOfClass:[NSString class]]) {
+           artworkUrl = [artwork valueForKey: @"uri"];
+      }
+  }
+
+  return artworkUrl;
+}
+
 - (void)sendEventWithValue:(NSString*)event withValue:(NSString*)value{
    [self sendEventWithName:@"RNMusicControlEvent" body:@{@"name": event, @"value":value}];
 }
 
-- (void)updateArtworkIfNeeded:(id)artwork
+- (void)updateArtworkIfNeeded:(id)artworkUrl
 {
-    NSString *url = nil;
-    if (artwork) {
-        if ([artwork isKindOfClass:[NSString class]]) {
-             url = artwork;
-        } else if ([[artwork valueForKey: @"uri"] isKindOfClass:[NSString class]]) {
-             url = [artwork valueForKey: @"uri"];
-        }
-    }
-
-    if (url != nil) {
-        self.artworkUrl = url;
+    if (artworkUrl != nil) {
+        self.artworkUrl = artworkUrl;
 
         // Custom handling of artwork in another thread, will be loaded async
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
             UIImage *image = nil;
 
             // check whether artwork path is present
-            if (![url isEqual: @""]) {
+            if (![artworkUrl isEqual: @""]) {
                 // artwork is url download from the interwebs
-                if ([url hasPrefix: @"http://"] || [url hasPrefix: @"https://"]) {
-                    NSURL *imageURL = [NSURL URLWithString:url];
+                if ([artworkUrl hasPrefix: @"http://"] || [artworkUrl hasPrefix: @"https://"]) {
+                    NSURL *imageURL = [NSURL URLWithString:artworkUrl];
                     NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
                     image = [UIImage imageWithData:imageData];
                 } else {
                     // artwork is local. so create it from a UIImage
-                    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:url];
+                    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:artworkUrl];
                     if (fileExists) {
-                        image = [UIImage imageNamed:url];
+                        image = [UIImage imageNamed:artworkUrl];
                     }
                 }
             }
@@ -312,10 +318,11 @@ RCT_EXPORT_METHOD(observeAudioInterruptions:(BOOL) observe){
             CIImage *cim = [image CIImage];
 
             if (cim != nil || cgref != NULL) {
+
                 dispatch_async(dispatch_get_main_queue(), ^{
 
                     // Check if URL wasn't changed in the meantime
-                    if ([url isEqual:self.artworkUrl]) {
+                    if ([artworkUrl isEqual:self.artworkUrl]) {
                         MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
                         MPMediaItemArtwork *artwork = [[MPMediaItemArtwork alloc] initWithImage: image];
                         NSMutableDictionary *mediaDict = (center.nowPlayingInfo != nil) ? [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo] : [NSMutableDictionary dictionary];
