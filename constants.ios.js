@@ -1,4 +1,4 @@
-import { NativeModules } from 'react-native';
+import { NativeModules } from "react-native";
 const NativeMusicControl = NativeModules.MusicControlManager;
 
 const STATE_PLAYING = NativeMusicControl.STATE_PLAYING;
@@ -24,5 +24,5 @@ export default {
   RATING_3_STARS,
   RATING_4_STARS,
   RATING_5_STARS,
-  RATING_PERCENTAGE,
-}
+  RATING_PERCENTAGE
+};

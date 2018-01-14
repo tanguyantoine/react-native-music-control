@@ -1,19 +1,23 @@
 /**
  * @providesModule MusicControl
  */
-'use strict';
+"use strict";
 
-import { NativeModules, DeviceEventEmitter, NativeEventEmitter, Platform } from 'react-native';
+import {
+  NativeModules,
+  DeviceEventEmitter,
+  NativeEventEmitter,
+  Platform
+} from "react-native";
 const NativeMusicControl = NativeModules.MusicControlManager;
-import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
-import constants from './constants';
+import resolveAssetSource from "react-native/Libraries/Image/resolveAssetSource";
+import constants from "./constants";
 
-let handlers = { };
+let handlers = {};
 let listenerOfNativeMusicControl = null;
-const IS_ANDROID = Platform.OS === 'android';
+const IS_ANDROID = Platform.OS === "android";
 
 const MusicControl = {
-
   STATE_PLAYING: constants.STATE_PLAYING,
   STATE_PAUSED: constants.STATE_PAUSED,
   STATE_ERROR: constants.STATE_ERROR,
@@ -27,69 +31,68 @@ const MusicControl = {
   RATING_5_STARS: constants.RATING_5_STARS,
   RATING_PERCENTAGE: constants.RATING_PERCENTAGE,
 
-  enableBackgroundMode: function(enable){
-    NativeMusicControl.enableBackgroundMode(enable)
+  enableBackgroundMode: function(enable) {
+    NativeMusicControl.enableBackgroundMode(enable);
   },
-  setNowPlaying: function(info){
+  setNowPlaying: function(info) {
     // Check if we have an android asset from react style image require
-    if(info.artwork) {
-        info.artwork = resolveAssetSource(info.artwork) || info.artwork;
+    if (info.artwork) {
+      info.artwork = resolveAssetSource(info.artwork) || info.artwork;
     }
 
     NativeMusicControl.setNowPlaying(info);
   },
-  setPlayback: function(info){
+  setPlayback: function(info) {
     // Backwards compatibility. Use updatePlayback instead.
-    NativeMusicControl.updatePlayback(info)
+    NativeMusicControl.updatePlayback(info);
   },
-  updatePlayback: function(info){
-    NativeMusicControl.updatePlayback(info)
+  updatePlayback: function(info) {
+    NativeMusicControl.updatePlayback(info);
   },
-  resetNowPlaying: function(){
-    NativeMusicControl.resetNowPlaying()
+  resetNowPlaying: function() {
+    NativeMusicControl.resetNowPlaying();
   },
-  enableControl: function(controlName, enable, options = {}){
-    NativeMusicControl.enableControl(controlName, enable, options || {})
+  enableControl: function(controlName, enable, options = {}) {
+    NativeMusicControl.enableControl(controlName, enable, options || {});
   },
-  handleCommand: function(commandName, value){
-    if(handlers[commandName]){
-      handlers[commandName](value)
+  handleCommand: function(commandName, value) {
+    if (handlers[commandName]) {
+      handlers[commandName](value);
     }
   },
-  on: function(actionName, cb){
-    if( !listenerOfNativeMusicControl ){
-      listenerOfNativeMusicControl = (IS_ANDROID ? DeviceEventEmitter : new NativeEventEmitter(NativeMusicControl))
-        .addListener(
-          'RNMusicControlEvent',
-          (event) => {
-            MusicControl.handleCommand(event.name, event.value)
-          }
-        );
+  on: function(actionName, cb) {
+    if (!listenerOfNativeMusicControl) {
+      listenerOfNativeMusicControl = (IS_ANDROID
+        ? DeviceEventEmitter
+        : new NativeEventEmitter(NativeMusicControl)
+      ).addListener("RNMusicControlEvent", event => {
+        MusicControl.handleCommand(event.name, event.value);
+      });
     }
-    handlers[actionName] = cb
+    handlers[actionName] = cb;
   },
-  off: function(actionName, cb){
-    delete(handlers[actionName])
-    if( !Object.keys(handlers).length && listenerOfNativeMusicControl ){
-      listenerOfNativeMusicControl.remove()
+  off: function(actionName, cb) {
+    delete handlers[actionName];
+    if (!Object.keys(handlers).length && listenerOfNativeMusicControl) {
+      listenerOfNativeMusicControl.remove();
       listenerOfNativeMusicControl = null;
     }
   },
   stopControl: function() {
-    if ( listenerOfNativeMusicControl ) {
+    if (listenerOfNativeMusicControl) {
       listenerOfNativeMusicControl.remove();
       listenerOfNativeMusicControl = null;
     }
     handlers = {};
     NativeMusicControl.stopControl();
   },
-  handleAudioInterruptions: function(enable){
+  handleAudioInterruptions: function(enable) {
     if (IS_ANDROID) {
       console.log("Audio interruption handling not implemented for Android");
     } else {
       NativeMusicControl.observeAudioInterruptions(enable);
     }
-  },
+  }
 };
 
 export default MusicControl;
