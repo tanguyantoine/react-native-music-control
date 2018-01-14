@@ -9,7 +9,7 @@ import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource'
 import constants from './constants';
 
 let handlers = { };
-let subscription = null;
+let listenerOfNativeMusicControl = null;
 const IS_ANDROID = Platform.OS === 'android';
 
 const MusicControl = {
@@ -57,30 +57,29 @@ const MusicControl = {
     }
   },
   on: function(actionName, cb){
-    if(subscription){
-      subscription.remove();
+    if( !listenerOfNativeMusicControl ){
+      listenerOfNativeMusicControl = (IS_ANDROID ? DeviceEventEmitter : new NativeEventEmitter(NativeMusicControl))
+        .addListener(
+          'RNMusicControlEvent',
+          (event) => {
+            MusicControl.handleCommand(event.name, event.value)
+          }
+        );
     }
-    subscription = (IS_ANDROID ? DeviceEventEmitter : new NativeEventEmitter(NativeMusicControl))
-      .addListener(
-        'RNMusicControlEvent',
-        (event) => {
-          MusicControl.handleCommand(event.name, event.value)
-        }
-      );
     handlers[actionName] = cb
   },
   off: function(actionName, cb){
     delete(handlers[actionName])
-    if(!Object.keys(handlers).length && subscription){
-      subscription.remove()
-      subscription = null;
+    if( !Object.keys(handlers).length && listenerOfNativeMusicControl ){
+      listenerOfNativeMusicControl.remove()
+      listenerOfNativeMusicControl = null;
     }
   },
   stopControl: function() {
-    if (subscription) {
-      subscription.remove();
+    if ( listenerOfNativeMusicControl ) {
+      listenerOfNativeMusicControl.remove();
+      listenerOfNativeMusicControl = null;
     }
-    subscription = null;
     handlers = {};
     NativeMusicControl.stopControl();
   },
