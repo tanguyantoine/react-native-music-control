@@ -163,7 +163,7 @@ MusicControl.resetNowPlaying()
 
 ### Stop controls
 
-Resets, hides, disables every controls
+Resets, hides the music controls and disables everything
 
 ```javascript
 MusicControl.stopControl()
