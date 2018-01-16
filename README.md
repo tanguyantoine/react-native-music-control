@@ -161,6 +161,14 @@ Resets and hides the music controls
 MusicControl.resetNowPlaying()
 ```
 
+### Stop controls
+
+Resets, hides the music controls and disables everything
+
+```javascript
+MusicControl.stopControl()
+```
+
 ### Enable/disable controls
 
 **iOS**: Lockscreen
