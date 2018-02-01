@@ -215,8 +215,8 @@ Important Notes:
 
 ```
 MusicControl.on('play', () => {
-// A valid funcion must be present
-player.play()
+  // A valid funcion must be present
+  player.play()
 })
 ```
 
