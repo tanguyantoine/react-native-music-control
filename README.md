@@ -43,6 +43,10 @@ In XCode, right click Libraries. Click Add Files to "[Your project]". Navigate t
 
 In the Project Navigator, select your project. Click the build target. Click Build Phases. Expand Link Binary With Libraries. Click the plus button and add libMusicControl.a under Workspace.
 
+### CocoaPods
+
+`pod 'react-native-music-control', :path => '../node_modules/react-native-music-control'`
+
 
 ## Android
 
