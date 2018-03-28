@@ -300,10 +300,10 @@ RCT_EXPORT_METHOD(observeAudioInterruptions:(BOOL) observe){
                     NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
                     image = [UIImage imageWithData:imageData];
                 } else {
-                    // artwork is local. so create it from a UIImage
-                    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:artworkUrl];
+                    NSString *localArtworkUrl = [artworkUrl stringByReplacingOccurrencesOfString:@"file://" withString:@""];
+                    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:localArtworkUrl];
                     if (fileExists) {
-                        image = [UIImage imageNamed:artworkUrl];
+                        image = [UIImage imageNamed:localArtworkUrl];
                     }
                 }
             }
