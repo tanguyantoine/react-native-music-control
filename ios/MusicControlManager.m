@@ -80,7 +80,7 @@ RCT_EXPORT_METHOD(updatePlayback:(NSDictionary *) originalDetails)
     center.nowPlayingInfo = [self update:mediaDict with:details andSetDefaults:false];
 
     NSString *artworkUrl = [self getArtworkUrl:[originalDetails objectForKey:@"artwork"]];
-    if (artworkUrl != self.artworkUrl) {
+    if (artworkUrl != self.artworkUrl && artworkUrl != nil) {
         self.artworkUrl = artworkUrl;
         [self updateArtworkIfNeeded:artworkUrl];
     }
@@ -300,10 +300,10 @@ RCT_EXPORT_METHOD(observeAudioInterruptions:(BOOL) observe){
                     NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
                     image = [UIImage imageWithData:imageData];
                 } else {
-                    // artwork is local. so create it from a UIImage
-                    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:artworkUrl];
+                    NSString *localArtworkUrl = [artworkUrl stringByReplacingOccurrencesOfString:@"file://" withString:@""];
+                    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:localArtworkUrl];
                     if (fileExists) {
-                        image = [UIImage imageNamed:artworkUrl];
+                        image = [UIImage imageNamed:localArtworkUrl];
                     }
                 }
             }
