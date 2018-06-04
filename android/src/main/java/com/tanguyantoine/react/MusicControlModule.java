@@ -1,9 +1,12 @@
 package com.tanguyantoine.react;
 
+import android.app.NotificationManager;
+import android.app.NotificationChannel;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -12,11 +15,15 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.SystemClock;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v7.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.media.app.NotificationCompat.MediaStyle;
 import android.util.Log;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -57,6 +64,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
     public NotificationClose notificationClose = NotificationClose.PAUSED;
 
+    public static final String CHANNEL_ID = "12min_playback_channel";
+
     public MusicControlModule(ReactApplicationContext context) {
         super(context);
     }
@@ -84,6 +93,22 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         return map;
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private void createChannel(ReactApplicationContext context) {
+        NotificationManager
+            mNotificationManager =
+            (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        CharSequence name = "Media playback";
+        String description = "Media playback controls";
+        int importance = NotificationManager.IMPORTANCE_LOW;
+        NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
+        mChannel.setDescription(description);
+        mChannel.setShowBadge(false);
+        mChannel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+        mNotificationManager.createNotificationChannel(mChannel);
+    }
+
     public void init() {
         if (init) return;
 
@@ -107,8 +132,12 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         md = new MediaMetadataCompat.Builder();
         pb = new PlaybackStateCompat.Builder();
         pb.setActions(controls);
-        nb = new NotificationCompat.Builder(context);
-        nb.setStyle(new NotificationCompat.MediaStyle().setMediaSession(session.getSessionToken()));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createChannel(context);
+        }
+        nb = new NotificationCompat.Builder(context, CHANNEL_ID);
+        nb.setStyle(new MediaStyle().setMediaSession(session.getSessionToken()));
 
         state = pb.build();
 
@@ -123,7 +152,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         receiver = new MusicControlReceiver(this, context);
         context.registerReceiver(receiver, filter);
 
-        context.startService(new Intent(context, MusicControlNotification.NotificationService.class));
+        ContextCompat.startForegroundService(context, new Intent(context, MusicControlNotification.NotificationService.class));
 
         context.registerComponentCallbacks(this);
 

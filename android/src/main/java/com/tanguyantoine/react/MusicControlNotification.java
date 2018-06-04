@@ -7,7 +7,7 @@ import android.content.res.Resources;
 import android.os.IBinder;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v7.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat;
 import android.view.KeyEvent;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableMap;
@@ -38,13 +38,13 @@ public class MusicControlNotification {
         smallIcon = r.getIdentifier("music_control_icon", "drawable", packageName);
         if(smallIcon == 0) smallIcon = r.getIdentifier("play", "drawable", packageName);
     }
-    
+
     public synchronized void setCustomNotificationIcon(String resourceName) {
         if(resourceName == null) {
             customIcon = 0;
             return;
         }
-        
+
         Resources r = context.getResources();
         String packageName = context.getPackageName();
 
@@ -88,9 +88,9 @@ public class MusicControlNotification {
         } else if(module.notificationClose == MusicControlModule.NotificationClose.PAUSED) {
             builder.setOngoing(isPlaying);
         } else { // NotificationClose.NEVER
-            builder.setOngoing(true); 
+            builder.setOngoing(true);
         }
-        
+
         builder.setSmallIcon(customIcon != 0 ? customIcon : smallIcon);
 
         // Open the app when the notification is clicked
