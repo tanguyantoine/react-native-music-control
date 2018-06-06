@@ -64,7 +64,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
     public NotificationClose notificationClose = NotificationClose.PAUSED;
 
-    public static final String CHANNEL_ID = "12min_playback_channel";
+    public static final String CHANNEL_ID = "react-native-music-control";
 
     public MusicControlModule(ReactApplicationContext context) {
         super(context);
@@ -95,15 +95,10 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
     @RequiresApi(Build.VERSION_CODES.O)
     private void createChannel(ReactApplicationContext context) {
-        NotificationManager
-            mNotificationManager =
-            (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        CharSequence name = "Media playback";
-        String description = "Media playback controls";
-        int importance = NotificationManager.IMPORTANCE_LOW;
-        NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
-        mChannel.setDescription(description);
+        NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, "Media playback", NotificationManager.IMPORTANCE_LOW);
+        mChannel.setDescription("Media playback controls");
         mChannel.setShowBadge(false);
         mChannel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
         mNotificationManager.createNotificationChannel(mChannel);
