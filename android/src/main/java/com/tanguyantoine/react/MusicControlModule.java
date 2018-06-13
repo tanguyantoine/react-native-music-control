@@ -147,8 +147,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         receiver = new MusicControlReceiver(this, context);
         context.registerReceiver(receiver, filter);
 
-        ContextCompat.startForegroundService(context, new Intent(context, MusicControlNotification.NotificationService.class));
-
+        context.startService(new Intent(context, MusicControlNotification.NotificationService.class));
+        
         context.registerComponentCallbacks(this);
 
         isPlaying = false;
@@ -238,7 +238,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         }
 
         nb.setContentTitle(title);
-        nb.setContentText(artist);
+        nb.setContentText(artist); ContextCompat.startForegroundService(context, new Intent(context, MusicControlNotification.NotificationService.class));
         nb.setContentInfo(album);
         nb.setColor(notificationColor);
 
