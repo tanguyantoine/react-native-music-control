@@ -147,7 +147,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         receiver = new MusicControlReceiver(this, context);
         context.registerReceiver(receiver, filter);
 
-        context.startService(new Intent(context, MusicControlNotification.NotificationService.class));
+        ContextCompat.startForegroundService(context, new Intent(context, MusicControlNotification.NotificationService.class));
 
         context.registerComponentCallbacks(this);
 
