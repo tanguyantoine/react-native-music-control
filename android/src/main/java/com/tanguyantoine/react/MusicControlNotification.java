@@ -104,7 +104,18 @@ public class MusicControlNotification {
         builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, remove, PendingIntent.FLAG_UPDATE_CURRENT));
 
         // Finally show/update the notification
-        NotificationManagerCompat.from(context).notify("MusicControl", 0, builder.build());
+        if(NotificationService.INSTANCE != null) {
+
+            if(isPlaying){
+                NotificationService.INSTANCE.startForeground(1,builder.build());
+            }else{
+                NotificationManagerCompat.from(context).notify(null, 1, builder.build());
+                NotificationService.INSTANCE.stopForeground(false);
+            }
+
+        }else{
+            NotificationManagerCompat.from(context).notify(null, 1, builder.build());
+        }
     }
 
     public void hide() {
@@ -156,6 +167,14 @@ public class MusicControlNotification {
     }
 
     public static class NotificationService extends Service {
+
+        static NotificationService INSTANCE;
+
+        @Override
+        public void onCreate() {
+            INSTANCE=this;
+        }
+
         @Override
         public IBinder onBind(Intent intent) {
             return null;
