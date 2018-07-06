@@ -74,7 +74,7 @@ include ':app'
 +project(':react-native-music-control').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-music-control/android')
 ```
 
-**MainActivity.java**
+**MainApplication.java**
 
 ```diff
 +import com.tanguyantoine.react.MusicControl;
