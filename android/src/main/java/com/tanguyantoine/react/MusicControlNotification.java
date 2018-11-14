@@ -186,8 +186,6 @@ public class MusicControlNotification {
             super.onCreate();
 
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                /*Notification notification = new Notification.Builder(MusicControlModule.INSTANCE.context, MusicControlModule.INSTANCE.CHANNEL_ID)
-                        .build();*/
                 Notification notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb,false);
                 startForeground(NOTIFICATION_ID, notification);
             }
