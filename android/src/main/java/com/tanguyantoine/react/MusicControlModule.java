@@ -1,5 +1,6 @@
 package com.tanguyantoine.react;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.NotificationChannel;
 import android.content.ComponentCallbacks2;
@@ -30,6 +31,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
+import com.facebook.react.packagerconnection.NotificationOnlyHandler;
 import com.facebook.react.views.imagehelper.ResourceDrawableIdHelper;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,15 +49,17 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
     private MediaMetadataCompat.Builder md;
     private PlaybackStateCompat.Builder pb;
-    private NotificationCompat.Builder nb;
+    public NotificationCompat.Builder nb;
 
     private PlaybackStateCompat state;
 
-    protected MusicControlNotification notification;
+    public MusicControlNotification notification;
     private MusicControlListener.VolumeListener volume;
     private MusicControlReceiver receiver;
 
     private Thread artworkThread;
+
+    public ReactApplicationContext context;
 
     private boolean remoteVolume = false;
     private boolean isPlaying = false;
@@ -65,6 +69,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     public NotificationClose notificationClose = NotificationClose.PAUSED;
 
     public static final String CHANNEL_ID = "react-native-music-control";
+
+    public static final int NOTIFICATION_ID = 100;
 
     public MusicControlModule(ReactApplicationContext context) {
         super(context);
@@ -108,7 +114,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         if (init) return;
 
         INSTANCE = this;
-        ReactApplicationContext context = getReactApplicationContext();
+
+        context = getReactApplicationContext();
 
         ComponentName compName = new ComponentName(context, MusicControlReceiver.class);
 
@@ -147,7 +154,14 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         receiver = new MusicControlReceiver(this, context);
         context.registerReceiver(receiver, filter);
 
-        context.startService(new Intent(context, MusicControlNotification.NotificationService.class));
+        Intent myIntent = new Intent(context, MusicControlNotification.NotificationService.class);
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            context.startForegroundService(myIntent);
+
+        }
+        else
+            context.startService(myIntent);
 
         context.registerComponentCallbacks(this);
 
