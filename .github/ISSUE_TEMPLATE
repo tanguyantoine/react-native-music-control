@@ -1,13 +1,17 @@
+<!-- Please keep in mind that the more you give detail easier the problem solving is -->
+
 # Description
 
 1. Sample code (provide repo url or sample code)
 
 
+<!-- replace the balnk space within backets by a x so that it checks the box ;-) -->
 2. Platform ?
+
    - [ ] iOS
    - [ ] Android
    
-   
+<!-- same here -->   
 3. Device
   - [ ] Simulator
   - [ ] Real device
