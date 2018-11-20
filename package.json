@@ -2,6 +2,12 @@
   "name": "react-native-music-control",
   "version": "0.7.3",
   "description": "Add information on lockscreen and control playing music",
+  "main": "lib/index.js",
+  "files": [
+    "ios/",
+    "android/",
+    "lib/"
+  ],
   "keywords": [
     "react",
     "react-native",
@@ -18,5 +24,13 @@
   "peerDependencies": {
     "react-native": ">=0.40.0"
   },
-  "rnpm": {}
+  "scripts": {
+    "prepack": "tsc -p tsconfig.json",
+    "start": "tsc -p tsconfig.json -w"
+  },
+  "rnpm": {},
+  "devDependencies": {
+    "@types/react-native": "^0.57.11",
+    "typescript": "^3.1.6"
+  }
 }
