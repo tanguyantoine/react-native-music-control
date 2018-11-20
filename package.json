@@ -3,6 +3,7 @@
   "version": "0.7.3",
   "description": "Add information on lockscreen and control playing music",
   "main": "lib/index.js",
+  "types": "./lib/index.d.ts",
   "files": [
     "ios/",
     "android/",
