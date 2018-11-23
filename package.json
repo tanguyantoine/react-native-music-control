@@ -28,7 +28,7 @@
   "scripts": {
     "prepack": "tsc -p tsconfig.json",
     "start": "tsc -p tsconfig.json -w",
-    "semantic-release": "semantic-release"
+    "semantic-release": "semantic-release --no-ci"
   },
   "rnpm": {},
   "devDependencies": {
