@@ -7,7 +7,8 @@
   "files": [
     "ios/",
     "android/",
-    "lib/"
+    "lib/",
+    "*.podspec"
   ],
   "keywords": [
     "react",
