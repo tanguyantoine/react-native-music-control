@@ -16,7 +16,9 @@
     "remote controls",
     "lockscreen",
     "nowplaying",
-    "MPNowPlayingInfoCenter"
+    "MPNowPlayingInfoCenter",
+    "ios",
+    "android"
   ],
   "repository": {
     "type": "git",
