@@ -43,6 +43,10 @@ In XCode, right click Libraries. Click Add Files to "[Your project]". Navigate t
 
 In the Project Navigator, select your project. Click the build target. Click Build Phases. Expand Link Binary With Libraries. Click the plus button and add libMusicControl.a under Workspace.
 
+### CocoaPods
+
+`pod 'react-native-music-control', :path => '../node_modules/react-native-music-control'`
+
 
 ## Android
 
@@ -70,7 +74,7 @@ include ':app'
 +project(':react-native-music-control').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-music-control/android')
 ```
 
-**MainActivity.java**
+**MainApplication.java**
 
 ```diff
 +import com.tanguyantoine.react.MusicControl;
@@ -88,6 +92,30 @@ public class MainApplication extends Application implements ReactApplication {
 
     //......
   }
+```
+
+### Troubleshooting
+Some user reported this error while compiling the android version:
+
+```
+Multiple dex files define Landroid/support/v4/accessibilityservice/AccessibilityServiceInfoCompat
+```
+
+to solve the issue just copy this line at the end of your application build.gradle
+
+**android/app/build.gradle**
+
+```diff
++configurations.all {
++    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
++        def requested = details.requested
++        if (requested.group == 'com.android.support') {
++            if (!requested.name.startsWith("multidex")) {
++                details.useVersion '26.0.1'
++            }
++        }
++    }
++}
 ```
 
 # Use
@@ -161,6 +189,14 @@ Resets and hides the music controls
 MusicControl.resetNowPlaying()
 ```
 
+### Stop controls
+
+Resets, hides the music controls and disables everything
+
+```javascript
+MusicControl.stopControl()
+```
+
 ### Enable/disable controls
 
 **iOS**: Lockscreen
@@ -203,6 +239,14 @@ Important Notes:
 * Android only supports the intervals 5, 10, & 30, while iOS supports any number
 * The interval value only changes what number displays in the UI, the actual logic to skip forward or backward by a given amount must be implemented in the appropriate callbacks
 * When using [react-native-sound](https://github.com/zmxv/react-native-sound) for audio playback, make sure that on iOS `mixWithOthers` is set to `false` in [`Sound.setCategory(value, mixWithOthers)`](https://github.com/zmxv/react-native-sound#soundsetcategoryvalue-mixwithothers-ios-only). MusicControl will not work on a real device when this is set to `true`.
+* For lockscreen controls to appear enabled instead of greyed out, the accompanying listener for each control that you want to display on the lock screen must contain a valid function:
+
+```
+MusicControl.on('play', () => {
+  // A valid funcion must be present
+  player.play()
+})
+```
 
 There is also a `closeNotification` control on Android controls the swipe behavior of the audio playing notification, and accepts additional configuration options with the `when` key:
 

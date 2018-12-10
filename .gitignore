@@ -4,3 +4,7 @@ android/build
 .idea/
 .vscode/
 .DS_Store
+node_modules/
+lib/
+.envrc
+.npmrc
