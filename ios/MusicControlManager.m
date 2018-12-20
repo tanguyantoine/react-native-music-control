@@ -15,6 +15,10 @@
 
 #define MEDIA_STATE_PLAYING @"STATE_PLAYING"
 #define MEDIA_STATE_PAUSED @"STATE_PAUSED"
+#define MEDIA_STATE_STOPPED @"STATE_STOPPED"
+#define MEDIA_STATE_ERROR @"STATE_ERROR"
+#define MEDIA_STATE_BUFFERING @"STATE_BUFFERING"
+#define MEDIA_STATE_RATING_PERCENTAGE @"STATE_RATING_PERCENTAGE"
 #define MEDIA_SPEED @"speed"
 #define MEDIA_STATE @"state"
 #define MEDIA_DICT @{@"album": MPMediaItemPropertyAlbumTitle, \
@@ -46,7 +50,11 @@ RCT_EXPORT_MODULE()
 {
     return @{
         @"STATE_PLAYING": MEDIA_STATE_PLAYING,
-        @"STATE_PAUSED": MEDIA_STATE_PAUSED
+        @"STATE_PAUSED": MEDIA_STATE_PAUSED,
+        @"STATE_STOPPED" : MEDIA_STATE_STOPPED,
+        @"STATE_ERROR" :MEDIA_STATE_ERROR,
+        @"STATE_BUFFERING":MEDIA_STATE_BUFFERING,
+        @"STATE_RATING_PERCENTAGE":MEDIA_STATE_RATING_PERCENTAGE,
     };
 }
 
@@ -73,6 +81,10 @@ RCT_EXPORT_METHOD(updatePlayback:(NSDictionary *) originalDetails)
         : [NSNumber numberWithDouble:1];
 
         [details setValue:speed forKey:MEDIA_SPEED];
+    }
+    if ([[details objectForKey:MEDIA_STATE] isEqual:MEDIA_STATE_STOPPED]) {
+        MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
+        [self toggleHandler:remoteCenter.stopCommand withSelector:@selector(onStop:) enabled:false];
     }
 
     NSMutableDictionary *mediaDict = [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo];
