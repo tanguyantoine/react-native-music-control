@@ -7,3 +7,4 @@ android/build
 node_modules/
 lib/
 .envrc
+.npmrc

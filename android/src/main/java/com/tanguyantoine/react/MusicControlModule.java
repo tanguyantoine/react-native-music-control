@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MusicControlModule extends ReactContextBaseJavaModule implements ComponentCallbacks2 {
+    private static final String TAG = MusicControlModule.class.getSimpleName();
 
     static MusicControlModule INSTANCE;
 
@@ -248,7 +249,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         md.putText(MediaMetadataCompat.METADATA_KEY_DATE, date);
         md.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration);
         if (android.os.Build.VERSION.SDK_INT > 19) {
-          md.putRating(MediaMetadataCompat.METADATA_KEY_RATING, rating);
+            md.putRating(MediaMetadataCompat.METADATA_KEY_RATING, rating);
         }
 
         nb.setContentTitle(title);
@@ -408,12 +409,14 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                 return;
             case "closeNotification":
                 if(enable) {
-                    if(options.getString("when").equals("always")) {
-                        this.notificationClose = notificationClose.ALWAYS;
-                    } else if(options.getString("when").equals("paused")) {
-                        this.notificationClose = notificationClose.PAUSED;
-                    } else {
-                        this.notificationClose = notificationClose.NEVER;
+                    if (options.hasKey("when")) {
+                       if ("always".equals(options.getString("when"))) {
+                           this.notificationClose = notificationClose.ALWAYS;
+                       }else if ("paused".equals(options.getString("when"))) {
+                           this.notificationClose = notificationClose.PAUSED;
+                       }else {
+                           this.notificationClose = notificationClose.NEVER;
+                       }
                     }
                     return;
                 }
@@ -463,7 +466,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
             }
         } catch(IOException ex) {
-            Log.w("MusicControl", "Could not load the artwork", ex);
+            Log.w(TAG, "Could not load the artwork", ex);
         }
 
         return bitmap;
@@ -477,11 +480,11 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE:
                 if(session.isActive()) break;
 
-            // Trims memory when it reaches a critical level
+                // Trims memory when it reaches a critical level
             case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
 
-                Log.w("MusicControl", "Control resources are being removed due to system's low memory (Level: " + level + ")");
+                Log.w(TAG, "Control resources are being removed due to system's low memory (Level: " + level + ")");
                 destroy();
                 break;
         }
@@ -494,7 +497,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
     @Override
     public void onLowMemory() {
-        Log.w("MusicControl", "Control resources are being removed due to system's low memory (Level: MEMORY_COMPLETE)");
+        Log.w(TAG, "Control resources are being removed due to system's low memory (Level: MEMORY_COMPLETE)");
         destroy();
     }
 
