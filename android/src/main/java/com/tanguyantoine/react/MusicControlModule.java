@@ -1,6 +1,6 @@
 package com.tanguyantoine.react;
 
-import android.app.Notification;
+
 import android.app.NotificationManager;
 import android.app.NotificationChannel;
 import android.content.ComponentCallbacks2;
@@ -8,7 +8,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -23,15 +22,14 @@ import android.support.v4.media.RatingCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.media.app.NotificationCompat.MediaStyle;
+import android.util.LruCache;
 import android.util.Log;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
-import com.facebook.react.packagerconnection.NotificationOnlyHandler;
 import com.facebook.react.views.imagehelper.ResourceDrawableIdHelper;
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,6 +79,21 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     public String getName() {
         return "MusicControlManager";
     }
+
+    private LruCache<String, Bitmap> mMemoryCache = new LruCache<String, Bitmap>(
+            // Get max available VM memory, exceeding this amount will throw an
+            // OutOfMemory exception. Stored in kilobytes as LruCache takes an
+            // int in its constructor.
+            ((int) (Runtime.getRuntime().maxMemory() / 1024)
+                    / 8 // Use 1/8th of the available memory for this memory cache.
+            )) {
+        @Override
+        protected int sizeOf(String key, Bitmap bitmap) {
+            // The cache size will be measured in kilobytes rather than
+            // number of items.
+            return bitmap.getByteCount() / 1024;
+        }
+    };;
 
     @Override
     public Map<String, Object> getConstants() {
@@ -273,24 +286,26 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             final String artworkUrl = artwork;
             final boolean artworkLocal = localArtwork;
 
-            artworkThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Bitmap bitmap = loadArtwork(artworkUrl, artworkLocal);
+            if (getBitmapFromMemCache(artworkUrl) == null) {//
+                artworkThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Bitmap bitmap = loadArtwork(artworkUrl, artworkLocal);
 
-                    if(md != null) {
-                        md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap);
-                        session.setMetadata(md.build());
-                    }
-                    if(nb != null) {
-                        nb.setLargeIcon(bitmap);
-                        notification.show(nb, isPlaying);
-                    }
+                        if (md != null) {
+                            md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap);
+                            session.setMetadata(md.build());
+                        }
+                        if (nb != null) {
+                            nb.setLargeIcon(bitmap);
+                            notification.show(nb, isPlaying);
+                        }
 
-                    artworkThread = null;
-                }
-            });
-            artworkThread.start();
+                        artworkThread = null;
+                    }
+                });
+                artworkThread.start();
+            }
         } else {
             md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, null);
             nb.setLargeIcon(null);
@@ -438,6 +453,15 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         session.setPlaybackState(state);
     }
 
+    private void addBitmapToMemoryCache(String key, Bitmap bitmap) {
+        if (getBitmapFromMemCache(key) == null) {
+            mMemoryCache.put(key, bitmap);
+        }
+    }
+
+    private Bitmap getBitmapFromMemCache(String key) {
+        return mMemoryCache.get(key);
+    }
     private Bitmap loadArtwork(String url, boolean local) {
         Bitmap bitmap = null;
 
@@ -469,6 +493,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             Log.w(TAG, "Could not load the artwork", ex);
         }
 
+        addBitmapToMemoryCache(url == null ? "" : url, bitmap);
         return bitmap;
     }
 
