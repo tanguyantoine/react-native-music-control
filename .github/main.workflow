@@ -1,6 +1,9 @@
 workflow "Build, Test, and Publish" {
   on = "push"
-  resolves = ["Publish"]
+  resolves = [
+    "Publish",
+    "GitHub Action for npm",
+  ]
 }
 
 action "Build" {
@@ -14,7 +17,10 @@ action "Test" {
   args = "test"
 }
 
-//action "Publish" {
+action "GitHub Action for npm" {
+  uses = "actions/npm@e7aaefe"
+  args = "install"
+}//action "Publish" {
 //  needs = "Test"
 //  uses = "actions/npm@master"
 //  args = "publish --access public"
