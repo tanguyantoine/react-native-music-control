@@ -31,6 +31,7 @@
   "scripts": {
     "prepack": "tsc -p tsconfig.json",
     "start": "tsc -p tsconfig.json -w",
+    "test": "echo 'no tests'",
     "semantic-release": "semantic-release --no-ci"
   },
   "rnpm": {},
