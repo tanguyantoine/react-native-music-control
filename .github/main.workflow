@@ -2,7 +2,9 @@ workflow "Build, Test, and Publish" {
   on = "push"
   resolves = [
     "Filter release tag",
-    "GitHub Action for npm",
+    "Install",
+    "Test",
+    "Release",
   ]
 }
 
@@ -23,8 +25,9 @@ action "Test" {
   needs = ["Install"]
 }
 
-action "GitHub Action for npm" {
+action "Release" {
   uses = "actions/npm@e7aaefe"
-  needs = ["Install"]
-  args = "test"
+  needs = ["Test", "Install"]
+  args = "run semantic-release"
+  secrets = ["GITHUB_TOKEN", "NPM_TOKEN", "NPM_AUTH_TOKEN"]
 }
