@@ -2,10 +2,9 @@ workflow "Build, Test, and Publish" {
   on = "release"
   resolves = [
     "Filter release tag",
-    "Install",
+    "GitHub Action for npm",
   ]
 }
-
 
 action "Filter release tag" {
   uses = "actions/bin/filter@b2bea07"
@@ -22,4 +21,10 @@ action "Test" {
   uses = "actions/npm@e7aaefe"
   args = "test"
   needs = ["Install"]
+}
+
+action "GitHub Action for npm" {
+  uses = "actions/npm@e7aaefe"
+  needs = ["Install"]
+  args = "test"
 }
