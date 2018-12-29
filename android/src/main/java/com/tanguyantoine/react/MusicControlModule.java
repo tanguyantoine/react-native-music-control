@@ -38,6 +38,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class MusicControlModule extends ReactContextBaseJavaModule implements ComponentCallbacks2 {
@@ -140,7 +141,10 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             createChannel(context);
         }
         nb = new NotificationCompat.Builder(context, CHANNEL_ID);
-        nb.setStyle(new MediaStyle().setMediaSession(session.getSessionToken()));
+
+        if (!(Build.MANUFACTURER.toLowerCase(Locale.getDefault()).contains("huawei") && Build.VERSION.SDK_INT < Build.VERSION_CODES.M)) {
+            nb.setStyle(new MediaStyle().setMediaSession(session.getSessionToken()));
+        }
 
         state = pb.build();
 
