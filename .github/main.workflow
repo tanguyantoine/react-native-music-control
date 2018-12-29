@@ -2,7 +2,7 @@ workflow "Build, Test, and Publish" {
   on = "push"
   resolves = [
     "Publish",
-    "new-action",
+    "run tests",
   ]
 }
 
@@ -22,22 +22,21 @@ action "Filter release tag" {
   args = "tag release-*"
 }
 
-action "GitHub Action for npm" {
+action "install" {
   uses = "actions/npm@e7aaefe"
   needs = ["Filter release tag"]
   args = "install"
 }
 
-action "GitHub Action for npm-1" {
+action "run tests" {
   uses = "actions/npm@e7aaefe"
-  needs = ["GitHub Action for npm"]
   args = "test"
+  needs = ["install"]
 }
 
-action "new-action" {
-  uses = "owner/repo/path@ref"
-  needs = ["GitHub Action for npm-1"]
-}//action "Publish" {
+//action "Publish" {
+
+
 //  needs = "Test"
 //  uses = "actions/npm@master"
 //  args = "publish --access public"
