@@ -1,5 +1,5 @@
 workflow "Build, Test, and Publish" {
-  on = "push"
+  on = "release"
   resolves = [
     "Filter release tag",
     "Install",
