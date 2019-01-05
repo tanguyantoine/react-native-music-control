@@ -10,7 +10,7 @@ workflow "Build, Test, and Publish" {
 
 action "Filter release tag" {
   uses = "actions/bin/filter@b2bea07"
-  args = "branch release-*"
+  args = "tag release-*"
 }
 
 action "Install" {
