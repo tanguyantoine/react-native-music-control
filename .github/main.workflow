@@ -14,20 +14,23 @@ action "Filter release tag" {
 }
 
 action "Install" {
-  uses = "actions/npm@e7aaefe"
+  uses = "docker://node:10"
   needs = ["Filter release tag"]
+  runs = "yarn"
   args = "install"
 }
 
 action "Test" {
-  uses = "actions/npm@e7aaefe"
+  uses = "docker://node:10"
+  runs = "yarn"
   args = "test"
   needs = ["Install"]
 }
 
 action "Release" {
-  uses = "actions/npm@e7aaefe"
+  uses = "docker://node:10"
   needs = ["Test", "Install"]
-  args = "run semantic-release"
+  runs = "yarn"
+  args = "semantic-release"
   secrets = ["GITHUB_TOKEN", "NPM_TOKEN", "NPM_AUTH_TOKEN"]
 }
