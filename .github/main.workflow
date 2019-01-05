@@ -34,6 +34,6 @@ action "Release" {
   uses = "docker://node:10"
   needs = ["Test", "Install"]
   runs = "yarn"
-  args = "semantic-release"
+  args = "semantic-release:ci"
   secrets = ["GITHUB_TOKEN", "NPM_TOKEN", "NPM_AUTH_TOKEN"]
 }
