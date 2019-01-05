@@ -11,6 +11,7 @@ workflow "Build, Test, and Publish" {
 action "Filter release tag" {
   uses = "actions/bin/filter@b2bea07"
   args = "tag release-*"
+  secrets = ["GITHUB_TOKEN"]
 }
 
 action "Install" {
@@ -18,6 +19,7 @@ action "Install" {
   needs = ["Filter release tag"]
   runs = "yarn"
   args = "install"
+  secrets = ["GITHUB_TOKEN"]
 }
 
 action "Test" {
@@ -25,6 +27,7 @@ action "Test" {
   runs = "yarn"
   args = "test"
   needs = ["Install"]
+  secrets = ["GITHUB_TOKEN"]
 }
 
 action "Release" {
