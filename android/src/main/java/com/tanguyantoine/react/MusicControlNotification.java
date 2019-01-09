@@ -202,6 +202,9 @@ public class MusicControlNotification {
             if(MusicControlModule.INSTANCE != null) {
                 MusicControlModule.INSTANCE.destroy();
             }
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                stopForeground(true);
+            }
             stopSelf(); // Stop the service as we won't need it anymore
         }
 
