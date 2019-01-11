@@ -182,16 +182,6 @@ public class MusicControlNotification {
         }
 
         @Override
-        public void onCreate() {
-            super.onCreate();
-
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Notification notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb,false);
-                startForeground(NOTIFICATION_ID, notification);
-            }
-        }
-
-        @Override
         public int onStartCommand(Intent intent, int flags, int startId) {
             return START_NOT_STICKY;
         }
@@ -201,9 +191,6 @@ public class MusicControlNotification {
             // Destroy the notification and sessions when the task is removed (closed, killed, etc)
             if(MusicControlModule.INSTANCE != null) {
                 MusicControlModule.INSTANCE.destroy();
-            }
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                stopForeground(true);
             }
             stopSelf(); // Stop the service as we won't need it anymore
         }

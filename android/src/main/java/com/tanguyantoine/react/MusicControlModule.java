@@ -161,12 +161,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         Intent myIntent = new Intent(context, MusicControlNotification.NotificationService.class);
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            context.startForegroundService(myIntent);
-
-        }
-        else
-            context.startService(myIntent);
+        context.startService(myIntent);
 
         context.registerComponentCallbacks(this);
 
