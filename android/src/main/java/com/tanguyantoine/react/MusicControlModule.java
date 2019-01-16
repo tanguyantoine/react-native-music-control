@@ -1,6 +1,6 @@
-package com.tanguyantoine.react;
+package com.lockscreen;
 
-import android.app.Notification;
+
 import android.app.NotificationManager;
 import android.app.NotificationChannel;
 import android.content.ComponentCallbacks2;
@@ -8,13 +8,11 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
+import android.os.AsyncTask;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
@@ -23,23 +21,21 @@ import android.support.v4.media.RatingCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.media.app.NotificationCompat.MediaStyle;
+import android.text.TextUtils;
 import android.util.Log;
+
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
-import com.facebook.react.packagerconnection.NotificationOnlyHandler;
-import com.facebook.react.views.imagehelper.ResourceDrawableIdHelper;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
+import com.bumptech.glide.Glide;
 
 public class MusicControlModule extends ReactContextBaseJavaModule implements ComponentCallbacks2 {
     private static final String TAG = MusicControlModule.class.getSimpleName();
@@ -59,8 +55,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     private MusicControlListener.VolumeListener volume;
     private MusicControlReceiver receiver;
 
-    private Thread artworkThread;
-
     public ReactApplicationContext context;
 
     private boolean remoteVolume = false;
@@ -73,6 +67,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     public static final String CHANNEL_ID = "react-native-music-control";
 
     public static final int NOTIFICATION_ID = 100;
+    private Bitmap theBitmap = null;
 
     public MusicControlModule(ReactApplicationContext context) {
         super(context);
@@ -164,9 +159,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             context.startForegroundService(myIntent);
 
-        }
-        else
+        } else {
             context.startService(myIntent);
+        }
 
         context.registerComponentCallbacks(this);
 
@@ -181,16 +176,13 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         if (notification != null)
             notification.hide();
-        session.release();
+        if (session != null)
+            session.release();
 
         ReactApplicationContext context = getReactApplicationContext();
 
         context.unregisterReceiver(receiver);
         context.unregisterComponentCallbacks(this);
-
-        if (artworkThread != null && artworkThread.isAlive())
-            artworkThread.interrupt();
-        artworkThread = null;
 
         session = null;
         notification = null;
@@ -216,7 +208,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     @ReactMethod
     synchronized public void setNowPlaying(ReadableMap metadata) {
         init();
-        if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
 
         String title = metadata.hasKey("title") ? metadata.getString("title") : null;
         String artist = metadata.hasKey("artist") ? metadata.getString("artist") : null;
@@ -263,39 +254,59 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         notification.setCustomNotificationIcon(notificationIcon);
 
-        if(metadata.hasKey("artwork")) {
+        if( (metadata.hasKey("artwork") && !TextUtils.isEmpty(metadata.getString("artwork")))
+                || getCurrentActivity() != null && !getCurrentActivity().isFinishing()) {
             String artwork = null;
-            boolean localArtwork = false;
 
             if(metadata.getType("artwork") == ReadableType.Map) {
                 artwork = metadata.getMap("artwork").getString("uri");
-                localArtwork = true;
             } else {
                 artwork = metadata.getString("artwork");
             }
 
             final String artworkUrl = artwork;
-            final boolean artworkLocal = localArtwork;
-
-            artworkThread = new Thread(new Runnable() {
+            Log.d(TAG,"artworkUrl = " + artworkUrl);
+            new AsyncTask<Void, Void, Void>() {
                 @Override
-                public void run() {
-                    Bitmap bitmap = loadArtwork(artworkUrl, artworkLocal);
-
-                    if(md != null) {
-                        md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap);
-                        session.setMetadata(md.build());
+                protected Void doInBackground(Void... params) {
+                    // Looper.prepare();
+                    if (Looper.myLooper() == null)
+                    {
+                        Looper.prepare();
                     }
-                    if(nb != null) {
-                        nb.setLargeIcon(bitmap);
-                        notification.show(nb, isPlaying);
+                    try {
+                        theBitmap = Glide.with(getCurrentActivity())
+                                .asBitmap()
+                                .load(artworkUrl)
+                                .submit(1024,597)
+                                .get();
+                    } catch (final ExecutionException e) {
+                        Log.e(TAG, e.getMessage());
+                    } catch (final InterruptedException e) {
+                        Log.e(TAG, e.getMessage());
                     }
-
-                    artworkThread = null;
+                    return null;
                 }
-            });
-            artworkThread.start();
+                @Override
+                protected void onPostExecute(Void dummy) {
+                    if (null != theBitmap) {
+                        // The full bitmap should be available here
+                        // image.setImageBitmap(theBitmap);
+                        Log.d(TAG, "Image loaded");
+
+                        if (md != null) {
+                            md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, theBitmap);
+                            // session.setMetadata(md.build());
+                        }
+                        if (nb != null) {
+                            nb.setLargeIcon(theBitmap);
+                            notification.show(nb, isPlaying);
+                        }
+                    };
+                }
+            }.execute();
         } else {
+            Log.d(TAG,"to set color..");
             md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, null);
             nb.setLargeIcon(null);
         }
@@ -348,8 +359,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     @ReactMethod
     synchronized public void resetNowPlaying() {
         if(!init) return;
-        if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
-        artworkThread = null;
 
         md = new MediaMetadataCompat.Builder();
 
@@ -442,40 +451,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         session.setPlaybackState(state);
     }
 
-    private Bitmap loadArtwork(String url, boolean local) {
-        Bitmap bitmap = null;
-
-        try {
-            // If we are running the app in debug mode, the "local" image will be served from htt://localhost:8080, so we need to check for this case and load those images from URL
-            if(local && !url.startsWith("http")) {
-
-                // Gets the drawable from the RN's helper for local resources
-                ResourceDrawableIdHelper helper = ResourceDrawableIdHelper.getInstance();
-                Drawable image = helper.getResourceDrawable(getReactApplicationContext(), url);
-
-                if(image instanceof BitmapDrawable) {
-                    bitmap = ((BitmapDrawable)image).getBitmap();
-                } else {
-                    bitmap = BitmapFactory.decodeFile(url);
-                }
-
-            } else {
-
-                // Open connection to the URL and decodes the image
-                URLConnection con = new URL(url).openConnection();
-                con.connect();
-                InputStream input = con.getInputStream();
-                bitmap = BitmapFactory.decodeStream(input);
-                input.close();
-
-            }
-        } catch(IOException ex) {
-            Log.w(TAG, "Could not load the artwork", ex);
-        }
-
-        return bitmap;
-    }
-
     @Override
     public void onTrimMemory(int level) {
         switch(level) {
@@ -488,7 +463,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
 
-                Log.w(TAG, "Control resources are being removed due to system's low memory (Level: " + level + ")");
+                Log.e(TAG, "Control resources are being removed due to system's low memory (Level: " + level + ")");
                 destroy();
                 break;
         }
@@ -501,7 +476,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
     @Override
     public void onLowMemory() {
-        Log.w(TAG, "Control resources are being removed due to system's low memory (Level: MEMORY_COMPLETE)");
+        Log.e(TAG, "Control resources are being removed due to system's low memory (Level: MEMORY_COMPLETE)");
         destroy();
     }
 
