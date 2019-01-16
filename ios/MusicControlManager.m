@@ -15,6 +15,10 @@
 
 #define MEDIA_STATE_PLAYING @"STATE_PLAYING"
 #define MEDIA_STATE_PAUSED @"STATE_PAUSED"
+#define MEDIA_STATE_STOPPED @"STATE_STOPPED"
+#define MEDIA_STATE_ERROR @"STATE_ERROR"
+#define MEDIA_STATE_BUFFERING @"STATE_BUFFERING"
+#define MEDIA_STATE_RATING_PERCENTAGE @"STATE_RATING_PERCENTAGE"
 #define MEDIA_SPEED @"speed"
 #define MEDIA_STATE @"state"
 #define MEDIA_DICT @{@"album": MPMediaItemPropertyAlbumTitle, \
@@ -46,7 +50,11 @@ RCT_EXPORT_MODULE()
 {
     return @{
         @"STATE_PLAYING": MEDIA_STATE_PLAYING,
-        @"STATE_PAUSED": MEDIA_STATE_PAUSED
+        @"STATE_PAUSED": MEDIA_STATE_PAUSED,
+        @"STATE_STOPPED" : MEDIA_STATE_STOPPED,
+        @"STATE_ERROR" :MEDIA_STATE_ERROR,
+        @"STATE_BUFFERING":MEDIA_STATE_BUFFERING,
+        @"STATE_RATING_PERCENTAGE":MEDIA_STATE_RATING_PERCENTAGE,
     };
 }
 
@@ -74,16 +82,17 @@ RCT_EXPORT_METHOD(updatePlayback:(NSDictionary *) originalDetails)
 
         [details setValue:speed forKey:MEDIA_SPEED];
     }
+    if ([[details objectForKey:MEDIA_STATE] isEqual:MEDIA_STATE_STOPPED]) {
+        MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
+        [self toggleHandler:remoteCenter.stopCommand withSelector:@selector(onStop:) enabled:false];
+    }
 
     NSMutableDictionary *mediaDict = [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo];
 
     center.nowPlayingInfo = [self update:mediaDict with:details andSetDefaults:false];
 
-
-    if ([details objectForKey:@"artwork"] != self.artworkUrl) {
-        [self updateArtworkIfNeeded:[details objectForKey:@"artwork"]];
-    }
-
+    NSString *artworkUrl = [self getArtworkUrl:[originalDetails objectForKey:@"artwork"]];
+    [self updateArtworkIfNeeded:artworkUrl];
 }
 
 
@@ -95,7 +104,8 @@ RCT_EXPORT_METHOD(setNowPlaying:(NSDictionary *) details)
 
     center.nowPlayingInfo = [self update:mediaDict with:details andSetDefaults:true];
 
-  [self updateArtworkIfNeeded:[details objectForKey:@"artwork"]];
+    NSString *artworkUrl = [self getArtworkUrl:[details objectForKey:@"artwork"]];
+    [self updateArtworkIfNeeded:artworkUrl];
 }
 
 RCT_EXPORT_METHOD(resetNowPlaying)
@@ -264,68 +274,86 @@ RCT_EXPORT_METHOD(observeAudioInterruptions:(BOOL) observe){
                        body:@{@"name": event}];
 }
 
+- (NSString*)getArtworkUrl:(NSString*)artwork {
+  NSString *artworkUrl = nil;
+
+  if (artwork) {
+      if ([artwork isKindOfClass:[NSString class]]) {
+           artworkUrl = artwork;
+      } else if ([[artwork valueForKey: @"uri"] isKindOfClass:[NSString class]]) {
+           artworkUrl = [artwork valueForKey: @"uri"];
+      }
+  }
+
+  return artworkUrl;
+}
+
 - (void)sendEventWithValue:(NSString*)event withValue:(NSString*)value{
    [self sendEventWithName:@"RNMusicControlEvent" body:@{@"name": event, @"value":value}];
 }
 
-- (void)updateArtworkIfNeeded:(id)artwork
+- (void)updateArtworkIfNeeded:(id)artworkUrl
 {
-    NSString *url = nil;
-    if (artwork) {
-        if ([artwork isKindOfClass:[NSString class]]) {
-             url = artwork;
-        } else if ([[artwork valueForKey: @"uri"] isKindOfClass:[NSString class]]) {
-             url = [artwork valueForKey: @"uri"];
-        }
+    if( artworkUrl == nil ) {
+        return;
     }
 
-    if (url != nil) {
-        self.artworkUrl = url;
+    MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
+    if ([artworkUrl isEqualToString:self.artworkUrl] && [center.nowPlayingInfo objectForKey:MPMediaItemPropertyArtwork] != nil) {
+        return;
+    }
 
-        // Custom handling of artwork in another thread, will be loaded async
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-            UIImage *image = nil;
+    self.artworkUrl = artworkUrl;
 
-            // check whether artwork path is present
-            if (![url isEqual: @""]) {
-                // artwork is url download from the interwebs
-                if ([url hasPrefix: @"http://"] || [url hasPrefix: @"https://"]) {
-                    NSURL *imageURL = [NSURL URLWithString:url];
-                    NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
-                    image = [UIImage imageWithData:imageData];
-                } else {
-                    // artwork is local. so create it from a UIImage
-                    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:url];
-                    if (fileExists) {
-                        image = [UIImage imageNamed:url];
-                    }
-                }
+    // Custom handling of artwork in another thread, will be loaded async
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        UIImage *image = nil;
+
+        // check whether artwork path is present
+        if ([artworkUrl isEqual: @""]) {
+            return;
+        }
+
+        // artwork is url download from the interwebs
+        if ([artworkUrl hasPrefix: @"http://"] || [artworkUrl hasPrefix: @"https://"]) {
+            NSURL *imageURL = [NSURL URLWithString:artworkUrl];
+            NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
+            image = [UIImage imageWithData:imageData];
+        } else {
+            NSString *localArtworkUrl = [artworkUrl stringByReplacingOccurrencesOfString:@"file://" withString:@""];
+            BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:localArtworkUrl];
+            if (fileExists) {
+                image = [UIImage imageNamed:localArtworkUrl];
             }
+        }
 
-            // Check if image was available otherwise don't do anything
-            if (image == nil) {
+        // Check if image was available otherwise don't do anything
+        if (image == nil) {
+            return;
+        }
+
+        // check whether image is loaded
+        CGImageRef cgref = [image CGImage];
+        CIImage *cim = [image CIImage];
+
+        if (cim == nil && cgref == NULL) {
+            return;
+        }
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+
+            // Check if URL wasn't changed in the meantime
+            if (![artworkUrl isEqual:self.artworkUrl]) {
                 return;
             }
 
-            // check whether image is loaded
-            CGImageRef cgref = [image CGImage];
-            CIImage *cim = [image CIImage];
-
-            if (cim != nil || cgref != NULL) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-
-                    // Check if URL wasn't changed in the meantime
-                    if ([url isEqual:self.artworkUrl]) {
-                        MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
-                        MPMediaItemArtwork *artwork = [[MPMediaItemArtwork alloc] initWithImage: image];
-                        NSMutableDictionary *mediaDict = (center.nowPlayingInfo != nil) ? [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo] : [NSMutableDictionary dictionary];
-                        [mediaDict setValue:artwork forKey:MPMediaItemPropertyArtwork];
-                        center.nowPlayingInfo = mediaDict;
-                    }
-                });
-            }
+            MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
+            MPMediaItemArtwork *artwork = [[MPMediaItemArtwork alloc] initWithImage: image];
+            NSMutableDictionary *mediaDict = (center.nowPlayingInfo != nil) ? [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo] : [NSMutableDictionary dictionary];
+            [mediaDict setValue:artwork forKey:MPMediaItemPropertyArtwork];
+            center.nowPlayingInfo = mediaDict;
         });
-    }
+    });
 }
 
 - (void)audioHardwareRouteChanged:(NSNotification *)notification {
