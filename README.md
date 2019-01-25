@@ -47,6 +47,8 @@ In the Project Navigator, select your project. Click the build target. Click Bui
 
 `pod 'react-native-music-control', :path => '../node_modules/react-native-music-control'`
 
+Run `pod install` in /ios folder.
+
 
 ## Android
 
