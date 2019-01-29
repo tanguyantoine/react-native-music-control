@@ -370,8 +370,9 @@ RCT_EXPORT_METHOD(observeAudioInterruptions:(BOOL) observe){
     }
     NSInteger interruptionType = [notification.userInfo[AVAudioSessionInterruptionTypeKey] integerValue];
     NSInteger interruptionOption = [notification.userInfo[AVAudioSessionInterruptionOptionKey] integerValue];
-
-    if (interruptionType == AVAudioSessionInterruptionTypeBegan) {
+    bool delayedSuspendedNotification = (@available(iOS 10.0, *)) && [notification.userInfo[AVAudioSessionInterruptionWasSuspendedKey] boolValue];
+    
+    if (interruptionType == AVAudioSessionInterruptionTypeBegan && !delayedSuspendedNotification) {
         // Playback interrupted by an incoming phone call.
         [self sendEvent:@"pause"];
     }
