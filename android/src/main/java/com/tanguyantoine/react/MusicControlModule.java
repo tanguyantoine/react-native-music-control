@@ -141,13 +141,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             createChannel(context);
         }
         nb = new NotificationCompat.Builder(context, CHANNEL_ID);
-        nb.setVisibility(Notification.VISIBILITY_PUBLIC);
 
         if (!(Build.MANUFACTURER.toLowerCase(Locale.getDefault()).contains("huawei") && Build.VERSION.SDK_INT < Build.VERSION_CODES.M)) {
-            MediaStyle style = new MediaStyle();
-            style.setMediaSession(session.getSessionToken());
-            style.setShowActionsInCompactView(new int[]{0,1,2});
-            nb.setStyle(style);
+            nb.setStyle(new MediaStyle().setMediaSession(session.getSessionToken()));
         }
 
         state = pb.build();
