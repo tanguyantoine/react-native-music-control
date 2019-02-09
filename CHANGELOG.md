@@ -1,3 +1,10 @@
+## [0.9.9](https://github.com/tanguyantoine/react-native-music-control/compare/v0.9.8...v0.9.9) (2019-02-09)
+
+
+### Bug Fixes
+
+* bump version ([c0c7754](https://github.com/tanguyantoine/react-native-music-control/commit/c0c7754))
+
 ## [0.9.8](https://github.com/tanguyantoine/react-native-music-control/compare/v0.9.7...v0.9.8) (2019-02-01)
 
 
