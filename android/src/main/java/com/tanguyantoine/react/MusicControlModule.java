@@ -112,6 +112,36 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         mNotificationManager.createNotificationChannel(mChannel);
     }
 
+    private boolean hasControl(long control) {
+        if((controls & control) == control) {
+            return true;
+        }
+        return false;
+    }
+
+    private void updateNotificationMediaStyle() {
+        if (!(Build.MANUFACTURER.toLowerCase(Locale.getDefault()).contains("huawei") && Build.VERSION.SDK_INT < Build.VERSION_CODES.M)) {
+            MediaStyle style = new MediaStyle();
+            style.setMediaSession(session.getSessionToken());
+            int controlCount = 0;
+            if(hasControl(PlaybackStateCompat.ACTION_PLAY) || hasControl(PlaybackStateCompat.ACTION_PAUSE) || hasControl(PlaybackStateCompat.ACTION_PLAY_PAUSE)) {
+                controlCount += 1;
+            }
+            if(hasControl(PlaybackStateCompat.ACTION_SKIP_TO_NEXT)) {
+                controlCount += 1;
+            }
+            if(hasControl(PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)) {
+                controlCount += 1;
+            }
+            int[] actions = new int[controlCount];
+            for(int i=0; i<actions.length; i++) {
+                actions[i] = i;
+            }
+            style.setShowActionsInCompactView(actions);
+            nb.setStyle(style);
+        }
+    }
+
     public void init() {
         if (init) return;
 
@@ -143,12 +173,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         nb = new NotificationCompat.Builder(context, CHANNEL_ID);
         nb.setVisibility(Notification.VISIBILITY_PUBLIC);
 
-        if (!(Build.MANUFACTURER.toLowerCase(Locale.getDefault()).contains("huawei") && Build.VERSION.SDK_INT < Build.VERSION_CODES.M)) {
-            MediaStyle style = new MediaStyle();
-            style.setMediaSession(session.getSessionToken());
-            style.setShowActionsInCompactView(new int[]{0,1,2});
-            nb.setStyle(style);
-        }
+        updateNotificationMediaStyle();
 
         state = pb.build();
 
@@ -444,6 +469,12 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         state = pb.build();
         session.setPlaybackState(state);
+
+        updateNotificationMediaStyle();
+
+        if(session.isActive()) {
+            notification.show(nb, isPlaying);
+        }
     }
 
     private Bitmap loadArtwork(String url, boolean local) {
