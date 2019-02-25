@@ -35,6 +35,6 @@ repositories {
 }
 
 dependencies {
-    compileOnly "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
+    compileOnly 'com.facebook.react:react-native:+'
     implementation "com.android.support:support-media-compat:${safeExtGet('supportLibVersion', '26.+')}"
 }
