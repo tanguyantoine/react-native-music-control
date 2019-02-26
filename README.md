@@ -273,6 +273,7 @@ componentDidMount() {
     MusicControl.enableBackgroundMode(true);
 
     // on iOS, pause playback during audio interruptions (incoming calls) and resume afterwards.
+    // As of {{ INSERT NEXT VERSION HERE}} works for android aswell.
     MusicControl.handleAudioInterruptions(true);
 
     MusicControl.on('play', ()=> {

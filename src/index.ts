@@ -88,12 +88,8 @@ const MusicControl = {
     })
     NativeMusicControl.stopControl()
   },
-  handleAudioInterruptions: function(enable: boolean): void {
-    if (IS_ANDROID) {
-      console.log('Audio interruption handling not implemented for Android')
-    } else {
-      NativeMusicControl.observeAudioInterruptions(enable)
-    }
+  handleAudioInterruptions: function(enable: boolean): void {    
+    NativeMusicControl.observeAudioInterruptions(enable)
   }
 }
 
