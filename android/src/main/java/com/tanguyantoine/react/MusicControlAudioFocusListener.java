@@ -29,10 +29,10 @@ public class MusicControlAudioFocusListener implements AudioManager.OnAudioFocus
         } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
             emitter.onPause();
         } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
-            volume.setCurrentVolume(4);
+            volume.setCurrentVolume(40);
         } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
-            if (volume.getCurrentVolume() != 10) {
-                volume.setCurrentVolume(10);
+            if (volume.getCurrentVolume() != 100) {
+                volume.setCurrentVolume(100);
             }
             emitter.onPlay();
         }
