@@ -72,17 +72,18 @@ RCT_EXPORT_METHOD(updatePlayback:(NSDictionary *) originalDetails)
     }
 
     NSMutableDictionary *details = [originalDetails mutableCopy];
+    NSString *state = [details objectForKey:MEDIA_STATE];
 
     // Set the playback rate from the state if no speed has been defined
     // If they provide the speed, then use it
-    if ([details objectForKey:MEDIA_STATE] != nil && [details objectForKey:MEDIA_SPEED] == nil) {
-        NSNumber *speed = [[details objectForKey:MEDIA_STATE] isEqual:MEDIA_STATE_PAUSED]
+    if (state != nil && [details objectForKey:MEDIA_SPEED] == nil) {
+        NSNumber *speed = [state isEqual:MEDIA_STATE_PAUSED]
         ? [NSNumber numberWithDouble:0]
         : [NSNumber numberWithDouble:1];
 
         [details setValue:speed forKey:MEDIA_SPEED];
     }
-    if ([[details objectForKey:MEDIA_STATE] isEqual:MEDIA_STATE_STOPPED]) {
+    if ([state isEqual:MEDIA_STATE_STOPPED]) {
         MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
         [self toggleHandler:remoteCenter.stopCommand withSelector:@selector(onStop:) enabled:false];
     }
@@ -90,6 +91,17 @@ RCT_EXPORT_METHOD(updatePlayback:(NSDictionary *) originalDetails)
     NSMutableDictionary *mediaDict = [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo];
 
     center.nowPlayingInfo = [self update:mediaDict with:details andSetDefaults:false];
+
+    // Playback state is separated in 11+
+    if (@available(iOS 11.0, *)) {
+        if ([state isEqual:MEDIA_STATE_PLAYING]) {
+            center.playbackState = MPNowPlayingPlaybackStatePlaying;
+        } else if ([state isEqual:MEDIA_STATE_PAUSED]) {
+            center.playbackState = MPNowPlayingPlaybackStatePaused;
+        } else if ([state isEqual:MEDIA_STATE_STOPPED]) {
+            center.playbackState = MPNowPlayingPlaybackStateStopped;
+        }
+    }
 
     NSString *artworkUrl = [self getArtworkUrl:[originalDetails objectForKey:@"artwork"]];
     [self updateArtworkIfNeeded:artworkUrl];
@@ -371,7 +383,7 @@ RCT_EXPORT_METHOD(observeAudioInterruptions:(BOOL) observe){
     NSInteger interruptionType = [notification.userInfo[AVAudioSessionInterruptionTypeKey] integerValue];
     NSInteger interruptionOption = [notification.userInfo[AVAudioSessionInterruptionOptionKey] integerValue];
     bool delayedSuspendedNotification = (@available(iOS 10.0, *)) && [notification.userInfo[AVAudioSessionInterruptionWasSuspendedKey] boolValue];
-    
+
     if (interruptionType == AVAudioSessionInterruptionTypeBegan && !delayedSuspendedNotification) {
         // Playback interrupted by an incoming phone call.
         [self sendEvent:@"pause"];
