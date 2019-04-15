@@ -14,5 +14,6 @@ export enum Command {
   disableLanguageOption = 'disableLanguageOption',
   skipForward = 'skipForward',
   skipBackward = 'skipBackward',
+  changePlaybackPosition = 'changePlaybackPosition',
   closeNotification = 'closeNotification'
 }
