@@ -229,6 +229,7 @@ RCT_EXPORT_METHOD(observeAudioInterruptions:(BOOL) observe){
 - (id)init {
     self = [super init];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioHardwareRouteChanged:) name:AVAudioSessionRouteChangeNotification object:nil];
+    [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
     self.audioInterruptionsObserved = false;
     return self;
 }
