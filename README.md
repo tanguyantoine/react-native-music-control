@@ -11,7 +11,7 @@ Plays well with [React Native Sound](https://github.com/zmxv/react-native-sound)
 	- [Linking on Android](#linking-on-android) 
 	- [Troubleshooting](#troubleshooting) 
 - [Usage](#Usage)
-	- [Enable / Disable Controls](#enable/disable-controls)
+	- [Enable and Disable Controls](#enable-and-disable-controls)
 	- [Now Playing](#now-playing)
 	- [Update Playback](#update-playback)
 	- [Reset Now Playing](#reset-now-playing)
@@ -39,7 +39,7 @@ Plays well with [React Native Sound](https://github.com/zmxv/react-native-sound)
 
 - - - -
 
-#Installation Process
+# Installation Process
 
 1. **Add it to your project**
 
@@ -155,13 +155,13 @@ To solve this, issue just copy this line at the end of your application build.gr
 
 - - - -
 
-#Usage
+# Usage
 
 ```javascript
 import MusicControl from 'react-native-music-control';
 ```
 
-### Enable/disable controls
+### Enable and Disable controls
 
 **iOS**: Lockscreen
 
@@ -362,7 +362,7 @@ componentDidMount() {
 
 - - - -
 
-#Important Notes
+# Important Notes
 
 * Android only supports the intervals 5, 10, & 30, while iOS supports any number
 * The interval value only changes what number displays in the UI, the actual logic to skip forward or backward by a given amount must be implemented in the appropriate callbacks
@@ -378,7 +378,7 @@ MusicControl.on('play', () => {
 
 - - - -
 
-#Customization
+# Customization
 
 It is possible to customize the icon used in the notification on Android. By default you can add a drawable resource to your package with the file name `music_control_icon` and the notification will use your custom icon. If you need to specify a custom icon name, or change your notification icon during runtime, the `setNowPlaying` function accepts a string for an Android drawable resource name in the `notificationIcon` prop. Keep in mind that just like with `music_control_icon` the resource specified has to be in the drawable package of your Android app.
 
@@ -386,7 +386,7 @@ It is possible to customize the icon used in the notification on Android. By def
   MusicControl.setCustomNotificationIcon('my_custom_icon');
 ```
 
-#TODOs
+# TODOs
 
 - [x] Android support
 - [ ] Test
@@ -397,6 +397,6 @@ It is possible to customize the icon used in the notification on Android. By def
 - [x] Android : Display cover artwork
 
 
-#Contributing
+# Contributing
 
 ### Of coursssssseeeeee. I'm waiting your PR :)
