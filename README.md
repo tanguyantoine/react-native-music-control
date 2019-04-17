@@ -6,7 +6,7 @@ Plays well with [React Native Sound](https://github.com/zmxv/react-native-sound)
 
 - - - -
 
-- [Installation Process](#Install)
+- [Installation Process](#installation-process)
 	- [Linking on iOS](#linking-on-ios) 
 	- [Linking on Android](#linking-on-android) 
 	- [Troubleshooting](#troubleshooting) 
