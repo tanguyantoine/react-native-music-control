@@ -1,3 +1,10 @@
+# [0.10.0](https://github.com/tanguyantoine/react-native-music-control/compare/v0.9.9...v0.10.0) (2019-04-25)
+
+
+### Features
+
+* Android interuption ([#240](https://github.com/tanguyantoine/react-native-music-control/issues/240)) ([7c5fe92](https://github.com/tanguyantoine/react-native-music-control/commit/7c5fe92))
+
 ## [0.9.9](https://github.com/tanguyantoine/react-native-music-control/compare/v0.9.8...v0.9.9) (2019-02-09)
 
 
