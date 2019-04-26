@@ -208,6 +208,11 @@ public class MusicControlNotification {
             stopSelf(); // Stop the service as we won't need it anymore
         }
 
+        @Override
+        public void onDestroy() {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                stopForeground(true);
+            }
+        }
     }
-
 }
