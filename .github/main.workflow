@@ -36,4 +36,7 @@ action "Release" {
   runs = "yarn"
   args = "semantic-release:ci"
   secrets = ["GITHUB_TOKEN", "NPM_TOKEN", "NPM_AUTH_TOKEN"]
+  env = {
+    npm_config_unsafe_perm = "true"
+  }
 }
