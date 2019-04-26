@@ -1,3 +1,10 @@
+## [0.10.1](https://github.com/tanguyantoine/react-native-music-control/compare/v0.10.0...v0.10.1) (2019-04-26)
+
+
+### Bug Fixes
+
+* do no skip prepack script ([51a2532](https://github.com/tanguyantoine/react-native-music-control/commit/51a2532))
+
 # [0.10.0](https://github.com/tanguyantoine/react-native-music-control/compare/v0.9.9...v0.10.0) (2019-04-25)
 
 
