@@ -1,3 +1,11 @@
+## [0.10.2](https://github.com/tanguyantoine/react-native-music-control/compare/v0.10.1...v0.10.2) (2019-04-26)
+
+
+### Bug Fixes
+
+* **ios:** call beginReceivingRemoteControlEvents ([442b77b](https://github.com/tanguyantoine/react-native-music-control/commit/442b77b))
+* **ios:** update playback state using :setPlaybackState in iOS 11+ ([b2b1acc](https://github.com/tanguyantoine/react-native-music-control/commit/b2b1acc)), closes [#242](https://github.com/tanguyantoine/react-native-music-control/issues/242)
+
 ## [0.10.1](https://github.com/tanguyantoine/react-native-music-control/compare/v0.10.0...v0.10.1) (2019-04-26)
 
 
