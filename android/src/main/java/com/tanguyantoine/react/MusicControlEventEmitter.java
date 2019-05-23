@@ -1,5 +1,9 @@
 package com.tanguyantoine.react;
 
+import android.content.Intent;
+import android.os.Build;
+import android.support.v4.content.ContextCompat;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
@@ -11,13 +15,13 @@ public class MusicControlEventEmitter {
         WritableMap data = Arguments.createMap();
         data.putString("name", type);
 
-        if(value != null) {
-            if(value instanceof Double || value instanceof Float) {
-                data.putDouble("value", (double)value);
-            } else if(value instanceof Boolean) {
-                data.putBoolean("value", (boolean)value);
-            } else if(value instanceof Integer) {
-                data.putInt("value", (int)value);
+        if (value != null) {
+            if (value instanceof Double || value instanceof Float) {
+                data.putDouble("value", (double) value);
+            } else if (value instanceof Boolean) {
+                data.putBoolean("value", (boolean) value);
+            } else if (value instanceof Integer) {
+                data.putInt("value", (int) value);
             }
         }
 
@@ -35,6 +39,7 @@ public class MusicControlEventEmitter {
     }
 
     public void onPause() {
+        stopForegroundService();
         sendEvent(context, "pause", null);
     }
 
@@ -63,11 +68,22 @@ public class MusicControlEventEmitter {
     }
 
     public void onSetRating(float rating) {
-        sendEvent(context,"setRating", rating);
-    }
-    public void onSetRating(boolean hasHeartOrThumb) {
-        sendEvent(context,"setRating", hasHeartOrThumb);
+        sendEvent(context, "setRating", rating);
     }
 
-    public void onVolumeChange(int volume) { sendEvent(context, "volume", volume); }
+    public void onSetRating(boolean hasHeartOrThumb) {
+        sendEvent(context, "setRating", hasHeartOrThumb);
+    }
+
+    public void onVolumeChange(int volume) {
+        sendEvent(context, "volume", volume);
+    }
+
+    private void stopForegroundService() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent intent = new Intent(context, MusicControlNotification.NotificationService.class);
+            intent.setAction("StopService");
+            ContextCompat.startForegroundService(context, intent);
+        }
+    }
 }
