@@ -3,13 +3,13 @@
  */
 
 import { NativeModules, DeviceEventEmitter, NativeEventEmitter, Platform } from 'react-native'
-const NativeMusicControl = NativeModules.MusicControlManager
 // @ts-ignore
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource'
 // @ts-ignore
 import constants from './constants'
 import { Command } from './types'
 
+const NativeMusicControl = NativeModules.MusicControlManager
 let handlers: { [key in Command]?: (value: any) => void } = {}
 let listenerOfNativeMusicControl: any = null
 const IS_ANDROID = Platform.OS === 'android'
@@ -88,7 +88,7 @@ const MusicControl = {
     })
     NativeMusicControl.stopControl()
   },
-  handleAudioInterruptions: function(enable: boolean): void {    
+  handleAudioInterruptions: function(enable: boolean): void {
     NativeMusicControl.observeAudioInterruptions(enable)
   }
 }
