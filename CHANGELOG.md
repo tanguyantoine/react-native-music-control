@@ -1,3 +1,10 @@
+## [0.10.3](https://github.com/tanguyantoine/react-native-music-control/compare/v0.10.2...v0.10.3) (2019-05-23)
+
+
+### Bug Fixes
+
+* move variables around and trigger deploy ([6703bf7](https://github.com/tanguyantoine/react-native-music-control/commit/6703bf7))
+
 ## [0.10.2](https://github.com/tanguyantoine/react-native-music-control/compare/v0.10.1...v0.10.2) (2019-04-26)
 
 
