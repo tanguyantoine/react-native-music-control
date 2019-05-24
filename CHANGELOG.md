@@ -1,3 +1,10 @@
+## [0.10.4](https://github.com/tanguyantoine/react-native-music-control/compare/v0.10.3...v0.10.4) (2019-05-24)
+
+
+### Bug Fixes
+
+* Illegal null AudioFocusRequest exception  ([#261](https://github.com/tanguyantoine/react-native-music-control/issues/261)) ([351a1ab](https://github.com/tanguyantoine/react-native-music-control/commit/351a1ab)), closes [#260](https://github.com/tanguyantoine/react-native-music-control/issues/260)
+
 ## [0.10.3](https://github.com/tanguyantoine/react-native-music-control/compare/v0.10.2...v0.10.3) (2019-05-23)
 
 
