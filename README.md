@@ -88,6 +88,11 @@ Run `pod install` in /ios folder.
 react-native link
 ```
 
+**Add following to your project AndroidManifest.xml**
+```
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+```
+
 ### Manual
 
 **android/app/build.gradle**
@@ -126,6 +131,11 @@ public class MainApplication extends Application implements ReactApplication {
 
     //......
   }
+```
+
+**Add following to your project AndroidManifest.xml**
+```
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 ```
 - - - -
 
