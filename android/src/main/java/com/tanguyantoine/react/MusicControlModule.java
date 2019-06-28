@@ -3,7 +3,6 @@ package com.tanguyantoine.react;
 import android.app.NotificationManager;
 import android.app.NotificationChannel;
 import android.content.ComponentCallbacks2;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Context;
@@ -118,11 +117,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         context = getReactApplicationContext();
 
-        ComponentName compName = new ComponentName(context, MusicControlReceiver.class);
-
         emitter = new MusicControlEventEmitter(context);
 
-        session = new MediaSessionCompat(context, "MusicControl", compName, null);
+        session = new MediaSessionCompat(context, "MusicControl");
         session.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
                 MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
