@@ -179,7 +179,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     @ReactMethod
-    public void stopControl() {
+    public synchronized void stopControl() {
         if (!init)
             return;
 
