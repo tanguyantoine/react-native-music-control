@@ -238,6 +238,13 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         int notificationColor = metadata.hasKey("color") ? metadata.getInt("color") : NotificationCompat.COLOR_DEFAULT;
         String notificationIcon = metadata.hasKey("notificationIcon") ? metadata.getString("notificationIcon") : null;
 
+        // If a color is supplied, we need to clear the MediaStyle set during init().
+        // Otherwise, the color will not be used for the notification's background.
+        boolean removeFade = metadata.hasKey("color");
+        if(removeFade) {
+            nb.setStyle(new MediaStyle());
+        }
+
         RatingCompat rating;
         if(metadata.hasKey("rating")) {
             if(ratingType == RatingCompat.RATING_PERCENTAGE) {
