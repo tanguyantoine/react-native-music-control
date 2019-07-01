@@ -80,9 +80,12 @@ public class MusicControlNotification {
         }
     }
 
-    public Notification prepareNotification(NotificationCompat.Builder builder, boolean isPlaying) {
+    /**
+     * NOTE: Synchronized since the NotificationService called prepare without a re-entrant lock.
+     *       Other call sites (e.g. show/hide in module) are already synchronized.
+     */
+    public synchronized Notification prepareNotification(NotificationCompat.Builder builder, boolean isPlaying) {
         // Add the buttons
-
 
         builder.mActions.clear();
         if (previous != null) builder.addAction(previous);
@@ -226,9 +229,16 @@ public class MusicControlNotification {
         @Override
         public void onDestroy() {
             isRunning = false;
+
+            if (MusicControlModule.INSTANCE != null) {
+                MusicControlModule.INSTANCE.destroy();
+            }
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 stopForeground(true);
             }
+
+            stopSelf();
         }
     }
 }
