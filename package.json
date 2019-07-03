@@ -34,7 +34,6 @@
     "test": "echo 'no tests'",
     "semantic-release:ci": "semantic-release --no-ci"
   },
-  "rnpm": {},
   "devDependencies": {
     "@semantic-release/changelog": "^3.0.2",
     "@semantic-release/git": "^7.0.7",
