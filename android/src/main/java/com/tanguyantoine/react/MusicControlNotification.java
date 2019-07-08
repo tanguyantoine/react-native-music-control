@@ -10,16 +10,16 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.IBinder;
-import android.support.v4.app.NotificationManagerCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v4.app.NotificationCompat;
 import android.view.KeyEvent;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableMap;
 
 import java.util.Map;
 
-import static android.support.v4.app.NotificationCompat.PRIORITY_MIN;
+import static androidx.core.app.NotificationCompat.PRIORITY_MIN;
 import static com.tanguyantoine.react.MusicControlModule.CHANNEL_ID;
 import static com.tanguyantoine.react.MusicControlModule.NOTIFICATION_ID;
 
