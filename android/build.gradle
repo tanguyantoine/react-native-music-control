@@ -40,5 +40,6 @@ repositories {
 
 dependencies {
     compileOnly 'com.facebook.react:react-native:+'
-    implementation "com.android.support:support-media-compat:${safeExtGet('supportLibVersion', '26.+')}"
+    implementation 'androidx.core:core:1.0.2'
+    implementation 'androidx.media:media:1.0.1'
 }
