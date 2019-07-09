@@ -170,7 +170,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             createChannel(context);
         }
         nb = new NotificationCompat.Builder(context, CHANNEL_ID);
-        nb.setVisibility(Notification.VISIBILITY_PUBLIC);
+        nb.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
 
         updateNotificationMediaStyle();
 
