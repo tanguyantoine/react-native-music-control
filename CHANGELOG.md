@@ -1,3 +1,14 @@
+## [0.10.5](https://github.com/tanguyantoine/react-native-music-control/compare/v0.10.4...v0.10.5) (2019-07-10)
+
+
+### Bug Fixes
+
+* **android:** error can't find symbol Notification ([b572320](https://github.com/tanguyantoine/react-native-music-control/commit/b572320))
+* **android:** migrate support libraries to androidx ([260f720](https://github.com/tanguyantoine/react-native-music-control/commit/260f720)), closes [#280](https://github.com/tanguyantoine/react-native-music-control/issues/280)
+* **package.json:** remove unused rnpm object to fix warning in RN 0.60 ([fc48d40](https://github.com/tanguyantoine/react-native-music-control/commit/fc48d40))
+* bump version ([9e6991a](https://github.com/tanguyantoine/react-native-music-control/commit/9e6991a))
+* bump version ([3fccd12](https://github.com/tanguyantoine/react-native-music-control/commit/3fccd12))
+
 ## [0.10.4](https://github.com/tanguyantoine/react-native-music-control/compare/v0.10.3...v0.10.4) (2019-05-24)
 
 
