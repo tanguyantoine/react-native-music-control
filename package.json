@@ -1,6 +1,6 @@
 {
   "name": "react-native-music-control",
-  "version": "0.10.5",
+  "version": "0.10.6",
   "description": "Add information on lockscreen and control playing music",
   "main": "lib/index.js",
   "types": "./lib/index.d.ts",
@@ -32,7 +32,8 @@
     "prepack": "tsc -p tsconfig.json",
     "start": "tsc -p tsconfig.json -w",
     "test": "echo 'no tests'",
-    "semantic-release:ci": "semantic-release --no-ci"
+    "semantic-release:ci": "semantic-release --no-ci",
+    "semantic-release": "semantic-release"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^3.0.4",
