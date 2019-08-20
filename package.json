@@ -35,10 +35,10 @@
     "semantic-release:ci": "semantic-release --no-ci"
   },
   "devDependencies": {
-    "@semantic-release/changelog": "^3.0.2",
-    "@semantic-release/git": "^7.0.7",
-    "@types/react-native": "^0.57.11",
-    "semantic-release": "^15.12.1",
-    "typescript": "^3.1.6"
+    "@semantic-release/changelog": "^3.0.4",
+    "@semantic-release/git": "^7.0.16",
+    "@types/react-native": "^0.60.7",
+    "semantic-release": "^15.13.21",
+    "typescript": "^3.5.3"
   }
 }
