@@ -264,19 +264,57 @@ RCT_EXPORT_METHOD(observeAudioInterruptions:(BOOL) observe){
     [[NSNotificationCenter defaultCenter] removeObserver:self name:AVAudioSessionRouteChangeNotification object:nil];
 }
 
-- (void)onPause:(MPRemoteCommandEvent*)event { [self sendEvent:@"pause"]; }
-- (void)onPlay:(MPRemoteCommandEvent*)event { [self sendEvent:@"play"]; }
-- (void)onChangePlaybackPosition:(MPChangePlaybackPositionCommandEvent*)event { [self sendEventWithValue:@"changePlaybackPosition" withValue:[NSString stringWithFormat:@"%.15f", event.positionTime]]; }
-- (void)onStop:(MPRemoteCommandEvent*)event { [self sendEvent:@"stop"]; }
-- (void)onTogglePlayPause:(MPRemoteCommandEvent*)event { [self sendEvent:@"togglePlayPause"]; }
-- (void)onEnableLanguageOption:(MPRemoteCommandEvent*)event { [self sendEvent:@"enableLanguageOption"]; }
-- (void)onDisableLanguageOption:(MPRemoteCommandEvent*)event { [self sendEvent:@"disableLanguageOption"]; }
-- (void)onNextTrack:(MPRemoteCommandEvent*)event { [self sendEvent:@"nextTrack"]; }
-- (void)onPreviousTrack:(MPRemoteCommandEvent*)event { [self sendEvent:@"previousTrack"]; }
-- (void)onSeekForward:(MPRemoteCommandEvent*)event { [self sendEvent:@"seekForward"]; }
-- (void)onSeekBackward:(MPRemoteCommandEvent*)event { [self sendEvent:@"seekBackward"]; }
-- (void)onSkipBackward:(MPRemoteCommandEvent*)event { [self sendEvent:@"skipBackward"]; }
-- (void)onSkipForward:(MPRemoteCommandEvent*)event { [self sendEvent:@"skipForward"]; }
+- (MPRemoteCommandHandlerStatus)onPause:(MPRemoteCommandEvent*)event {
+    [self sendEvent:@"pause"];
+    return MPRemoteCommandHandlerStatusSuccess;
+}
+- (MPRemoteCommandHandlerStatus)onPlay:(MPRemoteCommandEvent*)event {
+    [self sendEvent:@"play"];
+    return MPRemoteCommandHandlerStatusSuccess;
+}
+- (MPRemoteCommandHandlerStatus)onChangePlaybackPosition:(MPChangePlaybackPositionCommandEvent*)event { [self sendEventWithValue:@"changePlaybackPosition" withValue:[NSString stringWithFormat:@"%.15f", event.positionTime]];
+    return MPRemoteCommandHandlerStatusSuccess;
+}
+- (MPRemoteCommandHandlerStatus)onStop:(MPRemoteCommandEvent*)event {
+    [self sendEvent:@"stop"];
+    return MPRemoteCommandHandlerStatusSuccess;
+}
+- (MPRemoteCommandHandlerStatus)onTogglePlayPause:(MPRemoteCommandEvent*)event {
+    [self sendEvent:@"togglePlayPause"];
+    return MPRemoteCommandHandlerStatusSuccess;
+}
+- (MPRemoteCommandHandlerStatus)onEnableLanguageOption:(MPRemoteCommandEvent*)event {
+    [self sendEvent:@"enableLanguageOption"];
+    return MPRemoteCommandHandlerStatusSuccess;
+}
+- (MPRemoteCommandHandlerStatus)onDisableLanguageOption:(MPRemoteCommandEvent*)event {
+    [self sendEvent:@"disableLanguageOption"];
+    return MPRemoteCommandHandlerStatusSuccess;
+}
+- (MPRemoteCommandHandlerStatus)onNextTrack:(MPRemoteCommandEvent*)event {
+    [self sendEvent:@"nextTrack"];
+    return MPRemoteCommandHandlerStatusSuccess;
+}
+- (MPRemoteCommandHandlerStatus)onPreviousTrack:(MPRemoteCommandEvent*)event {
+    [self sendEvent:@"previousTrack"];
+    return MPRemoteCommandHandlerStatusSuccess;
+}
+- (MPRemoteCommandHandlerStatus)onSeekForward:(MPRemoteCommandEvent*)event {
+    [self sendEvent:@"seekForward"];
+    return MPRemoteCommandHandlerStatusSuccess;
+}
+- (MPRemoteCommandHandlerStatus)onSeekBackward:(MPRemoteCommandEvent*)event {
+    [self sendEvent:@"seekBackward"];
+    return MPRemoteCommandHandlerStatusSuccess;
+}
+- (MPRemoteCommandHandlerStatus)onSkipBackward:(MPRemoteCommandEvent*)event {
+    [self sendEvent:@"skipBackward"];
+    return MPRemoteCommandHandlerStatusSuccess;
+}
+- (MPRemoteCommandHandlerStatus)onSkipForward:(MPRemoteCommandEvent*)event {
+    [self sendEvent:@"skipForward"];
+    return MPRemoteCommandHandlerStatusSuccess;
+}
 
 - (NSArray<NSString *> *)supportedEvents {
     return @[@"RNMusicControlEvent"];
