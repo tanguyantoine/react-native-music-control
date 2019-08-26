@@ -1,3 +1,10 @@
+## [0.10.6](https://github.com/tanguyantoine/react-native-music-control/compare/v0.10.5...v0.10.6) (2019-08-26)
+
+
+### Bug Fixes
+
+* **java:** Move stopForegroundService() to onStop event ([#294](https://github.com/tanguyantoine/react-native-music-control/issues/294)) ([e9b4679](https://github.com/tanguyantoine/react-native-music-control/commit/e9b4679))
+
 ## [0.10.5](https://github.com/tanguyantoine/react-native-music-control/compare/v0.10.4...v0.10.5) (2019-07-10)
 
 
