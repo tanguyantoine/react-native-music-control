@@ -29,7 +29,6 @@
     "react-native": ">=0.40.0"
   },
   "scripts": {
-    "prepack": "tsc -p tsconfig.json",
     "start": "tsc -p tsconfig.json -w",
     "test": "echo 'no tests'",
     "semantic-release:ci": "semantic-release --no-ci"
