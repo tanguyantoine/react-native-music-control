@@ -193,12 +193,9 @@ public class MusicControlNotification {
         @Override
         public void onCreate() {
             super.onCreate();
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
-                startForeground(NOTIFICATION_ID, notification);
-                isRunning = true;
-            }
+            notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
+            startForeground(NOTIFICATION_ID, notification);
+            isRunning = true;
         }
 
         @Override
