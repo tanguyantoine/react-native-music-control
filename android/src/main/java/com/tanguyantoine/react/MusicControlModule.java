@@ -296,6 +296,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         }
 
         nb.setContentTitle(title);
+        nb.setSubText("My Playlist");
+        nb.setShowWhen(false);
         nb.setContentText(artist);
         nb.setContentInfo(album);
         nb.setColor(notificationColor);
