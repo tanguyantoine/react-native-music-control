@@ -557,4 +557,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         PAUSED,
         NEVER
     }
+
+    public boolean isPlaying() {
+        return isPlaying;
+    }
 }

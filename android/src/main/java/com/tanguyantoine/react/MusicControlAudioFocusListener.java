@@ -31,8 +31,10 @@ public class MusicControlAudioFocusListener implements AudioManager.OnAudioFocus
             mPlayOnAudioFocus = false;
             emitter.onStop();
         } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
-            mPlayOnAudioFocus = true;
-            emitter.onPause();
+            if (MusicControlModule.INSTANCE.isPlaying()) {
+                mPlayOnAudioFocus = true;
+                emitter.onPause();
+            }
         } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
             volume.setCurrentVolume(40);
         } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
