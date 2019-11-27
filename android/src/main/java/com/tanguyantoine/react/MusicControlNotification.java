@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
+import androidx.core.content.ContextCompat;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Build;
@@ -19,7 +20,7 @@ import com.facebook.react.bridge.ReadableMap;
 
 import java.util.Map;
 
-import static androidx.core.app.NotificationCompat.PRIORITY_MIN;
+import static androidx.core.app.NotificationCompat.PRIORITY_MAX;
 import static com.tanguyantoine.react.MusicControlModule.CHANNEL_ID;
 import static com.tanguyantoine.react.MusicControlModule.NOTIFICATION_ID;
 
@@ -106,6 +107,7 @@ public class MusicControlNotification {
         }
 
         builder.setSmallIcon(customIcon != 0 ? customIcon : smallIcon);
+        builder.setPriority(PRIORITY_MAX);
 
         // Open the app when the notification is clicked
         String packageName = context.getPackageName();
@@ -126,13 +128,8 @@ public class MusicControlNotification {
 
     public void hide() {
         NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
-            Intent myIntent = new Intent(context, MusicControlNotification.NotificationService.class);
-            context.stopService(myIntent);
-
-        }
+        Intent myIntent = new Intent(context, MusicControlNotification.NotificationService.class);
+        ContextCompat.stopService(context, myIntent);
     }
 
     /**
