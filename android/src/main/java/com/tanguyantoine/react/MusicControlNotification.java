@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -177,6 +178,13 @@ public class MusicControlNotification {
     }
 
     public static class NotificationService extends Service {
+
+        private final LocalBinder binder = new LocalBinder();
+        public class LocalBinder extends Binder {
+            public NotificationService getService() {
+                return NotificationService.this;
+            }
+        }
 
         @Override
         public IBinder onBind(Intent intent) {
