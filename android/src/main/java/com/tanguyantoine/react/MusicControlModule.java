@@ -1,11 +1,14 @@
 package com.tanguyantoine.react;
 
-import android.app.NotificationManager;
+import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.ComponentCallbacks2;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Context;
+import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +17,7 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.SystemClock;
 import android.os.Build;
+import android.os.IBinder;
 import androidx.annotation.RequiresApi;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
@@ -198,9 +202,14 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         afListener = new MusicControlAudioFocusListener(context, emitter, volume);
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            context.startForegroundService(myIntent);
-
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Try to bind the service
+            try {
+                context.bindService(myIntent, connection, Context.BIND_AUTO_CREATE);
+            }
+            catch (Exception ignored){
+                context.startForegroundService(myIntent);
+            }
         }
         else
             context.startService(myIntent);
@@ -210,6 +219,58 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         isPlaying = false;
         init = true;
     }
+    
+    // Create the service connection.
+    private ServiceConnection connection = new ServiceConnection()
+    {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service)
+        {
+            Log.w(TAG, "onServiceConnected");
+            // The binder of the service that returns the instance that is created.
+            MusicControlNotification.NotificationService.LocalBinder binder = (MusicControlNotification.NotificationService.LocalBinder) service;
+
+            // The getter method to acquire the service.
+            MusicControlNotification.NotificationService myService = binder.getService();
+
+            // getServiceIntent(context) returns the relative service intent
+            Intent myIntent = new Intent(context, MusicControlNotification.NotificationService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(myIntent);
+            } else {
+                context.startService(myIntent);
+            }
+
+            // This is the key: Without waiting Android Framework to call this method
+            // inside Service.onCreate(), immediately call here to post the notification.
+            if(MusicControlModule.INSTANCE.notification == null){
+                init();
+            }
+            Notification notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
+            myService.startForeground(NOTIFICATION_ID, notification);
+
+            // Release the connection to prevent leaks.
+            context.unbindService(this);
+        }
+
+        @Override
+        public void onBindingDied(ComponentName name)
+        {
+            Log.w(TAG, "Binding has dead.");
+        }
+
+        @Override
+        public void onNullBinding(ComponentName name)
+        {
+            Log.w(TAG, "Bind was null.");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name)
+        {
+            Log.w(TAG, "Service is disconnected..");
+        }
+    };
 
     @ReactMethod
     public synchronized void stopControl() {
