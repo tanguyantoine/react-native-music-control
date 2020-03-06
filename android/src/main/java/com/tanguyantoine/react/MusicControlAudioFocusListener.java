@@ -14,6 +14,8 @@ public class MusicControlAudioFocusListener implements AudioManager.OnAudioFocus
     private AudioManager mAudioManager;
     private AudioFocusRequest mFocusRequest;
 
+    private boolean mPlayOnAudioFocus = false;
+
     MusicControlAudioFocusListener(ReactApplicationContext context, MusicControlEventEmitter emitter,
                                    MusicControlVolumeListener volume) {
         this.emitter = emitter;
@@ -25,16 +27,24 @@ public class MusicControlAudioFocusListener implements AudioManager.OnAudioFocus
     @Override
     public void onAudioFocusChange(int focusChange) {
         if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+            abandonAudioFocus();
+            mPlayOnAudioFocus = false;
             emitter.onStop();
         } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
-            emitter.onPause();
+            if (MusicControlModule.INSTANCE.isPlaying()) {
+                mPlayOnAudioFocus = true;
+                emitter.onPause();
+            }
         } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
             volume.setCurrentVolume(40);
         } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
             if (volume.getCurrentVolume() != 100) {
                 volume.setCurrentVolume(100);
             }
-            emitter.onPlay();
+            if (mPlayOnAudioFocus) {
+                emitter.onPlay();
+            }
+            mPlayOnAudioFocus = false;
         }
     }
 
