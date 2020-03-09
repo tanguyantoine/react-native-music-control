@@ -1,3 +1,15 @@
+
+
+
+:warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning:
+
+The package is not maintained anymore
+
+please use https://github.com/react-native-kit/react-native-track-player
+
+
+:warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning:
+
 # react-native-music-control
 
 React Native Music Control is a module to enable remote controls and display "Now Playing" info on the lock screen and in the notification area on Android and iOS.
