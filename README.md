@@ -3,9 +3,9 @@
 
 :warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning:
 
-The package is not maintained anymore
+# The package is not maintained anymore
 
-please use https://github.com/react-native-kit/react-native-track-player
+# please use https://github.com/react-native-kit/react-native-track-player
 
 
 :warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning::warning:
