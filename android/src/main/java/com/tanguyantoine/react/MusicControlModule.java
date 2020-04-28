@@ -324,6 +324,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     synchronized public void setNowPlaying(ReadableMap metadata) {
         init();
         if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
+        artworkThread = null;
+
+        md = new MediaMetadataCompat.Builder();
 
         String title = metadata.hasKey("title") ? metadata.getString("title") : null;
         String artist = metadata.hasKey("artist") ? metadata.getString("artist") : null;
