@@ -1,169 +1,40 @@
 # react-native-music-control
 
-React Native Music Control is a module to enable remote controls and display "Now Playing" info on the lock screen and notification area on Android and iOS.
+![NPM Version](https://img.shields.io/npm/v/react-native-music-control?style=flat-square "NPM Version")
+![NPM Downloads](https://img.shields.io/npm/dm/react-native-music-control?style=flat-square "NPM Downloads")
 
-Plays well with [React Native Sound](https://github.com/zmxv/react-native-sound).
+## Project
+With Yarn:
 
-- - - -
-
-- [Installation Process](#installation-process)
-	- [Linking on iOS](#linking-on-ios) 
-	- [Linking on Android](#linking-on-android) 
-	- [Troubleshooting](#troubleshooting) 
-- [Usage](#Usage)
-	- [Enable and Disable Controls](#enable-and-disable-controls)
-	- [Now Playing](#now-playing)
-	- [Update Playback](#update-playback)
-	- [Reset Now Playing](#reset-now-playing)
-	- [Stop Controls](#stop-controls)
-	- [Register to Events](#register-to-events)
-- [Important Notes](#important-notes)
-- [Customization](#customization)
-- [TODOs](#todos)
-- [Contributing](#contributing)
-
-
-
-### Mix between: ###
-
-* [Cordova Plugin RemoteCommand](https://github.com/Muntligt/cordova-plugin-remotecommand) (iOS)
-* [Cordova Plugin NowPlaying](https://github.com/Muntligt/cordova-plugin-nowplaying) (iOS)
-* [Cordova Music Controls Plugin](https://github.com/homerours/cordova-music-controls-plugin) (Android)
-* [Remote Controls](https://github.com/shi11/RemoteControls/pull/32) (Android)
-
-### Project using this repo: ###
-
-* [https://github.com/just-team/react-native-youtube-player](https://github.com/just-team/react-native-youtube-player)
-
-![iOS lockscreen](./docs/ios.png)
-
-- - - -
-
-# Installation Process
-
-1. **Add it to your project**
+```
+yarn add react-native-music-control
+```
+or with NPM:
 
 ```
 npm install react-native-music-control --save
 ```
 
-
-2. **Link it to your project**
-
-## Linking on iOS
-
-### Automatic
-
-```
-react-native link
-```
-
-:warning: You must enable Audio Background mode in XCode project settings :
+## iOS
+1. `pod install --project-directory=ios/`
+1. Enable Audio Background mode in XCode project settings
 
 ![XCode bqckground mode enabled](https://user-images.githubusercontent.com/263097/28630866-beb84094-722b-11e7-8ed2-b495c9f37956.png)
 
+## Android
+Add the `android.permission.FOREGROUND_SERVICE` permission to your `AndroidManifest.xml`
 
-
-### Manual
-
-In XCode, right click Libraries. Click Add Files to "[Your project]". Navigate to node_modules/react-native-music-control. Add the file MusicControl.xcodeproj.
-
-In the Project Navigator, select your project. Click the build target. Click Build Phases. Expand Link Binary With Libraries. Click the plus button and add libMusicControl.a under Workspace.
-
-### CocoaPods
-
-```
-pod 'react-native-music-control', :path => '../node_modules/react-native-music-control'
-```
-
-Run `pod install` in /ios folder.
-
-- - - -
-
-## Linking on Android
-
-### Automatic
-
-```
-react-native link
-```
-
-**Add following to your project AndroidManifest.xml**
 ```
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 ```
 
-### Manual
+## For React Native < v0.60
+See here: [README-PRE-0.60.md](./README-PRE-0.60.md)
 
-**android/app/build.gradle**
+## Troubleshooting
+See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
 
-```diff
-dependencies {
-    ...
-    compile "com.facebook.react:react-native:+"  // From node_modules
-+   compile project(':react-native-music-control')
-}
-```
-
-**android/settings.gradle**
-```diff
-...
-include ':app'
-+include ':react-native-music-control'
-+project(':react-native-music-control').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-music-control/android')
-```
-
-**MainApplication.java**
-
-```diff
-+import com.tanguyantoine.react.MusicControl;
-
-public class MainApplication extends Application implements ReactApplication {
-    //......
-
-    @Override
-    protected List<ReactPackage> getPackages() {
-        return Arrays.<ReactPackage>asList(
-+           new MusicControl(),
-            new MainReactPackage()
-        );
-    }
-
-    //......
-  }
-```
-
-**Add following to your project AndroidManifest.xml**
-```
-<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-```
-- - - -
-
-### Troubleshooting
-Some users reported this error while compiling the Android version:
-
-```
-Multiple dex files define Landroid/support/v4/accessibilityservice/AccessibilityServiceInfoCompat
-```
-
-To solve this, issue just copy this line at the end of your application build.gradle
-
-**android/app/build.gradle**
-
-```diff
-+configurations.all {
-+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-+        def requested = details.requested
-+        if (requested.group == 'com.android.support') {
-+            if (!requested.name.startsWith("multidex")) {
-+                details.useVersion '26.0.1'
-+            }
-+        }
-+    }
-+}
-```
-
-- - - -
+---
 
 # Usage
 
@@ -212,8 +83,6 @@ MusicControl.enableControl('skipBackward', true, {interval: 15}))
 MusicControl.enableControl('skipForward', true, {interval: 30}))
 ```
 
-- - - -
-
 ### Now Playing
 
 The `setNowPlaying` method enables the music controls. To disable them, use `resetNowPlaying()`.
@@ -239,8 +108,6 @@ MusicControl.setNowPlaying({
   notificationIcon: 'my_custom_icon' // Android Only (String), Android Drawable resource name for a custom notification icon
 })
 ```
-
-- - - -
 
 ### Update Playback
 
@@ -275,8 +142,6 @@ MusicControl.updatePlayback({
 })
 ```
 
-- - - -
-
 ### Reset Now Playing
 
 Resets and hides the music controls.
@@ -284,8 +149,6 @@ Resets and hides the music controls.
 ```javascript
 MusicControl.resetNowPlaying()
 ```
-
-- - - -
 
 ### Stop Controls
 
@@ -295,8 +158,7 @@ Resets, hides the music controls and disables everything.
 MusicControl.stopControl()
 ```
 
-- - - -
-
+---
 
 There is also a `closeNotification` control on Android controls the swipe behavior of the audio playing notification, and accepts additional configuration options with the `when` key:
 
@@ -371,7 +233,7 @@ componentDidMount() {
 
 **Note**: Enabling both the 'play' and 'pause' controls will only show one icon -- either a play or a pause icon. The Music Control notification will switch which one is displayed based on the state set via the `updatePlayback` method. While the state is `MusicControl.STATE_PLAYING` it will show the pause icon, and while the state is `MusicControl.STATE_PAUSED` it will show the play icon.
 
-- - - -
+---
 
 # Important Notes
 
@@ -387,9 +249,7 @@ MusicControl.on('play', () => {
 })
 ```
 
-- - - -
-
-# Customization
+## Customization
 
 It is possible to customize the icon used in the notification on Android. By default you can add a drawable resource to your package with the file name `music_control_icon` and the notification will use your custom icon. If you need to specify a custom icon name, or change your notification icon during runtime, the `setNowPlaying` function accepts a string for an Android drawable resource name in the `notificationIcon` prop. Keep in mind that just like with `music_control_icon` the resource specified has to be in the drawable package of your Android app.
 
@@ -397,17 +257,5 @@ It is possible to customize the icon used in the notification on Android. By def
   MusicControl.setCustomNotificationIcon('my_custom_icon');
 ```
 
-# TODOs
-
-- [x] Android support
-- [ ] Test
-- [x] Publish package
-- [x] React-Native link configuration for Android
-- [x] React-Native link configuration for iOS
-- [x] Android : Handle remote events
-- [x] Android : Display cover artwork
-
-
 # Contributing
-
-### Of coursssssseeeeee. I'm waiting your PR :)
+Of course! We are waiting for your PR :)
