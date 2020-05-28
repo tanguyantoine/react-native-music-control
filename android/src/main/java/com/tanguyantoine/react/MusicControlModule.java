@@ -119,7 +119,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     private void updateNotificationMediaStyle() {
-        if (!(Build.MANUFACTURER.toLowerCase(Locale.getDefault()).contains("huawei") && Build.VERSION.SDK_INT < Build.VERSION_CODES.M)) {
+        if (!Build.MANUFACTURER.toLowerCase(Locale.getDefault()).contains("huawei") && Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
             MediaStyle style = new MediaStyle();
             style.setMediaSession(session.getSessionToken());
             int controlCount = 0;
@@ -130,6 +130,12 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                 controlCount += 1;
             }
             if(hasControl(PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)) {
+                controlCount += 1;
+            }
+            if(hasControl(PlaybackStateCompat.ACTION_FAST_FORWARD)) {
+                controlCount += 1;
+            }
+            if(hasControl(PlaybackStateCompat.ACTION_REWIND)) {
                 controlCount += 1;
             }
             int[] actions = new int[controlCount];
@@ -172,6 +178,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         }
         nb = new NotificationCompat.Builder(context, CHANNEL_ID);
         nb.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+         nb.setPriority(NotificationCompat.PRIORITY_HIGH);
 
         updateNotificationMediaStyle();
 
@@ -550,5 +557,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         ALWAYS,
         PAUSED,
         NEVER
+    }
+
+    public boolean isPlaying() {
+        return isPlaying;
     }
 }
