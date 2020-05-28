@@ -79,8 +79,10 @@ public class MusicControlEventEmitter {
     }
 
     private void stopForegroundService() {
-      Intent intent = new Intent(context, MusicControlNotification.NotificationService.class);
-      intent.setAction("StopService");
-      ContextCompat.startForegroundService(context, intent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent intent = new Intent(context, MusicControlNotification.NotificationService.class);
+            intent.setAction("StopService");
+            ContextCompat.startForegroundService(context, intent);
+        }
     }
 }
