@@ -1,5 +1,7 @@
 # react-native-music-control
 
+Display and manage media controls on lock screen and notification center for iOS and Android.
+
 ![NPM Version](https://img.shields.io/npm/v/react-native-music-control?style=flat-square "NPM Version")
 ![NPM Downloads](https://img.shields.io/npm/dm/react-native-music-control?style=flat-square "NPM Downloads")
 
