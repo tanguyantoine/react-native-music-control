@@ -22,7 +22,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/bunmiedee/react-native-music-control.git"
+    "url": "https://github.com/tanguyantoine/react-native-music-control.git"
   },
   "author": "Tanguy Antoine",
   "peerDependencies": {
