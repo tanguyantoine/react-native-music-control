@@ -6,6 +6,7 @@ import android.content.ComponentCallbacks2;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Context;
+import androidx.core.content.ContextCompat;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -198,13 +199,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         afListener = new MusicControlAudioFocusListener(context, emitter, volume);
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            context.startForegroundService(myIntent);
-
-        }
-        else
-            context.startService(myIntent);
-
+        ContextCompat.startForegroundService(context, myIntent);
         context.registerComponentCallbacks(this);
 
         isPlaying = false;
