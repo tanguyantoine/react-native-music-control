@@ -517,7 +517,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                 bitmap = BitmapFactory.decodeStream(input);
                 input.close();
             }
-        } catch(IOException ex) {
+        } catch(IOException | IndexOutOfBoundsException ex) {
             Log.w(TAG, "Could not load the artwork", ex);
         }
 

@@ -60,7 +60,7 @@ public class MusicControlAudioFocusListener implements AudioManager.OnAudioFocus
     }
 
     public void abandonAudioFocus() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && mAudioManager != null) {
+         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && mAudioManager != null && mFocusRequest != null) {
             mAudioManager.abandonAudioFocusRequest(mFocusRequest);
         } else if ( mAudioManager != null ) {
             mAudioManager.abandonAudioFocus(this);

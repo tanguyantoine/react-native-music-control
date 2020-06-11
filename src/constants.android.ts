@@ -1,3 +1,4 @@
+// @ts-ignore
 import { NativeModules } from 'react-native'
 const NativeMusicControl = NativeModules.MusicControlManager
 
