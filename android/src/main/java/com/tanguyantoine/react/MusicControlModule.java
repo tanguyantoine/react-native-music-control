@@ -8,6 +8,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Context;
+import androidx.core.content.ContextCompat;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -208,11 +209,12 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                 context.bindService(myIntent, connection, Context.BIND_AUTO_CREATE);
             }
             catch (Exception ignored){
-                context.startForegroundService(myIntent);
+                ContextCompat.startForegroundService(context, myIntent);
             }
         }
-        else
+        else {
             context.startService(myIntent);
+        }
 
         context.registerComponentCallbacks(this);
 
@@ -234,21 +236,23 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             MusicControlNotification.NotificationService myService = binder.getService();
 
             // getServiceIntent(context) returns the relative service intent
-            Intent myIntent = new Intent(context, MusicControlNotification.NotificationService.class);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(myIntent);
-            } else {
-                context.startService(myIntent);
-            }
+            //Intent myIntent = new Intent(context, MusicControlNotification.NotificationService.class);
+            //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            //    context.startForegroundService(myIntent);
+            //} else {
+            //    context.startService(myIntent);
+            //}
 
             // This is the key: Without waiting Android Framework to call this method
             // inside Service.onCreate(), immediately call here to post the notification.
-            if(MusicControlModule.INSTANCE.notification == null){
-                init();
+            //if(MusicControlModule.INSTANCE.notification == null){
+            //    init();
+            //}
+            //Notification notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
+            //myService.startForeground(NOTIFICATION_ID, notification);
+            if (myService != null) {
+                myService.forceForeground();
             }
-            Notification notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
-            myService.startForeground(NOTIFICATION_ID, notification);
-
             // Release the connection to prevent leaks.
             context.unbindService(this);
         }
