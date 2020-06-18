@@ -190,16 +190,20 @@ public class MusicControlNotification {
         public IBinder onBind(Intent intent) {
             return null;
         }
+        
+        private Notification notification;
 
         @Override
         public void onCreate() {
             super.onCreate();
+            notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
+            startForeground(NOTIFICATION_ID, notification);
         }
 
         @Override
         public int onStartCommand(Intent intent, int flags, int startId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Notification notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
+                notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
                 startForeground(NOTIFICATION_ID, notification);
             }
             return START_NOT_STICKY;
