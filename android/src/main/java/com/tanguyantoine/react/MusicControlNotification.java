@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 
+import java.lang.ref.WeakReference;
 import java.util.Map;
 
 import androidx.core.app.NotificationCompat;
@@ -182,14 +183,24 @@ public class MusicControlNotification {
 
         private final LocalBinder binder = new LocalBinder();
         public class LocalBinder extends Binder {
+
+            private WeakReference<NotificationService> weakService;
+
+            /**
+             * Inject service instance to weak reference.
+             */
+            public void onBind(NotificationService service) {
+                this.weakService = new WeakReference<>(service);
+            }
+
             public NotificationService getService() {
-                return NotificationService.this;
+                return weakService == null ? null : weakService.get();
             }
         }
 
         @Override
         public IBinder onBind(Intent intent) {
-            binder.onBind(this);
+            binder.onBind(MusicControlNotification.NotificationService.this);
             return binder;
         }
         
@@ -200,7 +211,10 @@ public class MusicControlNotification {
                 // service has already been initialized.
                 // startForeground method should be called within 5 seconds.
                 ContextCompat.startForegroundService(MusicControlNotification.NotificationService.this, intent);
-                
+
+                if(MusicControlModule.INSTANCE.notification == null){
+                    MusicControlModule.INSTANCE.init();
+                }
                 notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
                 // call startForeground just after startForegroundService.
                 startForeground(NOTIFICATION_ID, notification);
