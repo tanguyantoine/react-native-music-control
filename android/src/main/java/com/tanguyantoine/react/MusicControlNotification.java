@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
+import androidx.core.content.ContextCompat;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 
@@ -188,7 +189,22 @@ public class MusicControlNotification {
 
         @Override
         public IBinder onBind(Intent intent) {
-            return null;
+            binder.onBind(this);
+            return binder;
+        }
+        
+        public void forceForeground() {
+            // API lower than 26 do not need this work around.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Intent intent = new Intent(MusicControlNotification.NotificationService.this, MusicControlNotification.NotificationService.class);
+                // service has already been initialized.
+                // startForeground method should be called within 5 seconds.
+                ContextCompat.startForegroundService(MusicControlNotification.NotificationService.this, intent);
+                
+                notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
+                // call startForeground just after startForegroundService.
+                startForeground(NOTIFICATION_ID, notification);
+            }
         }
         
         private Notification notification;
