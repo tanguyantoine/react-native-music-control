@@ -233,25 +233,10 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             MusicControlNotification.NotificationService.LocalBinder binder = (MusicControlNotification.NotificationService.LocalBinder) service;
 
             // The getter method to acquire the service.
-            MusicControlNotification.NotificationService myService = binder.getService();
+            MusicControlNotification.NotificationService notificationService = binder.getService();
 
-            // getServiceIntent(context) returns the relative service intent
-            //Intent myIntent = new Intent(context, MusicControlNotification.NotificationService.class);
-            //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            //    context.startForegroundService(myIntent);
-            //} else {
-            //    context.startService(myIntent);
-            //}
-
-            // This is the key: Without waiting Android Framework to call this method
-            // inside Service.onCreate(), immediately call here to post the notification.
-            //if(MusicControlModule.INSTANCE.notification == null){
-            //    init();
-            //}
-            //Notification notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
-            //myService.startForeground(NOTIFICATION_ID, notification);
-            if (myService != null) {
-                myService.forceForeground();
+            if (notificationService != null) {
+                notificationService.forceForeground();
             }
             // Release the connection to prevent leaks.
             context.unbindService(this);
