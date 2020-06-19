@@ -6,6 +6,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
@@ -17,7 +18,7 @@ import java.util.Map;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-import static com.tanguyantoine.react.MusicControlModule.NOTIFICATION_ID;
+import static com.tanguyantoine.react.MusicControlModule.DEFAULT_NOTIFICATION_ID;
 
 public class MusicControlNotification {
 
@@ -31,6 +32,7 @@ public class MusicControlNotification {
     private int smallIcon;
     private int customIcon;
     private NotificationCompat.Action play, pause, stop, next, previous, skipForward, skipBackward;
+    private int notificationId = DEFAULT_NOTIFICATION_ID;
 
     public MusicControlNotification(MusicControlModule module, ReactApplicationContext context) {
         this.context = context;
@@ -42,6 +44,10 @@ public class MusicControlNotification {
         // Optional custom icon with fallback to the play icon
         smallIcon = r.getIdentifier("music_control_icon", "drawable", packageName);
         if (smallIcon == 0) smallIcon = r.getIdentifier("play", "drawable", packageName);
+    }
+
+    public synchronized  void setNotificationId(int notificationId) {
+        this.notificationId = notificationId;
     }
 
     public synchronized void setCustomNotificationIcon(String resourceName) {
@@ -116,16 +122,17 @@ public class MusicControlNotification {
         return builder.build();
     }
 
-    public synchronized void show(NotificationCompat.Builder builder, boolean isPlaying, int notificationId) {
+    public synchronized void show(NotificationCompat.Builder builder, boolean isPlaying) {
         NotificationManagerCompat.from(context).notify(notificationId, prepareNotification(builder, isPlaying));
     }
 
     public void hide() {
-        NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID);
+        NotificationManagerCompat.from(context).cancel(notificationId);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             Intent myIntent = new Intent(context, MusicControlNotification.NotificationService.class);
+            myIntent.putExtra("notificationId", notificationId);
             context.stopService(myIntent);
 
         }
@@ -178,8 +185,11 @@ public class MusicControlNotification {
 
     public static class NotificationService extends Service {
 
+        private int notificationId;
+
         @Override
         public IBinder onBind(Intent intent) {
+            notificationId = intent.getIntExtra("notificationId", DEFAULT_NOTIFICATION_ID);
             return null;
         }
 
@@ -189,14 +199,14 @@ public class MusicControlNotification {
         public void onCreate() {
             super.onCreate();
             notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
-            startForeground(NOTIFICATION_ID, notification);
+            startForeground(notificationId, notification);
         }
 
         @Override
         public int onStartCommand(Intent intent, int flags, int startId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
-                startForeground(NOTIFICATION_ID, notification);
+                startForeground(notificationId, notification);
             }
             return START_NOT_STICKY;
         }

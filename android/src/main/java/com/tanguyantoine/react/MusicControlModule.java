@@ -266,6 +266,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         final int notificationId = metadata.hasKey("notificationId") ? metadata.getInt("notificationId") : DEFAULT_NOTIFICATION_ID;
         emitter.setNotificationId(notificationId);
+        notification.setNotificationId(notificationId);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelId = metadata.hasKey("channelId") ? metadata.getString("channelId") : DEFAULT_CHANNEL_ID;
@@ -347,7 +348,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                     }
                     if(nb != null) {
                         nb.setLargeIcon(bitmap);
-                        notification.show(nb, isPlaying, notificationId);
+                        notification.show(nb, isPlaying);
                     }
 
                     artworkThread = null;
@@ -361,7 +362,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         session.setMetadata(md.build());
         session.setActive(true);
-        notification.show(nb, isPlaying, notificationId);
+        notification.show(nb, isPlaying);
     }
 
     @ReactMethod

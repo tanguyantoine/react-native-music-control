@@ -87,7 +87,7 @@ public class MusicControlEventEmitter {
     }
 
     private void stopForegroundService() {
-        NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID);
+        NotificationManagerCompat.from(context).cancel(notificationId);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Intent myIntent =
                     new Intent(context, MusicControlNotification.NotificationService.class);
