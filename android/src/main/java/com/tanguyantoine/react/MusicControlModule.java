@@ -65,13 +65,13 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     private boolean remoteVolume = false;
     private boolean isPlaying = false;
     private long controls = 0;
+    private NotificationChannel notificationChannel;
     protected int ratingType = RatingCompat.RATING_PERCENTAGE;
 
     public NotificationClose notificationClose = NotificationClose.PAUSED;
 
-    public static final String CHANNEL_ID = "react-native-music-control";
-
-    public static final int NOTIFICATION_ID = 100;
+    public final static String DEFAULT_CHANNEL_ID = "react-native-music-control";
+    public final static int DEFAULT_NOTIFICATION_ID = 100;
 
     public MusicControlModule(ReactApplicationContext context) {
         super(context);
@@ -101,14 +101,22 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private void createChannel(ReactApplicationContext context) {
+    private void createChannel(ReactApplicationContext context, String channelId) {
         NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, "Media playback", NotificationManager.IMPORTANCE_LOW);
+        if (notificationChannel != null) {
+             if(notificationChannel.getId().equals(channelId)) {
+                 return;
+             }
+             mNotificationManager.deleteNotificationChannel(notificationChannel.getId());
+        }
+
+        NotificationChannel mChannel = new NotificationChannel(channelId, "Media playback", NotificationManager.IMPORTANCE_LOW);
         mChannel.setDescription("Media playback controls");
         mChannel.setShowBadge(false);
         mChannel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
         mNotificationManager.createNotificationChannel(mChannel);
+        this.notificationChannel = mChannel;
     }
 
     private boolean hasControl(long control) {
@@ -173,9 +181,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         pb = new PlaybackStateCompat.Builder();
         pb.setActions(controls);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createChannel(context);
-        }
         nb = new NotificationCompat.Builder(context, CHANNEL_ID);
         nb.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
          nb.setPriority(NotificationCompat.PRIORITY_HIGH);
@@ -258,6 +263,14 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     synchronized public void setNowPlaying(ReadableMap metadata) {
         init();
         if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
+
+        int notificationId = metadata.hasKey("notificationId") ? metadata.getInt("notificationId") : DEFAULT_NOTIFICATION_ID;
+        emitter.setNotificationId(notificationId);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelId = metadata.hasKey("channelId") ? metadata.getString("channelId") : DEFAULT_CHANNEL_ID;
+            createChannel(context, channelId);
+        }
 
         String title = metadata.hasKey("title") ? metadata.getString("title") : null;
         String artist = metadata.hasKey("artist") ? metadata.getString("artist") : null;

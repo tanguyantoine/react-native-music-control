@@ -31,9 +31,14 @@ public class MusicControlEventEmitter {
     }
 
     private final ReactApplicationContext context;
+    private int notificationId;
 
-    MusicControlEventEmitter(ReactApplicationContext context) {
+    MusicControlEventEmitter(ReactApplicationContext context, int notificationId) {
         this.context = context;
+    }
+
+    public void setNotificationId(int notificationId) {
+        this.notificationId = notificationId;
     }
 
     public void onPlay() {
