@@ -116,8 +116,8 @@ public class MusicControlNotification {
         return builder.build();
     }
 
-    public synchronized void show(NotificationCompat.Builder builder, boolean isPlaying) {
-        NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, prepareNotification(builder, isPlaying));
+    public synchronized void show(NotificationCompat.Builder builder, boolean isPlaying, int notificationId) {
+        NotificationManagerCompat.from(context).notify(notificationId, prepareNotification(builder, isPlaying));
     }
 
     public void hide() {

@@ -264,7 +264,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         init();
         if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
 
-        int notificationId = metadata.hasKey("notificationId") ? metadata.getInt("notificationId") : DEFAULT_NOTIFICATION_ID;
+        final int notificationId = metadata.hasKey("notificationId") ? metadata.getInt("notificationId") : DEFAULT_NOTIFICATION_ID;
         emitter.setNotificationId(notificationId);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -347,7 +347,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                     }
                     if(nb != null) {
                         nb.setLargeIcon(bitmap);
-                        notification.show(nb, isPlaying);
+                        notification.show(nb, isPlaying, notificationId);
                     }
 
                     artworkThread = null;
@@ -361,7 +361,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         session.setMetadata(md.build());
         session.setActive(true);
-        notification.show(nb, isPlaying);
+        notification.show(nb, isPlaying, notificationId);
     }
 
     @ReactMethod
