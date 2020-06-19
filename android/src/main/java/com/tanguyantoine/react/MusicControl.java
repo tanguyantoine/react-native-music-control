@@ -18,7 +18,7 @@ public class MusicControl implements ReactPackage {
         modules.add(new MusicControlModule(context));
         return modules;
     }
- 
+
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext context) {
         return Collections.emptyList();

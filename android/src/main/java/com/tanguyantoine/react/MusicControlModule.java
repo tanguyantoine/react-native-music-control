@@ -119,6 +119,12 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         this.notificationChannel = mChannel;
     }
 
+    private void createNotificationBuilder() {
+        nb = new NotificationCompat.Builder(context, notificationChannel);
+        nb.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+        nb.setPriority(NotificationCompat.PRIORITY_HIGH);
+    }
+
     private boolean hasControl(long control) {
         if((controls & control) == control) {
             return true;
@@ -162,7 +168,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         context = getReactApplicationContext();
 
-        emitter = new MusicControlEventEmitter(context);
+        emitter = new MusicControlEventEmitter(context, DEFAULT_NOTIFICATION_ID);
 
         session = new MediaSessionCompat(context, "MusicControl");
         session.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
@@ -180,10 +186,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         md = new MediaMetadataCompat.Builder();
         pb = new PlaybackStateCompat.Builder();
         pb.setActions(controls);
-
-        nb = new NotificationCompat.Builder(context, CHANNEL_ID);
-        nb.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-         nb.setPriority(NotificationCompat.PRIORITY_HIGH);
+        createNotificationBuilder();
 
         updateNotificationMediaStyle();
 
@@ -271,6 +274,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelId = metadata.hasKey("channelId") ? metadata.getString("channelId") : DEFAULT_CHANNEL_ID;
             createChannel(context, channelId);
+            createNotificationBuilder();
         }
 
         String title = metadata.hasKey("title") ? metadata.getString("title") : null;

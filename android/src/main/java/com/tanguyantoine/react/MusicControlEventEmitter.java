@@ -10,8 +10,6 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import androidx.core.app.NotificationManagerCompat;
 
-import static com.tanguyantoine.react.MusicControlModule.NOTIFICATION_ID;
-
 public class MusicControlEventEmitter {
     private static void sendEvent(ReactApplicationContext context, String type, Object value) {
         WritableMap data = Arguments.createMap();
@@ -35,6 +33,7 @@ public class MusicControlEventEmitter {
 
     MusicControlEventEmitter(ReactApplicationContext context, int notificationId) {
         this.context = context;
+        this.notificationId = notificationId;
     }
 
     public void setNotificationId(int notificationId) {
