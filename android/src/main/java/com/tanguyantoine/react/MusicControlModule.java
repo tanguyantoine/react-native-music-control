@@ -117,10 +117,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         mChannel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
         mNotificationManager.createNotificationChannel(mChannel);
         this.notificationChannel = mChannel;
-    }
 
-    private void createNotificationBuilder() {
-        nb = new NotificationCompat.Builder(context, notificationChannel);
+        nb = new NotificationCompat.Builder(context, notificationChannel.getId());
         nb.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
         nb.setPriority(NotificationCompat.PRIORITY_HIGH);
     }
@@ -186,7 +184,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         md = new MediaMetadataCompat.Builder();
         pb = new PlaybackStateCompat.Builder();
         pb.setActions(controls);
-        createNotificationBuilder();
+        nb = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID);
+        nb.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+        nb.setPriority(NotificationCompat.PRIORITY_HIGH);
 
         updateNotificationMediaStyle();
 
@@ -274,7 +274,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelId = metadata.hasKey("channelId") ? metadata.getString("channelId") : DEFAULT_CHANNEL_ID;
             createChannel(context, channelId);
-            createNotificationBuilder();
         }
 
         String title = metadata.hasKey("title") ? metadata.getString("title") : null;
