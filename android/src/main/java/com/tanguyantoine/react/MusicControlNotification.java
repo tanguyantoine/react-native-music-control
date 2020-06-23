@@ -17,8 +17,6 @@ import java.util.Map;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-import static com.tanguyantoine.react.MusicControlModule.NOTIFICATION_ID;
-
 public class MusicControlNotification {
 
     protected static final String REMOVE_NOTIFICATION = "music_control_remove_notification";
@@ -117,11 +115,11 @@ public class MusicControlNotification {
     }
 
     public synchronized void show(NotificationCompat.Builder builder, boolean isPlaying) {
-        NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, prepareNotification(builder, isPlaying));
+        NotificationManagerCompat.from(context).notify(MusicControlModule.INSTANCE.getNotificationId(), prepareNotification(builder, isPlaying));
     }
 
     public void hide() {
-        NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID);
+        NotificationManagerCompat.from(context).cancel(MusicControlModule.INSTANCE.getNotificationId());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
@@ -189,14 +187,14 @@ public class MusicControlNotification {
         public void onCreate() {
             super.onCreate();
             notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
-            startForeground(NOTIFICATION_ID, notification);
+            startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
         }
 
         @Override
         public int onStartCommand(Intent intent, int flags, int startId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
-                startForeground(NOTIFICATION_ID, notification);
+                startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
             }
             return START_NOT_STICKY;
         }

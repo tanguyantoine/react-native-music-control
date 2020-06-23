@@ -69,9 +69,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
     public NotificationClose notificationClose = NotificationClose.PAUSED;
 
-    public static final String CHANNEL_ID = "react-native-music-control";
-
-    public static final int NOTIFICATION_ID = 100;
+    private String channelId = "react-native-music-control";
+    private int notificationId = 100;
 
     public MusicControlModule(ReactApplicationContext context) {
         super(context);
@@ -104,7 +103,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     private void createChannel(ReactApplicationContext context) {
         NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, "Media playback", NotificationManager.IMPORTANCE_LOW);
+        NotificationChannel mChannel = new NotificationChannel(channelId, "Media playback", NotificationManager.IMPORTANCE_LOW);
         mChannel.setDescription("Media playback controls");
         mChannel.setShowBadge(false);
         mChannel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
@@ -147,6 +146,10 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         }
     }
 
+    public int getNotificationId() {
+        return notificationId;
+    }
+
     public void init() {
         if (init) return;
 
@@ -154,7 +157,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         context = getReactApplicationContext();
 
-        emitter = new MusicControlEventEmitter(context);
+        emitter = new MusicControlEventEmitter(context, notificationId);
 
         session = new MediaSessionCompat(context, "MusicControl");
         session.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
@@ -176,7 +179,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createChannel(context);
         }
-        nb = new NotificationCompat.Builder(context, CHANNEL_ID);
+        nb = new NotificationCompat.Builder(context, channelId);
         nb.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
          nb.setPriority(NotificationCompat.PRIORITY_HIGH);
 
@@ -204,6 +207,12 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         isPlaying = false;
         init = true;
+    }
+
+    @ReactMethod
+    public synchronized  void setNotificationIds(int notificationId, String channelId) {
+        this.notificationId = notificationId;
+        this.channelId = channelId;
     }
 
     @ReactMethod
