@@ -160,6 +160,12 @@ Resets, hides the music controls and disables everything.
 MusicControl.stopControl()
 ```
 
+### Set notification id and channel id (Android Only). 
+```javascript
+MusicControl.setNotificationId(10, "channel")
+```
+If you want to change the default notification id and channel name, call this once before displaying any notifications. 
+
 ---
 
 There is also a `closeNotification` control on Android controls the swipe behavior of the audio playing notification, and accepts additional configuration options with the `when` key:
