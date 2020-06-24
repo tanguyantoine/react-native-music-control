@@ -362,11 +362,13 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         int maxVol = info.hasKey("maxVolume") ? info.getInt("maxVolume") : volume.getMaxVolume();
         int vol = info.hasKey("volume") ? info.getInt("volume") : volume.getCurrentVolume();
         ratingType = info.hasKey("rating") ? info.getInt("rating") : ratingType;
-
-		// The default speed is 0 if it was never supplied. Adjust this to 1 to ensure that the seek bar progresses properly
-		if (speed == 0) {
-			speed = 1;
-		}
+        
+        isPlaying = pbState == PlaybackStateCompat.STATE_PLAYING || pbState == PlaybackStateCompat.STATE_BUFFERING;
+                
+        // The default speed is 0 if it was never supplied. Adjust this to 1 if player is playing to ensure that the seek bar progresses properly
+        if (isPlaying && speed == 0) {
+            speed = 1;
+        }
 
         if(info.hasKey("elapsedTime")) {
             elapsedTime = (long)(info.getDouble("elapsedTime") * 1000);
@@ -380,7 +382,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         pb.setBufferedPosition(bufferedTime);
         pb.setActions(controls);
 
-        isPlaying = pbState == PlaybackStateCompat.STATE_PLAYING || pbState == PlaybackStateCompat.STATE_BUFFERING;
         if(session.isActive()) notification.show(nb, isPlaying);
 
         state = pb.build();
