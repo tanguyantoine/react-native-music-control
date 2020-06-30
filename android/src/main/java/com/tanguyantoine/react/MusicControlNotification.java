@@ -226,13 +226,23 @@ public class MusicControlNotification {
         @Override
         public void onCreate() {
             super.onCreate();
-            notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
-            startForeground(NOTIFICATION_ID, notification);
+            try {
+                if (MusicControlModule.INSTANCE.notification == null) {
+                    MusicControlModule.INSTANCE.init();
+                }
+                notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
+                startForeground(NOTIFICATION_ID, notification);
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
         }
 
         @Override
         public int onStartCommand(Intent intent, int flags, int startId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (MusicControlModule.INSTANCE.notification == null) {
+                    MusicControlModule.INSTANCE.init();
+                }
                 notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
                 startForeground(NOTIFICATION_ID, notification);
             }
