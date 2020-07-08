@@ -10,8 +10,6 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import androidx.core.app.NotificationManagerCompat;
 
-import static com.tanguyantoine.react.MusicControlModule.NOTIFICATION_ID;
-
 public class MusicControlEventEmitter {
     private static void sendEvent(ReactApplicationContext context, String type, Object value) {
         WritableMap data = Arguments.createMap();
@@ -31,9 +29,11 @@ public class MusicControlEventEmitter {
     }
 
     private final ReactApplicationContext context;
+    private int notificationId;
 
-    MusicControlEventEmitter(ReactApplicationContext context) {
+    MusicControlEventEmitter(ReactApplicationContext context, int notificationId) {
         this.context = context;
+        this.notificationId = notificationId;
     }
 
     public void onPlay() {
@@ -82,7 +82,7 @@ public class MusicControlEventEmitter {
     }
 
     private void stopForegroundService() {
-        NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID);
+        NotificationManagerCompat.from(context).cancel(notificationId);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Intent myIntent =
                     new Intent(context, MusicControlNotification.NotificationService.class);
