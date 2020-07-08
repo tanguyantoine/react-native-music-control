@@ -12,6 +12,7 @@ declare const MusicControl: {
     RATING_4_STARS: any;
     RATING_5_STARS: any;
     RATING_PERCENTAGE: any;
+    setNotificationIds: (notificationId: number, channelId: String) => void;
     enableBackgroundMode: (enable: boolean) => void;
     setNowPlaying: (info: TPlayingInfo) => void;
     setPlayback: (info: TPlayingInfo) => void;
