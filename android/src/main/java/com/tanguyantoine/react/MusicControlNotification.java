@@ -215,7 +215,7 @@ public class MusicControlNotification {
                 }
                 notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
                 // call startForeground just after startForegroundService.
-                startForeground(NOTIFICATION_ID, notification);
+                startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
             }
         }
 
