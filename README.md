@@ -104,7 +104,8 @@ MusicControl.setNowPlaying({
   genre: 'Post-disco, Rhythm and Blues, Funk, Dance-pop',
   duration: 294, // (Seconds)
   description: '', // Android Only
-  color: 0xFFFFFF, // Notification Color - Android Only
+  color: 0xFFFFFF, // Android Only - Notification Color
+  colorized: true, // Android 8+ Only - Notification Color extracted from the artwork. Set to false to use the color property instead
   date: '1983-01-02T00:00:00Z', // Release Date (RFC 3339) - Android Only
   rating: 84, // Android Only (Boolean or Number depending on the type)
   notificationIcon: 'my_custom_icon' // Android Only (String), Android Drawable resource name for a custom notification icon
@@ -159,6 +160,12 @@ Resets, hides the music controls and disables everything.
 ```javascript
 MusicControl.stopControl()
 ```
+
+### Set notification id and channel id (Android Only). 
+```javascript
+MusicControl.setNotificationId(10, "channel")
+```
+If you want to change the default notification id and channel name, call this once before displaying any notifications. 
 
 ---
 
@@ -241,6 +248,7 @@ componentDidMount() {
 
 * Android only supports the intervals 5, 10, & 30, while iOS supports any number
 * The interval value only changes what number displays in the UI, the actual logic to skip forward or backward by a given amount must be implemented in the appropriate callbacks
+* Android 10+ does support the seek bar in the notification, but only when meeting specific requirements: setNowPlaying() must be called with a duration value before enabling any controls
 * When using [react-native-sound](https://github.com/zmxv/react-native-sound) for audio playback, make sure that on iOS `mixWithOthers` is set to `false` in [`Sound.setCategory(value, mixWithOthers)`](https://github.com/zmxv/react-native-sound#soundsetcategoryvalue-mixwithothers-ios-only). MusicControl will not work on a real device when this is set to `true`.
 * For lockscreen controls to appear enabled instead of greyed out, the accompanying listener for each control that you want to display on the lock screen must contain a valid function:
 

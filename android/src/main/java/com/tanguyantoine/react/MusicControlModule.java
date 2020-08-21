@@ -66,12 +66,12 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     private boolean isPlaying = false;
     private long controls = 0;
     protected int ratingType = RatingCompat.RATING_PERCENTAGE;
+    private Map<String, Integer> skipOptions = new HashMap<>();
 
     public NotificationClose notificationClose = NotificationClose.PAUSED;
 
-    public static final String CHANNEL_ID = "react-native-music-control";
-
-    public static final int NOTIFICATION_ID = 100;
+    private String channelId = "react-native-music-control";
+    private int notificationId = 100;
 
     public MusicControlModule(ReactApplicationContext context) {
         super(context);
@@ -104,7 +104,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     private void createChannel(ReactApplicationContext context) {
         NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, "Media playback", NotificationManager.IMPORTANCE_LOW);
+        NotificationChannel mChannel = new NotificationChannel(channelId, "Media playback", NotificationManager.IMPORTANCE_LOW);
         mChannel.setDescription("Media playback controls");
         mChannel.setShowBadge(false);
         mChannel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
@@ -147,6 +147,10 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         }
     }
 
+    public int getNotificationId() {
+        return notificationId;
+    }
+
     public void init() {
         if (init) return;
 
@@ -154,7 +158,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         context = getReactApplicationContext();
 
-        emitter = new MusicControlEventEmitter(context);
+        emitter = new MusicControlEventEmitter(context, notificationId);
 
         session = new MediaSessionCompat(context, "MusicControl");
         session.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
@@ -176,7 +180,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createChannel(context);
         }
-        nb = new NotificationCompat.Builder(context, CHANNEL_ID);
+        nb = new NotificationCompat.Builder(context, channelId);
         nb.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
          nb.setPriority(NotificationCompat.PRIORITY_HIGH);
 
@@ -185,7 +189,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         state = pb.build();
 
         notification = new MusicControlNotification(this, context);
-        notification.updateActions(controls, null);
+        notification.updateActions(controls, skipOptions);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MusicControlNotification.REMOVE_NOTIFICATION);
@@ -204,6 +208,12 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         isPlaying = false;
         init = true;
+    }
+
+    @ReactMethod
+    public synchronized  void setNotificationIds(int notificationId, String channelId) {
+        this.notificationId = notificationId;
+        this.channelId = channelId;
     }
 
     @ReactMethod
@@ -267,14 +277,8 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         String date = metadata.hasKey("date") ? metadata.getString("date") : null;
         long duration = metadata.hasKey("duration") ? (long)(metadata.getDouble("duration") * 1000) : 0;
         int notificationColor = metadata.hasKey("color") ? metadata.getInt("color") : NotificationCompat.COLOR_DEFAULT;
+        final boolean isColorized = metadata.hasKey("colorized") ? metadata.getBoolean("colorized") : ! metadata.hasKey("color");
         String notificationIcon = metadata.hasKey("notificationIcon") ? metadata.getString("notificationIcon") : null;
-
-        // If a color is supplied, we need to clear the MediaStyle set during init().
-        // Otherwise, the color will not be used for the notification's background.
-        boolean removeFade = metadata.hasKey("color");
-        if(removeFade) {
-            nb.setStyle(new MediaStyle());
-        }
 
         RatingCompat rating;
         if(metadata.hasKey("rating")) {
@@ -306,6 +310,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         nb.setContentText(artist);
         nb.setContentInfo(album);
         nb.setColor(notificationColor);
+        nb.setColorized(false);
 
         notification.setCustomNotificationIcon(notificationIcon);
 
@@ -333,6 +338,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                         session.setMetadata(md.build());
                     }
                     if(nb != null) {
+                        // If enabled, Android 8+ "colorizes" the notification color by extracting colors from the artwork
+                        nb.setColorized(isColorized);
+
                         nb.setLargeIcon(bitmap);
                         notification.show(nb, isPlaying);
                     }
@@ -363,6 +371,13 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         int maxVol = info.hasKey("maxVolume") ? info.getInt("maxVolume") : volume.getMaxVolume();
         int vol = info.hasKey("volume") ? info.getInt("volume") : volume.getCurrentVolume();
         ratingType = info.hasKey("rating") ? info.getInt("rating") : ratingType;
+        
+        isPlaying = pbState == PlaybackStateCompat.STATE_PLAYING || pbState == PlaybackStateCompat.STATE_BUFFERING;
+                
+        // The default speed is 0 if it was never supplied. Adjust this to 1 if player is playing to ensure that the seek bar progresses properly
+        if (isPlaying && speed == 0) {
+            speed = 1;
+        }
 
         if(info.hasKey("elapsedTime")) {
             elapsedTime = (long)(info.getDouble("elapsedTime") * 1000);
@@ -376,7 +391,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         pb.setBufferedPosition(bufferedTime);
         pb.setActions(controls);
 
-        isPlaying = pbState == PlaybackStateCompat.STATE_PLAYING || pbState == PlaybackStateCompat.STATE_BUFFERING;
         if(session.isActive()) notification.show(nb, isPlaying);
 
         state = pb.build();
@@ -406,8 +420,6 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     @ReactMethod
     synchronized public void enableControl(String control, boolean enable, ReadableMap options) {
         init();
-
-        Map<String, Integer> skipOptions = new HashMap<String, Integer>();
 
         long controlValue;
         switch(control) {
