@@ -221,8 +221,6 @@ public class MusicControlNotification {
 
         private Notification notification;
 
-        private Notification notification;
-
         @Override
         public void onCreate() {
             super.onCreate();
