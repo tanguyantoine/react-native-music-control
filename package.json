@@ -29,6 +29,7 @@
     "react-native": ">=0.40.0"
   },
   "scripts": {
+    "prepublish": "tsc -p tsconfig.json",
     "start": "tsc -p tsconfig.json -w",
     "test": "echo 'no tests'",
     "semantic-release:ci": "semantic-release --no-ci",
@@ -38,6 +39,7 @@
     "@semantic-release/changelog": "^3.0.4",
     "@semantic-release/git": "^7.0.16",
     "@types/react-native": "^0.60.7",
+    "react-native": "^0.59.9",
     "semantic-release": "^15.13.21",
     "typescript": "^3.5.3"
   }
