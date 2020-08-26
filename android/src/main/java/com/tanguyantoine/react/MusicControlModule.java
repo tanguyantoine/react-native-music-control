@@ -602,9 +602,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE:
             case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
-                if(session.isActive()) break;
+                if(session != null && session.isActive()) break;
 
-                // Trims memory when it reaches a critical level
+            // Trims memory when it reaches a critical level
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
                 Log.w(TAG, "Control resources are being removed due to system's low memory (Level: " + level + ")");
                 destroy();
