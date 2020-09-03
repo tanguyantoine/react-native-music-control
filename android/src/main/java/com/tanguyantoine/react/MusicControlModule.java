@@ -384,19 +384,23 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             artworkThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    Bitmap bitmap = loadArtwork(artworkUrl, artworkLocal);
+                    try {
+                        Bitmap bitmap = loadArtwork(artworkUrl, artworkLocal);
 
-                    if(session != null) {
-                        MediaMetadataCompat currentMetadata = session.getController().getMetadata();
-                        MediaMetadataCompat.Builder newBuilder = currentMetadata == null ? new MediaMetadataCompat.Builder() : new MediaMetadataCompat.Builder(currentMetadata);
-                        session.setMetadata(newBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap).build());
-                    }
-                    if(nb != null) {
-                        nb.setLargeIcon(bitmap);
-                        notification.show(nb, isPlaying);
-                    }
+                        if (session != null) {
+                            MediaMetadataCompat currentMetadata = session.getController().getMetadata();
+                            MediaMetadataCompat.Builder newBuilder = currentMetadata == null ? new MediaMetadataCompat.Builder() : new MediaMetadataCompat.Builder(currentMetadata);
+                            session.setMetadata(newBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap).build());
+                        }
+                        if (nb != null) {
+                            nb.setLargeIcon(bitmap);
+                            notification.show(nb, isPlaying);
+                        }
 
-                    artworkThread = null;
+                        artworkThread = null;
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
                 }
             });
             artworkThread.start();
