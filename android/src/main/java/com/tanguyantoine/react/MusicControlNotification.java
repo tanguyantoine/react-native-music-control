@@ -210,7 +210,7 @@ public class MusicControlNotification {
                 // startForeground method should be called within 5 seconds.
                 ContextCompat.startForegroundService(MusicControlNotification.NotificationService.this, intent);
 
-                if(MusicControlModule.INSTANCE.notification == null){
+                if(MusicControlModule.INSTANCE == null){
                     MusicControlModule.INSTANCE.init();
                 }
                 notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
@@ -225,7 +225,7 @@ public class MusicControlNotification {
         public void onCreate() {
             super.onCreate();
             try {
-                if (MusicControlModule.INSTANCE.notification == null) {
+                if (MusicControlModule.INSTANCE == null) {
                     MusicControlModule.INSTANCE.init();
                 }
                 notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
@@ -238,7 +238,7 @@ public class MusicControlNotification {
         @Override
         public int onStartCommand(Intent intent, int flags, int startId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                if (MusicControlModule.INSTANCE.notification == null) {
+                if (MusicControlModule.INSTANCE == null) {
                     MusicControlModule.INSTANCE.init();
                 }
                 notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
