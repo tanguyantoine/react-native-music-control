@@ -1,12 +1,15 @@
 package com.tanguyantoine.react;
 
-import android.app.NotificationManager;
+import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.ComponentCallbacks2;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Context;
 import androidx.core.content.ContextCompat;
+import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,6 +18,7 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.SystemClock;
 import android.os.Build;
+import android.os.IBinder;
 import androidx.annotation.RequiresApi;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
@@ -203,12 +207,63 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
 
         afListener = new MusicControlAudioFocusListener(context, emitter, volume);
 
-        ContextCompat.startForegroundService(context, myIntent);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Try to bind the service
+            try {
+                context.bindService(myIntent, connection, Context.BIND_AUTO_CREATE);
+            }
+            catch (Exception ignored){
+                ContextCompat.startForegroundService(context, myIntent);
+            }
+        }
+        else {
+            context.startService(myIntent);
+        }
+
         context.registerComponentCallbacks(this);
 
         isPlaying = false;
         init = true;
     }
+
+    // Create the service connection.
+    private ServiceConnection connection = new ServiceConnection()
+    {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service)
+        {
+            Log.w(TAG, "onServiceConnected");
+            // The binder of the service that returns the instance that is created.
+            MusicControlNotification.NotificationService.LocalBinder binder = (MusicControlNotification.NotificationService.LocalBinder) service;
+
+            // The getter method to acquire the service.
+            MusicControlNotification.NotificationService notificationService = binder.getService();
+
+            if (notificationService != null) {
+                notificationService.forceForeground();
+            }
+            // Release the connection to prevent leaks.
+            context.unbindService(this);
+        }
+
+        @Override
+        public void onBindingDied(ComponentName name)
+        {
+            Log.w(TAG, "Binding has dead.");
+        }
+
+        @Override
+        public void onNullBinding(ComponentName name)
+        {
+            Log.w(TAG, "Bind was null.");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name)
+        {
+            Log.w(TAG, "Service is disconnected..");
+        }
+    };
 
     @ReactMethod
     public synchronized  void setNotificationIds(int notificationId, String channelId) {
@@ -268,6 +323,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     synchronized public void setNowPlaying(ReadableMap metadata) {
         init();
         if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
+        artworkThread = null;
+
+        md = new MediaMetadataCompat.Builder();
 
         String title = metadata.hasKey("title") ? metadata.getString("title") : null;
         String artist = metadata.hasKey("artist") ? metadata.getString("artist") : null;
@@ -331,21 +389,27 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             artworkThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    Bitmap bitmap = loadArtwork(artworkUrl, artworkLocal);
+                    try {
+                        Bitmap bitmap = loadArtwork(artworkUrl, artworkLocal);
 
-                    if(md != null) {
-                        md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap);
-                        session.setMetadata(md.build());
+                        if(session != null) {
+                            MediaMetadataCompat currentMetadata = session.getController().getMetadata();
+                            MediaMetadataCompat.Builder newBuilder = currentMetadata == null ? new MediaMetadataCompat.Builder() : new MediaMetadataCompat.Builder(currentMetadata);
+                            session.setMetadata(newBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap).build());
+                        }
+                        if(nb != null) {
+                            // If enabled, Android 8+ "colorizes" the notification color by extracting colors from the artwork
+                            nb.setColorized(isColorized);
+
+                            nb.setLargeIcon(bitmap);
+                            notification.show(nb, isPlaying);
+                        }
+
+                        artworkThread = null;
+
+                    }catch (Exception ex){
+                        ex.printStackTrace();
                     }
-                    if(nb != null) {
-                        // If enabled, Android 8+ "colorizes" the notification color by extracting colors from the artwork
-                        nb.setColorized(isColorized);
-
-                        nb.setLargeIcon(bitmap);
-                        notification.show(nb, isPlaying);
-                    }
-
-                    artworkThread = null;
                 }
             });
             artworkThread.start();
@@ -371,9 +435,9 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         int maxVol = info.hasKey("maxVolume") ? info.getInt("maxVolume") : volume.getMaxVolume();
         int vol = info.hasKey("volume") ? info.getInt("volume") : volume.getCurrentVolume();
         ratingType = info.hasKey("rating") ? info.getInt("rating") : ratingType;
-        
+
         isPlaying = pbState == PlaybackStateCompat.STATE_PLAYING || pbState == PlaybackStateCompat.STATE_BUFFERING;
-                
+
         // The default speed is 0 if it was never supplied. Adjust this to 1 if player is playing to ensure that the seek bar progresses properly
         if (isPlaying && speed == 0) {
             speed = 1;
@@ -542,12 +606,11 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             // Trims memory when it reaches a moderate level and the session is inactive
             case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE:
-                if(session.isActive()) break;
-
-                // Trims memory when it reaches a critical level
             case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
-            case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
+                if(session != null && session.isActive()) break;
 
+            // Trims memory when it reaches a critical level
+            case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
                 Log.w(TAG, "Control resources are being removed due to system's low memory (Level: " + level + ")");
                 destroy();
                 break;
