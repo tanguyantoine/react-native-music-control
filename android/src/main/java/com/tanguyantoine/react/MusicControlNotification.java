@@ -5,13 +5,16 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
+import androidx.core.content.ContextCompat;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 
+import java.lang.ref.WeakReference;
 import java.util.Map;
 
 import androidx.core.app.NotificationCompat;
@@ -176,9 +179,44 @@ public class MusicControlNotification {
 
     public static class NotificationService extends Service {
 
+        private final LocalBinder binder = new LocalBinder();
+        public class LocalBinder extends Binder {
+
+            private WeakReference<NotificationService> weakService;
+
+            /**
+             * Inject service instance to weak reference.
+             */
+            public void onBind(NotificationService service) {
+                this.weakService = new WeakReference<>(service);
+            }
+
+            public NotificationService getService() {
+                return weakService == null ? null : weakService.get();
+            }
+        }
+
         @Override
         public IBinder onBind(Intent intent) {
-            return null;
+            binder.onBind(MusicControlNotification.NotificationService.this);
+            return binder;
+        }
+
+        public void forceForeground() {
+            // API lower than 26 do not need this work around.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Intent intent = new Intent(MusicControlNotification.NotificationService.this, MusicControlNotification.NotificationService.class);
+                // service has already been initialized.
+                // startForeground method should be called within 5 seconds.
+                ContextCompat.startForegroundService(MusicControlNotification.NotificationService.this, intent);
+
+                if(MusicControlModule.INSTANCE == null){
+                    MusicControlModule.INSTANCE.init();
+                }
+                notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
+                // call startForeground just after startForegroundService.
+                startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
+            }
         }
 
         private Notification notification;
@@ -186,13 +224,23 @@ public class MusicControlNotification {
         @Override
         public void onCreate() {
             super.onCreate();
-            notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
-            startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
+            try {
+                if (MusicControlModule.INSTANCE == null) {
+                    MusicControlModule.INSTANCE.init();
+                }
+                notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
+               startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
         }
 
         @Override
         public int onStartCommand(Intent intent, int flags, int startId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (MusicControlModule.INSTANCE == null) {
+                    MusicControlModule.INSTANCE.init();
+                }
                 notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
                 startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
             }
