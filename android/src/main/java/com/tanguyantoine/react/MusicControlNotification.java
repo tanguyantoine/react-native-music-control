@@ -107,7 +107,11 @@ public class MusicControlNotification {
         // Open the app when the notification is clicked
         String packageName = context.getPackageName();
         Intent openApp = context.getPackageManager().getLaunchIntentForPackage(packageName);
-        builder.setContentIntent(PendingIntent.getActivity(context, 0, openApp, 0));
+        try {
+            builder.setContentIntent(PendingIntent.getActivity(context, 0, openApp, 0));
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+        }
 
         // Remove notification
         Intent remove = new Intent(REMOVE_NOTIFICATION);
