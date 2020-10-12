@@ -13,20 +13,23 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
-        with:
-          node-version: 12
-          registry-url: https://registry.npmjs.org/
       - run: yarn install --frozen-lockfile
       - name: npm version
         run: |
           npm version ${{ github.event.inputs.version }} --git-tag-version=false
-      - name: Commit changes
-        uses: EndBug/add-and-commit@v5
+      - uses: EndBug/add-and-commit@v5
         with:
+          # The arguments for the `git add` command (see the paragraph below for more info)
+          # Default: '.'
+          add: '.'
+
+          # The name of the user that will be displayed as the author of the commit
+          # Default: author of the commit that triggered the run
           author_name: Release Bot
-          message: 'Bump version'
+          message: 'Bump version: by ${{github.actor}}'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # This is necessary in order to push a commit to the repo
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Leave this line unchanged
 
       - uses: JS-DevTools/npm-publish@v1
         with:
