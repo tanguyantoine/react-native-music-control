@@ -1,9 +1,12 @@
 name: Publish
 
 on:
-  push:
-    tags:
-      - release-*
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version major | minor | patch'
+        required: true
+        default: 'minor'
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
@@ -14,12 +17,17 @@ jobs:
           node-version: 12
           registry-url: https://registry.npmjs.org/
       - run: yarn install --frozen-lockfile
-      - run: yarn semantic-release:ci
+      - run: npm version ${{ github.event.inputs.name }}
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v5
+        with:
+          author_name: Release Bot
+          message: 'Bump version'
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          NPM_TOKEN: ${{secrets.NPM_TOKEN}}
-          NPM_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
 
   publish-gpr:
     runs-on: ubuntu-latest
@@ -31,6 +39,6 @@ jobs:
           registry-url: https://npm.pkg.github.com/
           scope: '@tanguyantoine'
       - run: yarn install --frozen-lockfile
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
+      - uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_AUTH_TOKEN }}
