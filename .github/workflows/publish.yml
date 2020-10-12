@@ -19,9 +19,7 @@ jobs:
       - run: yarn install --frozen-lockfile
       - name: npm version
         run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          npm version ${{ github.event.inputs.version }}
+          npm version ${{ github.event.inputs.version }} --git-tag-version=false
       - name: Commit changes
         uses: EndBug/add-and-commit@v5
         with:
@@ -29,6 +27,7 @@ jobs:
           message: 'Bump version'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
