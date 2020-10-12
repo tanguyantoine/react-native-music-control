@@ -17,7 +17,7 @@ jobs:
           node-version: 12
           registry-url: https://registry.npmjs.org/
       - run: yarn install --frozen-lockfile
-      - run: npm version ${{ github.event.inputs.name }}
+      - run: npm version ${{ github.event.inputs.version }}  --git-tag-version=false
       - name: Commit changes
         uses: EndBug/add-and-commit@v5
         with:
