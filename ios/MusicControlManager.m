@@ -37,7 +37,8 @@
     @"playbackQueueIndex": MPNowPlayingInfoPropertyPlaybackQueueIndex, \
     @"playbackQueueCount": MPNowPlayingInfoPropertyPlaybackQueueCount, \
     @"chapterNumber": MPNowPlayingInfoPropertyChapterNumber, \
-    @"chapterCount": MPNowPlayingInfoPropertyChapterCount \
+    @"chapterCount": MPNowPlayingInfoPropertyChapterCount, \
+    @"isLiveStream": MPNowPlayingInfoPropertyIsLiveStream \
 }
 
 @implementation MusicControlManager
