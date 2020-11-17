@@ -53,7 +53,7 @@ const MusicControl = {
   enableControl: function(controlName: string, enable: boolean, options = {}) {
     NativeMusicControl.enableControl(controlName, enable, options || {})
   },
-  handleCommand: function(commandName: Command, value: any) {
+  handleCommand: function(commandName: Command | string, value: any) {
     if (handlers[commandName]) {
       //@ts-ignore
       handlers[commandName](value)
