@@ -199,43 +199,43 @@ componentDidMount() {
 
     // on iOS this event will also be triggered by audio router change events
     // happening when headphones are unplugged or a bluetooth audio peripheral disconnects from the device
-    MusicControl.on('pause', ()=> {
+    MusicControl.on(MusicControl.Command.pause, ()=> {
       this.props.dispatch(pauseRemoteControl());
     })
 
-    MusicControl.on('stop', ()=> {
+    MusicControl.on(MusicControl.Command.stop, ()=> {
       this.props.dispatch(stopRemoteControl());
     })
 
-    MusicControl.on('nextTrack', ()=> {
+    MusicControl.on(MusicControl.Command.nextTrack, ()=> {
       this.props.dispatch(nextRemoteControl());
     })
 
-    MusicControl.on('previousTrack', ()=> {
+    MusicControl.on(MusicControl.Command.previousTrack, ()=> {
       this.props.dispatch(previousRemoteControl());
     })
 
-    MusicControl.on('changePlaybackPosition', ()=> {
+    MusicControl.on(MusicControl.Command.changePlaybackPosition, ()=> {
       this.props.dispatch(updateRemoteControl());
     })
 
-    MusicControl.on('seekForward', ()=> {});
-    MusicControl.on('seekBackward', ()=> {});
+    MusicControl.on(MusicControl.Command.seekForward, ()=> {});
+    MusicControl.on(MusicControl.Command.seekBackward, ()=> {});
 
-    MusicControl.on('seek', (pos)=> {}); // Android only (Seconds)
-    MusicControl.on('volume', (volume)=> {}); // Android only (0 to maxVolume) - Only fired when remoteVolume is enabled
+    MusicControl.on(MusicControl.Command.seek, (pos)=> {}); // Android only (Seconds)
+    MusicControl.on(MusicControl.Command.volume, (volume)=> {}); // Android only (0 to maxVolume) - Only fired when remoteVolume is enabled
 
     // Android Only (Boolean for RATING_HEART or RATING_THUMBS_UP_DOWN, Number for other types)
-    MusicControl.on('setRating', (rating)=> {});
+    MusicControl.on(MusicControl.Command.setRating, (rating)=> {});
 
-    MusicControl.on('togglePlayPause', ()=> {}); // iOS only
-    MusicControl.on('enableLanguageOption', ()=> {}); // iOS only
-    MusicControl.on('disableLanguageOption', ()=> {}); // iOS only
-    MusicControl.on('skipForward', ()=> {});
-    MusicControl.on('skipBackward', ()=> {});
+    MusicControl.on(MusicControl.Command.togglePlayPause, ()=> {}); // iOS only
+    MusicControl.on(MusicControl.Command.enableLanguageOption, ()=> {}); // iOS only
+    MusicControl.on(MusicControl.Command.disableLanguageOption, ()=> {}); // iOS only
+    MusicControl.on(MusicControl.Command.skipForward, ()=> {});
+    MusicControl.on(MusicControl.Command.skipBackward, ()=> {});
 
     // Android Only
-    MusicControl.on('closeNotification', ()=> {
+    MusicControl.on(MusicControl.Command.closeNotification, ()=> {
       this.props.dispatch(onAudioEnd());
     })
 }
@@ -254,7 +254,7 @@ componentDidMount() {
 * For lockscreen controls to appear enabled instead of greyed out, the accompanying listener for each control that you want to display on the lock screen must contain a valid function:
 
 ```
-MusicControl.on('play', () => {
+MusicControl.on(MusicControl.Command.play, () => {
   // A valid funcion must be present
   player.play()
 })
