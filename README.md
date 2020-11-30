@@ -196,7 +196,7 @@ componentDidMount() {
     MusicControl.on('play', ()=> {
       this.props.dispatch(playRemoteControl());
     })
-
+import { Command } from 'react-native-music-control'
     // on iOS this event will also be triggered by audio router change events
     // happening when headphones are unplugged or a bluetooth audio peripheral disconnects from the device
     MusicControl.on(MusicControl.Command.pause, ()=> {
