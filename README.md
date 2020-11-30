@@ -2,15 +2,17 @@
 
 Display and manage media controls on lock screen and notification center for iOS and Android.
 
-![NPM Version](https://img.shields.io/npm/v/react-native-music-control?style=flat-square "NPM Version")
-![NPM Downloads](https://img.shields.io/npm/dm/react-native-music-control?style=flat-square "NPM Downloads")
+![NPM Version](https://img.shields.io/npm/v/react-native-music-control?style=flat-square 'NPM Version')
+![NPM Downloads](https://img.shields.io/npm/dm/react-native-music-control?style=flat-square 'NPM Downloads')
 
 ## Project
+
 With Yarn:
 
 ```
 yarn add react-native-music-control
 ```
+
 or with NPM:
 
 ```
@@ -18,12 +20,14 @@ npm install react-native-music-control --save
 ```
 
 ## iOS
+
 1. `pod install --project-directory=ios/`
 1. Enable Audio Background mode in XCode project settings
 
 ![XCode bqckground mode enabled](https://user-images.githubusercontent.com/263097/28630866-beb84094-722b-11e7-8ed2-b495c9f37956.png)
 
 ## Android
+
 Add the `android.permission.FOREGROUND_SERVICE` permission to your `AndroidManifest.xml`
 
 ```
@@ -31,9 +35,11 @@ Add the `android.permission.FOREGROUND_SERVICE` permission to your `AndroidManif
 ```
 
 ## For React Native < v0.60
+
 See here: [README-PRE-0.60.md](./README-PRE-0.60.md)
 
 ## Troubleshooting
+
 See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
 
 ---
@@ -41,7 +47,7 @@ See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
 # Usage
 
 ```javascript
-import MusicControl from 'react-native-music-control';
+import MusicControl from 'react-native-music-control'
 ```
 
 ### Enable and Disable controls
@@ -104,12 +110,12 @@ MusicControl.setNowPlaying({
   genre: 'Post-disco, Rhythm and Blues, Funk, Dance-pop',
   duration: 294, // (Seconds)
   description: '', // Android Only
-  color: 0xFFFFFF, // Android Only - Notification Color
+  color: 0xffffff, // Android Only - Notification Color
   colorized: true, // Android 8+ Only - Notification Color extracted from the artwork. Set to false to use the color property instead
   date: '1983-01-02T00:00:00Z', // Release Date (RFC 3339) - Android Only
   rating: 84, // Android Only (Boolean or Number depending on the type)
   notificationIcon: 'my_custom_icon', // Android Only (String), Android Drawable resource name for a custom notification icon
-  isLiveStream: true // iOS Only (Boolean), Show or hide Live Indicator instead of seekbar on lock screen for live streams. Default value is false.
+  isLiveStream: true, // iOS Only (Boolean), Show or hide Live Indicator instead of seekbar on lock screen for live streams. Default value is false.
 })
 ```
 
@@ -127,22 +133,23 @@ MusicControl.updatePlayback({
   bufferedTime: 200, // Android Only (Seconds)
   volume: 10, // Android Only (Number from 0 to maxVolume) - Only used when remoteVolume is enabled
   maxVolume: 10, // Android Only (Number) - Only used when remoteVolume is enabled
-  rating: MusicControl.RATING_PERCENTAGE // Android Only (RATING_HEART, RATING_THUMBS_UP_DOWN, RATING_3_STARS, RATING_4_STARS, RATING_5_STARS, RATING_PERCENTAGE)
+  rating: MusicControl.RATING_PERCENTAGE, // Android Only (RATING_HEART, RATING_THUMBS_UP_DOWN, RATING_3_STARS, RATING_4_STARS, RATING_5_STARS, RATING_PERCENTAGE)
 })
 ```
 
-*Examples*
+_Examples_
+
 ```javascript
 // Changes the state to paused
 MusicControl.updatePlayback({
   state: MusicControl.STATE_PAUSED,
-  elapsedTime: 135
+  elapsedTime: 135,
 })
 
 // Changes the volume
 MusicControl.updatePlayback({
   volume: 9, // Android Only
-  elapsedTime: 167
+  elapsedTime: 167,
 })
 ```
 
@@ -162,11 +169,13 @@ Resets, hides the music controls and disables everything.
 MusicControl.stopControl()
 ```
 
-### Set notification id and channel id (Android Only). 
+### Set notification id and channel id (Android Only).
+
 ```javascript
-MusicControl.setNotificationId(10, "channel")
+MusicControl.setNotificationId(10, 'channel')
 ```
-If you want to change the default notification id and channel name, call this once before displaying any notifications. 
+
+If you want to change the default notification id and channel name, call this once before displaying any notifications.
 
 ---
 
@@ -174,13 +183,13 @@ There is also a `closeNotification` control on Android controls the swipe behavi
 
 ```javascript
 // Always allow user to close notification on swipe
-MusicControl.enableControl('closeNotification', true, {when: 'always'})
+MusicControl.enableControl('closeNotification', true, { when: 'always' })
 
 // Default - Allow user to close notification on swipe when audio is paused
-MusicControl.enableControl('closeNotification', true, {when: 'paused'})
+MusicControl.enableControl('closeNotification', true, { when: 'paused' })
 
 // Never allow user to close notification on swipe
-MusicControl.enableControl('closeNotification', true, {when: 'never'})
+MusicControl.enableControl('closeNotification', true, { when: 'never' })
 ```
 
 ### Register to Events
@@ -203,39 +212,39 @@ import { Command } from 'react-native-music-control'
       this.props.dispatch(pauseRemoteControl());
     })
 
-    MusicControl.on(MusicControl.Command.stop, ()=> {
+    MusicControl.on(Command.stop, ()=> {
       this.props.dispatch(stopRemoteControl());
     })
 
-    MusicControl.on(MusicControl.Command.nextTrack, ()=> {
+    MusicControl.on(Command.nextTrack, ()=> {
       this.props.dispatch(nextRemoteControl());
     })
 
-    MusicControl.on(MusicControl.Command.previousTrack, ()=> {
+    MusicControl.on(Command.previousTrack, ()=> {
       this.props.dispatch(previousRemoteControl());
     })
 
-    MusicControl.on(MusicControl.Command.changePlaybackPosition, ()=> {
+    MusicControl.on(Command.changePlaybackPosition, ()=> {
       this.props.dispatch(updateRemoteControl());
     })
 
-    MusicControl.on(MusicControl.Command.seekForward, ()=> {});
-    MusicControl.on(MusicControl.Command.seekBackward, ()=> {});
+    MusicControl.on(Command.seekForward, ()=> {});
+    MusicControl.on(Command.seekBackward, ()=> {});
 
-    MusicControl.on(MusicControl.Command.seek, (pos)=> {}); // Android only (Seconds)
-    MusicControl.on(MusicControl.Command.volume, (volume)=> {}); // Android only (0 to maxVolume) - Only fired when remoteVolume is enabled
+    MusicControl.on(Command.seek, (pos)=> {}); // Android only (Seconds)
+    MusicControl.on(Command.volume, (volume)=> {}); // Android only (0 to maxVolume) - Only fired when remoteVolume is enabled
 
     // Android Only (Boolean for RATING_HEART or RATING_THUMBS_UP_DOWN, Number for other types)
-    MusicControl.on(MusicControl.Command.setRating, (rating)=> {});
+    MusicControl.on(Command.setRating, (rating)=> {});
 
-    MusicControl.on(MusicControl.Command.togglePlayPause, ()=> {}); // iOS only
-    MusicControl.on(MusicControl.Command.enableLanguageOption, ()=> {}); // iOS only
-    MusicControl.on(MusicControl.Command.disableLanguageOption, ()=> {}); // iOS only
-    MusicControl.on(MusicControl.Command.skipForward, ()=> {});
-    MusicControl.on(MusicControl.Command.skipBackward, ()=> {});
+    MusicControl.on(Command.togglePlayPause, ()=> {}); // iOS only
+    MusicControl.on(Command.enableLanguageOption, ()=> {}); // iOS only
+    MusicControl.on(Command.disableLanguageOption, ()=> {}); // iOS only
+    MusicControl.on(Command.skipForward, ()=> {});
+    MusicControl.on(Command.skipBackward, ()=> {});
 
     // Android Only
-    MusicControl.on(MusicControl.Command.closeNotification, ()=> {
+    MusicControl.on(Command.closeNotification, ()=> {
       this.props.dispatch(onAudioEnd());
     })
 }
@@ -247,14 +256,14 @@ import { Command } from 'react-native-music-control'
 
 # Important Notes
 
-* Android only supports the intervals 5, 10, & 30, while iOS supports any number
-* The interval value only changes what number displays in the UI, the actual logic to skip forward or backward by a given amount must be implemented in the appropriate callbacks
-* Android 10+ does support the seek bar in the notification, but only when meeting specific requirements: setNowPlaying() must be called with a duration value before enabling any controls
-* When using [react-native-sound](https://github.com/zmxv/react-native-sound) for audio playback, make sure that on iOS `mixWithOthers` is set to `false` in [`Sound.setCategory(value, mixWithOthers)`](https://github.com/zmxv/react-native-sound#soundsetcategoryvalue-mixwithothers-ios-only). MusicControl will not work on a real device when this is set to `true`.
-* For lockscreen controls to appear enabled instead of greyed out, the accompanying listener for each control that you want to display on the lock screen must contain a valid function:
+- Android only supports the intervals 5, 10, & 30, while iOS supports any number
+- The interval value only changes what number displays in the UI, the actual logic to skip forward or backward by a given amount must be implemented in the appropriate callbacks
+- Android 10+ does support the seek bar in the notification, but only when meeting specific requirements: setNowPlaying() must be called with a duration value before enabling any controls
+- When using [react-native-sound](https://github.com/zmxv/react-native-sound) for audio playback, make sure that on iOS `mixWithOthers` is set to `false` in [`Sound.setCategory(value, mixWithOthers)`](https://github.com/zmxv/react-native-sound#soundsetcategoryvalue-mixwithothers-ios-only). MusicControl will not work on a real device when this is set to `true`.
+- For lockscreen controls to appear enabled instead of greyed out, the accompanying listener for each control that you want to display on the lock screen must contain a valid function:
 
 ```
-MusicControl.on(MusicControl.Command.play, () => {
+MusicControl.on(Command.play, () => {
   // A valid funcion must be present
   player.play()
 })
@@ -265,8 +274,9 @@ MusicControl.on(MusicControl.Command.play, () => {
 It is possible to customize the icon used in the notification on Android. By default you can add a drawable resource to your package with the file name `music_control_icon` and the notification will use your custom icon. If you need to specify a custom icon name, or change your notification icon during runtime, the `setNowPlaying` function accepts a string for an Android drawable resource name in the `notificationIcon` prop. Keep in mind that just like with `music_control_icon` the resource specified has to be in the drawable package of your Android app.
 
 ```javascript
-  MusicControl.setCustomNotificationIcon('my_custom_icon');
+MusicControl.setCustomNotificationIcon('my_custom_icon')
 ```
 
 # Contributing
+
 Of course! We are waiting for your PR :)
