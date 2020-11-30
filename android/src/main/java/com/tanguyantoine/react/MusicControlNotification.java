@@ -128,11 +128,11 @@ public class MusicControlNotification {
     public void hide() {
         NotificationManagerCompat.from(context).cancel(MusicControlModule.INSTANCE.getNotificationId());
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
+        try {
             Intent myIntent = new Intent(context, MusicControlNotification.NotificationService.class);
             context.stopService(myIntent);
-
+        }catch(Exception e){
+            System.out.println(e.getMessage());
         }
     }
 
