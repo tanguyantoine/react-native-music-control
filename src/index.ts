@@ -9,6 +9,8 @@ import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource'
 import constants from './constants'
 import { Command } from './types'
 
+export { Command }
+
 const NativeMusicControl = NativeModules.MusicControlManager
 let handlers: { [key in Command]?: (value: any) => void } = {}
 let listenerOfNativeMusicControl: any = null
