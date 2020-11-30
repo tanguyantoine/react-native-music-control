@@ -1,4 +1,5 @@
 import { Command } from './types';
+export { Command };
 declare const MusicControl: {
     STATE_PLAYING: any;
     STATE_PAUSED: any;
