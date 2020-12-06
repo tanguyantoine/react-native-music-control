@@ -90,6 +90,9 @@ MusicControl.enableControl('disableLanguageOption', false)
 MusicControl.enableControl('skipBackward', true, {interval: 15}))
 MusicControl.enableControl('skipForward', true, {interval: 30}))
 ```
+For Android, 5, 10 and 30 is fixed
+
+For iOS, it is dynamic so any number is accepted
 
 ### Now Playing
 
@@ -195,6 +198,8 @@ MusicControl.enableControl('closeNotification', true, { when: 'never' })
 ### Register to Events
 
 ```javascript
+import { Command } from 'react-native-music-control'
+
 componentDidMount() {
     MusicControl.enableBackgroundMode(true);
 
@@ -202,10 +207,10 @@ componentDidMount() {
     // As of {{ INSERT NEXT VERSION HERE}} works for android aswell.
     MusicControl.handleAudioInterruptions(true);
 
-    MusicControl.on('play', ()=> {
+    MusicControl.on(Command.play, ()=> {
       this.props.dispatch(playRemoteControl());
     })
-import { Command } from 'react-native-music-control'
+    
     // on iOS this event will also be triggered by audio router change events
     // happening when headphones are unplugged or a bluetooth audio peripheral disconnects from the device
     MusicControl.on(Command.pause, ()=> {
@@ -257,6 +262,8 @@ import { Command } from 'react-native-music-control'
 # Important Notes
 
 - Android only supports the intervals 5, 10, & 30, while iOS supports any number
+- Make sure when you call `MusicControl.resetNowPlaying()` and  `MusicControl.stopControl()` you must have controls enabled otherwise it will create issues
+- You can also use `Command` constants in `enableControl`
 - The interval value only changes what number displays in the UI, the actual logic to skip forward or backward by a given amount must be implemented in the appropriate callbacks
 - Android 10+ does support the seek bar in the notification, but only when meeting specific requirements: setNowPlaying() must be called with a duration value before enabling any controls
 - When using [react-native-sound](https://github.com/zmxv/react-native-sound) for audio playback, make sure that on iOS `mixWithOthers` is set to `false` in [`Sound.setCategory(value, mixWithOthers)`](https://github.com/zmxv/react-native-sound#soundsetcategoryvalue-mixwithothers-ios-only). MusicControl will not work on a real device when this is set to `true`.
