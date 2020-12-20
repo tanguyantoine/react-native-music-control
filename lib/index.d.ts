@@ -18,6 +18,7 @@ declare const MusicControl: {
     resetNowPlaying: () => void;
     enableControl: (controlName: string, enable: boolean, options?: {}) => void;
     handleCommand: (commandName: Command, value: any) => void;
+    setNotificationId: (notificationId: any, channelId: any) => void;
     on: (actionName: Command, cb: (value: any) => void) => void;
     off: (actionName: Command) => void;
     stopControl: () => void;
