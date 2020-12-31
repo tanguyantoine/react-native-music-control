@@ -50,6 +50,34 @@ See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
 import MusicControl from 'react-native-music-control'
 ```
 
+### Now Playing
+
+The `setNowPlaying` method enables the music controls. To disable them, use `resetNowPlaying()`.
+
+You should call this method after a sound is playing.
+
+For Android's rating system, remove the `rating` value for unrated tracks, use a boolean for RATING_HEART or RATING_THUMBS_UP_DOWN and use a number for other types.
+
+**Note**: To use custom types, you have to define the type with `updatePlayback` before calling this function.
+
+```javascript
+MusicControl.setNowPlaying({
+  title: 'Billie Jean',
+  artwork: 'https://i.imgur.com/e1cpwdo.png', // URL or RN's image require()
+  artist: 'Michael Jackson',
+  album: 'Thriller',
+  genre: 'Post-disco, Rhythm and Blues, Funk, Dance-pop',
+  duration: 294, // (Seconds)
+  description: '', // Android Only
+  color: 0xffffff, // Android Only - Notification Color
+  colorized: true, // Android 8+ Only - Notification Color extracted from the artwork. Set to false to use the color property instead
+  date: '1983-01-02T00:00:00Z', // Release Date (RFC 3339) - Android Only
+  rating: 84, // Android Only (Boolean or Number depending on the type)
+  notificationIcon: 'my_custom_icon', // Android Only (String), Android Drawable resource name for a custom notification icon
+  isLiveStream: true, // iOS Only (Boolean), Show or hide Live Indicator instead of seekbar on lock screen for live streams. Default value is false.
+})
+```
+
 ### Enable and Disable controls
 
 **iOS**: Lockscreen
@@ -93,34 +121,6 @@ MusicControl.enableControl('skipForward', true, {interval: 30}))
 For Android, 5, 10 and 30 is fixed
 
 For iOS, it is dynamic so any number is accepted
-
-### Now Playing
-
-The `setNowPlaying` method enables the music controls. To disable them, use `resetNowPlaying()`.
-
-You should call this method after a sound is playing.
-
-For Android's rating system, remove the `rating` value for unrated tracks, use a boolean for RATING_HEART or RATING_THUMBS_UP_DOWN and use a number for other types.
-
-**Note**: To use custom types, you have to define the type with `updatePlayback` before calling this function.
-
-```javascript
-MusicControl.setNowPlaying({
-  title: 'Billie Jean',
-  artwork: 'https://i.imgur.com/e1cpwdo.png', // URL or RN's image require()
-  artist: 'Michael Jackson',
-  album: 'Thriller',
-  genre: 'Post-disco, Rhythm and Blues, Funk, Dance-pop',
-  duration: 294, // (Seconds)
-  description: '', // Android Only
-  color: 0xffffff, // Android Only - Notification Color
-  colorized: true, // Android 8+ Only - Notification Color extracted from the artwork. Set to false to use the color property instead
-  date: '1983-01-02T00:00:00Z', // Release Date (RFC 3339) - Android Only
-  rating: 84, // Android Only (Boolean or Number depending on the type)
-  notificationIcon: 'my_custom_icon', // Android Only (String), Android Drawable resource name for a custom notification icon
-  isLiveStream: true, // iOS Only (Boolean), Show or hide Live Indicator instead of seekbar on lock screen for live streams. Default value is false.
-})
-```
 
 ### Update Playback
 
