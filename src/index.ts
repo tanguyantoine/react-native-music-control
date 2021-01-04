@@ -61,6 +61,11 @@ const MusicControl = {
       handlers[commandName](value)
     }
   },
+  setNotificationId: function (notificationId: any, channelId: any) {
+      if (IS_ANDROID) {
+          NativeMusicControl.setNotificationIds(notificationId, channelId);
+      }
+  },   
   on: function(actionName: Command, cb: (value: any) => void) {
     if (!listenerOfNativeMusicControl) {
       listenerOfNativeMusicControl = (IS_ANDROID
