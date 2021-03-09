@@ -183,6 +183,7 @@ public class MusicControlNotification {
 
     public static class NotificationService extends Service {
 
+        private boolean init = false;
         private final LocalBinder binder = new LocalBinder();
         public class LocalBinder extends Binder {
 
@@ -220,6 +221,7 @@ public class MusicControlNotification {
                 notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
                 // call startForeground just after startForegroundService.
                 startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
+                init = true;
             }
         }
 
@@ -233,7 +235,8 @@ public class MusicControlNotification {
                     MusicControlModule.INSTANCE.init();
                 }
                 notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
-               startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
+                startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
+				init = true;
             }catch (Exception ex){
                 ex.printStackTrace();
             }
@@ -241,12 +244,13 @@ public class MusicControlNotification {
 
         @Override
         public int onStartCommand(Intent intent, int flags, int startId) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!init && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 if (MusicControlModule.INSTANCE == null) {
                     MusicControlModule.INSTANCE.init();
                 }
                 notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
                 startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
+				init = true;
             }
             return START_NOT_STICKY;
         }
@@ -260,6 +264,7 @@ public class MusicControlNotification {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 stopForeground(true);
             }
+            init = false;
             stopSelf(); // Stop the service as we won't need it anymore
         }
 
@@ -273,7 +278,7 @@ public class MusicControlNotification {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 stopForeground(true);
             }
-
+            init = false;
             stopSelf();
         }
     }
