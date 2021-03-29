@@ -215,11 +215,19 @@ public class MusicControlNotification {
                 ContextCompat.startForegroundService(MusicControlNotification.NotificationService.this, intent);
 
                 if(MusicControlModule.INSTANCE == null){
-                    MusicControlModule.INSTANCE.init();
+                    try {
+                        MusicControlModule.INSTANCE.init();
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
                 }
-                notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
-                // call startForeground just after startForegroundService.
-                startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
+                try {
+                    notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
+                    // call startForeground just after startForegroundService.
+                    startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }                
             }
         }
 
@@ -243,10 +251,18 @@ public class MusicControlNotification {
         public int onStartCommand(Intent intent, int flags, int startId) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 if (MusicControlModule.INSTANCE == null) {
-                    MusicControlModule.INSTANCE.init();
+                    try {
+                        MusicControlModule.INSTANCE.init();
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
                 }
-                notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
-                startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
+                try {
+                    notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
+                    startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
             }
             return START_NOT_STICKY;
         }
