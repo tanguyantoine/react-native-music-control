@@ -28,11 +28,17 @@ npm install react-native-music-control --save
 
 ## Android
 
-Add the `android.permission.FOREGROUND_SERVICE` permission to your `AndroidManifest.xml`
-
-```
-<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-```
+1. Add the `android.permission.FOREGROUND_SERVICE` permission to your `AndroidManifest.xml`:
+    ```
+    <uses-permission
+      android:name="android.permission.FOREGROUND_SERVICE" />
+    ```
+1. Set the `launchMode` of MainActivity to `singleTask` by adding in `AndroidManifest.xml`:
+    ```
+    <activity
+      android:name=".MainActivity"
+      android:launchMode="singleTask">
+    ```
 
 ## For React Native < v0.60
 
