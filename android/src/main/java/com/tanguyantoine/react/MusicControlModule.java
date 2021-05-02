@@ -322,6 +322,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     @ReactMethod
     synchronized public void setNowPlaying(ReadableMap metadata) {
         init();
+        if (notification == null) return;
         if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
         artworkThread = null;
 
@@ -369,8 +370,10 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         nb.setContentInfo(album);
         nb.setColor(notificationColor);
         nb.setColorized(false);
-
-        notification.setCustomNotificationIcon(notificationIcon);
+ 
+        if(notificationIcon != null){
+            notification.setCustomNotificationIcon(notificationIcon);
+        }
 
         if(metadata.hasKey("artwork")) {
             String artwork = null;
@@ -426,6 +429,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     @ReactMethod
     synchronized public void updatePlayback(ReadableMap info) {
         init();
+        if (notification == null) return;
 
         long updateTime;
         long elapsedTime;
@@ -484,6 +488,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     @ReactMethod
     synchronized public void enableControl(String control, boolean enable, ReadableMap options) {
         init();
+        if (notification == null) return;
 
         long controlValue;
         switch(control) {
