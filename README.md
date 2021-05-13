@@ -121,8 +121,8 @@ MusicControl.enableControl('disableLanguageOption', false)
 `skipBackward` and `skipForward` controls on accept additional configuration options with `interval` key:
 
 ```javascript
-MusicControl.enableControl('skipBackward', true, {interval: 15}))
-MusicControl.enableControl('skipForward', true, {interval: 30}))
+MusicControl.enableControl('skipBackward', true, { interval: 15 })
+MusicControl.enableControl('skipForward', true, { interval: 30 })
 ```
 For Android, 5, 10 and 30 is fixed
 
