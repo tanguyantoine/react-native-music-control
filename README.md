@@ -235,8 +235,8 @@ componentDidMount() {
       this.props.dispatch(previousRemoteControl());
     })
 
-    MusicControl.on(Command.changePlaybackPosition, ()=> {
-      this.props.dispatch(updateRemoteControl());
+    MusicControl.on(Command.changePlaybackPosition, (playbackPosition)=> {
+      this.props.dispatch(updateRemoteControl(playbackPosition));
     })
 
     MusicControl.on(Command.seekForward, ()=> {});
