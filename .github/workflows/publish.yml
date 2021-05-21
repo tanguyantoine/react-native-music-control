@@ -1,36 +1,15 @@
 name: Publish
-
-on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version major | minor | patch'
-        required: true
-        default: 'minor'
+on: workflow_dispatch
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v2
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
       - run: yarn install --frozen-lockfile
-      - name: npm version
-        run: |
-          npm version ${{ github.event.inputs.version }} --git-tag-version=false
-      - uses: EndBug/add-and-commit@v5
-        with:
-          # The arguments for the `git add` command (see the paragraph below for more info)
-          # Default: '.'
-          add: '.'
-
-          # The name of the user that will be displayed as the author of the commit
-          # Default: author of the commit that triggered the run
-          author_name: Release Bot
-          message: 'Bump version: by ${{github.actor}}'
+      - run: npm publish
         env:
-          # This is necessary in order to push a commit to the repo
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Leave this line unchanged
-
-      - uses: JS-DevTools/npm-publish@v1
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
