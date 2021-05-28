@@ -1,4 +1,7 @@
-# react-native-music-control
+<div align="center">
+
+# 📱 🎵 react-native-music-control 📞 🎛️
+</div>
 
 Display and manage media controls on lock screen and notification center for iOS and Android.
 
@@ -293,3 +296,10 @@ MusicControl.setCustomNotificationIcon('my_custom_icon')
 # Contributing
 
 Of course! We are waiting for your PR :)
+<!-- Copy-paste in your Readme.md file -->
+
+<a href = "https://github.com/tanguyantoine/react-native-music-control/graphs/contributors">
+  <img src = "https://contrib.rocks/image?repo=tanguyantoine/react-native-music-control"/>
+</a>
+
+Made with [contributors-img](https://contrib.rocks).
