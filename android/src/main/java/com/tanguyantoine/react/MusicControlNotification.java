@@ -108,7 +108,7 @@ public class MusicControlNotification {
         String packageName = context.getPackageName();
         Intent openApp = context.getPackageManager().getLaunchIntentForPackage(packageName);
         try {
-            builder.setContentIntent(PendingIntent.getActivity(context, 0, openApp, 0));
+            builder.setContentIntent(PendingIntent.getActivity(context, 0, openApp, PendingIntent.FLAG_IMMUTABLE));
         }catch(Exception e){
             System.out.println(e.getMessage());
         }
@@ -116,7 +116,7 @@ public class MusicControlNotification {
         // Remove notification
         Intent remove = new Intent(REMOVE_NOTIFICATION);
         remove.putExtra(PACKAGE_NAME, context.getApplicationInfo().packageName);
-        builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, remove, PendingIntent.FLAG_UPDATE_CURRENT));
+        builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, remove, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT));
 
         return builder.build();
     }
@@ -176,7 +176,7 @@ public class MusicControlNotification {
         Intent intent = new Intent(MEDIA_BUTTON);
         intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
         intent.putExtra(PACKAGE_NAME, packageName);
-        PendingIntent i = PendingIntent.getBroadcast(context, keyCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent i = PendingIntent.getBroadcast(context, keyCode, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
         return new NotificationCompat.Action(icon, title, i);
     }
