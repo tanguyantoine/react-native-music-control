@@ -2,7 +2,7 @@
           package="com.tanguyantoine.react">
 
     <application>
-        <service android:stopWithTask="true" android:name=".MusicControlNotification$NotificationService" />
+        <service android:stopWithTask="true" android:name=".MusicControlNotification$NotificationService" android:foregroundServiceType="mediaPlayback" />
     </application>
 
 </manifest>
