@@ -271,6 +271,12 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         this.channelId = channelId;
     }
 
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    public synchronized boolean hasSession() {
+        if (session == null) return false;
+        return true;
+    }
+
     @ReactMethod
     public synchronized void stopControl() {
         if (!init)

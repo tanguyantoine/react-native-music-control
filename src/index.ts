@@ -84,6 +84,9 @@ const MusicControl = {
       listenerOfNativeMusicControl = null
     }
   },
+  hasSession: function(): boolean {
+    return NativeMusicControl.hasSession();
+  },
   stopControl: function(): void {
     if (listenerOfNativeMusicControl) {
       listenerOfNativeMusicControl.remove()

@@ -23,6 +23,7 @@ declare const MusicControl: {
     setNotificationId: (notificationId: any, channelId: any) => void;
     on: (actionName: Command, cb: (value: any) => void) => void;
     off: (actionName: Command) => void;
+    hasSession: () => boolean;
     stopControl: () => void;
     handleAudioInterruptions: (enable: boolean) => void;
 };
