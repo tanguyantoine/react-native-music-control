@@ -24,6 +24,7 @@ declare const MusicControl: {
     on: (actionName: Command, cb: (value: any) => void) => void;
     off: (actionName: Command) => void;
     hasSession: () => boolean;
+    isSessionActive: () => boolean;
     stopControl: () => void;
     handleAudioInterruptions: (enable: boolean) => void;
 };
