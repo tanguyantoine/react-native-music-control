@@ -1,46 +1,46 @@
 {
-  "name": "react-native-music-control",
-  "version": "1.4.0",
-  "description": "Add information on lockscreen and control playing music",
-  "main": "lib/index.js",
-  "types": "./lib/index.d.ts",
-  "files": [
-    "ios/",
-    "android/",
-    "lib/",
-    "*.podspec"
-  ],
-  "keywords": [
-    "react",
-    "react-native",
-    "remote controls",
-    "lockscreen",
-    "nowplaying",
-    "MPNowPlayingInfoCenter",
-    "ios",
-    "android"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/tanguyantoine/react-native-music-control.git"
-  },
-  "author": "Tanguy Antoine",
-  "peerDependencies": {
-    "react-native": ">=0.40.0"
-  },
-  "scripts": {
-    "prepublish": "tsc -p tsconfig.json",
-    "start": "tsc -p tsconfig.json -w",
-    "test": "echo 'no tests'",
-    "semantic-release:ci": "semantic-release --no-ci",
-    "semantic-release": "semantic-release"
-  },
-  "devDependencies": {
-    "@semantic-release/changelog": "^5.0.1",
-    "@semantic-release/git": "^9.0.0",
-    "@types/react-native": "^0.64.5",
-    "react-native": "^0.59.9",
-    "semantic-release": "^17.4.3",
-    "typescript": "^4.2.4"
-  }
+	"name": "react-native-music-control",
+	"version": "1.4.0",
+	"description": "Add information on lockscreen and control playing music",
+	"main": "lib/index.js",
+	"types": "./lib/index.d.ts",
+	"files": [
+		"ios/",
+		"android/",
+		"lib/",
+		"*.podspec"
+	],
+	"keywords": [
+		"react",
+		"react-native",
+		"remote controls",
+		"lockscreen",
+		"nowplaying",
+		"MPNowPlayingInfoCenter",
+		"ios",
+		"android"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tanguyantoine/react-native-music-control.git"
+	},
+	"author": "Tanguy Antoine",
+	"peerDependencies": {
+		"react-native": ">=0.40.0"
+	},
+	"scripts": {
+		"prepublish": "tsc -p tsconfig.json",
+		"start": "tsc -p tsconfig.json -w",
+		"test": "echo 'no tests'",
+		"semantic-release:ci": "semantic-release --no-ci",
+		"semantic-release": "semantic-release"
+	},
+	"devDependencies": {
+		"@semantic-release/changelog": "^5.0.1",
+		"@semantic-release/git": "^9.0.0",
+		"@types/react-native": "^0.64.5",
+		"react-native": "^0.59.9",
+		"semantic-release": "^17.4.3",
+		"typescript": "^4.2.4"
+	}
 }

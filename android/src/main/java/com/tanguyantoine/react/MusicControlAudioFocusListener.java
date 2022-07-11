@@ -17,7 +17,7 @@ public class MusicControlAudioFocusListener implements AudioManager.OnAudioFocus
     private boolean mPlayOnAudioFocus = false;
 
     MusicControlAudioFocusListener(ReactApplicationContext context, MusicControlEventEmitter emitter,
-                                   MusicControlVolumeListener volume) {
+            MusicControlVolumeListener volume) {
         this.emitter = emitter;
         this.volume = volume;
 
@@ -60,9 +60,9 @@ public class MusicControlAudioFocusListener implements AudioManager.OnAudioFocus
     }
 
     public void abandonAudioFocus() {
-         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && mAudioManager != null && mFocusRequest != null) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && mAudioManager != null && mFocusRequest != null) {
             mAudioManager.abandonAudioFocusRequest(mFocusRequest);
-        } else if ( mAudioManager != null ) {
+        } else if (mAudioManager != null) {
             mAudioManager.abandonAudioFocus(this);
         }
     }
