@@ -31,6 +31,7 @@
 	"scripts": {
 		"prepublish": "tsc -p tsconfig.json",
 		"start": "tsc -p tsconfig.json -w",
+		"build": "cd ./android && ./gradlew build",
 		"test": "echo 'no tests'",
 		"semantic-release:ci": "semantic-release --no-ci",
 		"semantic-release": "semantic-release"
