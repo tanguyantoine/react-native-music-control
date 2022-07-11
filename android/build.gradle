@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.4'
+        classpath 'com.android.tools.build:gradle:7.2.1'
     }
 }
 
@@ -17,13 +17,11 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion safeExtGet('compileSdkVersion', 26)
-    buildToolsVersion safeExtGet('buildToolsVersion', '26.0.3')
+    buildToolsVersion safeExtGet('buildToolsVersion', '31.0.0')
 
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', 16)
         targetSdkVersion safeExtGet('targetSdkVersion', 26)
-        versionCode 1
-        versionName "1.0"
     }
     lintOptions {
         abortOnError false
@@ -36,10 +34,11 @@ repositories {
         url "../node_modules/react-native/android"
     }
     mavenCentral()
+    google()
 }
 
 dependencies {
     compileOnly 'com.facebook.react:react-native:+'
-    implementation 'androidx.core:core:1.0.2'
-    implementation 'androidx.media:media:1.0.1'
+    implementation 'androidx.core:core:1.8.0'
+    implementation 'androidx.media:media:1.6.0'
 }
