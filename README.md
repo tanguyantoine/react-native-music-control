@@ -9,13 +9,13 @@ Display and manage media controls on lock screen and notification center for iOS
 
 With Yarn:
 
-```
+```sh
 yarn add react-native-music-control
 ```
 
 or with NPM:
 
-```
+```sh
 npm install react-native-music-control --save
 ```
 
@@ -24,17 +24,30 @@ npm install react-native-music-control --save
 1. `pod install --project-directory=ios/`
 1. Enable Audio Background mode in XCode project settings
 
-![XCode bqckground mode enabled](https://user-images.githubusercontent.com/263097/28630866-beb84094-722b-11e7-8ed2-b495c9f37956.png)
+![XCode background mode enabled](https://user-images.githubusercontent.com/263097/28630866-beb84094-722b-11e7-8ed2-b495c9f37956.png)
 
 ## Android
 
 1. Add the `android.permission.FOREGROUND_SERVICE` permission to your `AndroidManifest.xml`:
-    ```
+
+    ```xml
     <uses-permission
       android:name="android.permission.FOREGROUND_SERVICE" />
     ```
-1. Set the `launchMode` of MainActivity to `singleTask` by adding in `AndroidManifest.xml`:
+
+2. Add the following service entry to your `AndroidManifest.xml`:
+
+    ```xml
+    <service
+      android:name="com.tanguyantoine.react.MusicControlNotification$NotificationService"
+      android:foregroundServiceType="mediaPlayback"
+      android:exported="false">
+    </service>
     ```
+
+3. Set the `launchMode` of MainActivity to `singleTask` by adding in `AndroidManifest.xml`:
+
+    ```xml
     <activity
       android:name=".MainActivity"
       android:launchMode="singleTask">
@@ -124,6 +137,7 @@ MusicControl.enableControl('disableLanguageOption', false)
 MusicControl.enableControl('skipBackward', true, { interval: 15 })
 MusicControl.enableControl('skipForward', true, { interval: 30 })
 ```
+
 For Android, 5, 10 and 30 is fixed
 
 For iOS, it is dynamic so any number is accepted
@@ -275,9 +289,9 @@ componentDidMount() {
 - When using [react-native-sound](https://github.com/zmxv/react-native-sound) for audio playback, make sure that on iOS `mixWithOthers` is set to `false` in [`Sound.setCategory(value, mixWithOthers)`](https://github.com/zmxv/react-native-sound#soundsetcategoryvalue-mixwithothers-ios-only). MusicControl will not work on a real device when this is set to `true`.
 - For lockscreen controls to appear enabled instead of greyed out, the accompanying listener for each control that you want to display on the lock screen must contain a valid function:
 
-```
+```javascript
 MusicControl.on(Command.play, () => {
-  // A valid funcion must be present
+  // A valid function must be present
   player.play()
 })
 ```
