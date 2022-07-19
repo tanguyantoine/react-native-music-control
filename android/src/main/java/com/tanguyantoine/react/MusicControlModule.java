@@ -251,10 +251,10 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
             Log.w(TAG, "Binding has dead.");
         }
 
-        //@Override
-        //public void onNullBinding(ComponentName name) {
-        //    Log.w(TAG, "Bind was null.");
-        //}
+        // @Override
+        // public void onNullBinding(ComponentName name) {
+        // Log.w(TAG, "Bind was null.");
+        // }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
