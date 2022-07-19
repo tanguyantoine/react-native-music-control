@@ -31,8 +31,10 @@
 	"scripts": {
 		"prepublish": "tsc -p tsconfig.json",
 		"start": "tsc -p tsconfig.json -w",
-		"build": "cd ./android && ./gradlew build",
 		"test": "echo 'no tests'",
+		"build:all": "yarn build:ios && yarn build:android",
+		"build:ios": "cd ./ios && pod install && xcrun xcodebuild -workspace MusicControl.xcworkspace -scheme MusicControl -configuration Debug -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 13,OS=15.5' build",
+		"build:android": "cd ./android && ./gradlew assembleDebug",
 		"semantic-release:ci": "semantic-release --no-ci",
 		"semantic-release": "semantic-release"
 	},
