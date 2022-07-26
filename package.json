@@ -41,8 +41,8 @@
 	"devDependencies": {
 		"@semantic-release/changelog": "^6.0.1",
 		"@semantic-release/git": "^10.0.1",
-		"@types/react-native": "^0.69.2",
-		"react-native": "^0.69.1",
+		"@types/react-native": "^0.69.3",
+		"react-native": "^0.69.3",
 		"semantic-release": "^19.0.3",
 		"typescript": "^4.7.4"
 	}
