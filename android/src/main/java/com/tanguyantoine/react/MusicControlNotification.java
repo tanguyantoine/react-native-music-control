@@ -234,20 +234,17 @@ public class MusicControlNotification {
         public void forceForeground() {
             // API lower than 26 do not need this work around.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Intent intent = new Intent(MusicControlNotification.NotificationService.this,
-                        MusicControlNotification.NotificationService.class);
-                // service has already been initialized.
-                // startForeground method should be called within 5 seconds.
-                ContextCompat.startForegroundService(MusicControlNotification.NotificationService.this, intent);
-
-                if (MusicControlModule.INSTANCE == null) {
-                    try {
-                        MusicControlModule.INSTANCE.init();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
                 try {
+                    Intent intent = new Intent(MusicControlNotification.NotificationService.this,
+                            MusicControlNotification.NotificationService.class);
+                    // service has already been initialized.
+                    // startForeground method should be called within 5 seconds.
+                    ContextCompat.startForegroundService(MusicControlNotification.NotificationService.this, intent);
+
+                    if (MusicControlModule.INSTANCE == null) {
+                        MusicControlModule.INSTANCE.init();
+                    }
+
                     notification = MusicControlModule.INSTANCE.notification
                             .prepareNotification(MusicControlModule.INSTANCE.nb, false);
                     // call startForeground just after startForegroundService.
