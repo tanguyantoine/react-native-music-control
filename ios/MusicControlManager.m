@@ -173,6 +173,9 @@ RCT_EXPORT_METHOD(enableControl:(NSString *) controlName enabled:(BOOL) enabled 
             remoteCenter.skipForwardCommand.preferredIntervals = @[options[@"interval"]];
         }
         [self toggleHandler:remoteCenter.skipForwardCommand withSelector:@selector(onSkipForward:) enabled:enabled];
+    } else if ([controlName isEqual: @"setRating"]) {
+        [self toggleHandler:remoteCenter.likeCommand withSelector:@selector(onLike:) enabled:enabled];
+        [self toggleHandler:remoteCenter.dislikeCommand withSelector:@selector(onLike:) enabled:enabled];
     }
 }
 
@@ -314,6 +317,16 @@ RCT_EXPORT_METHOD(observeAudioInterruptions:(BOOL) observe){
 }
 - (MPRemoteCommandHandlerStatus)onSkipForward:(MPRemoteCommandEvent*)event {
     [self sendEvent:@"skipForward"];
+    return MPRemoteCommandHandlerStatusSuccess;
+}
+
+- (MPRemoteCommandHandlerStatus)onLike:(MPRemoteCommandEvent*)event {
+    [self sendEventWithValue:@"setRating" withValue:@1];
+    return MPRemoteCommandHandlerStatusSuccess;
+}
+
+- (MPRemoteCommandHandlerStatus)onDislike:(MPRemoteCommandEvent*)event {
+    [self sendEventWithValue:@"setRating" withValue:@0];
     return MPRemoteCommandHandlerStatusSuccess;
 }
 
