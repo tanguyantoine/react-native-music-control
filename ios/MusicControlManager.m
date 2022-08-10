@@ -174,8 +174,8 @@ RCT_EXPORT_METHOD(enableControl:(NSString *) controlName enabled:(BOOL) enabled 
         }
         [self toggleHandler:remoteCenter.skipForwardCommand withSelector:@selector(onSkipForward:) enabled:enabled];
     } else if ([controlName isEqual: @"setRating"]) {
-        [self toggleHandler:remoteCenter.likeCommand withSelector:@selector(onLike:) enabled:enabled];
-        [self toggleHandler:remoteCenter.dislikeCommand withSelector:@selector(onLike:) enabled:enabled];
+        [self toggleHandler:remoteCenter.likeCommand withSelector:@selector(onLike:) enabled:YES];
+        [self toggleHandler:remoteCenter.dislikeCommand withSelector:@selector(onLike:) enabled:YES];
     }
 }
 
