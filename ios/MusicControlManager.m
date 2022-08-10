@@ -174,8 +174,8 @@ RCT_EXPORT_METHOD(enableControl:(NSString *) controlName enabled:(BOOL) enabled 
         }
         [self toggleHandler:remoteCenter.skipForwardCommand withSelector:@selector(onSkipForward:) enabled:enabled];
     } else if ([controlName isEqual: @"setRating"]) {
-        [self toggleHandler:remoteCenter.likeCommand withSelector:@selector(onLike:) enabled:YES];
-        [self toggleHandler:remoteCenter.dislikeCommand withSelector:@selector(onLike:) enabled:YES];
+        [self toggleHandler:remoteCenter.likeCommand withSelector:@selector(onLike:) enabled:enabled];
+        [self toggleHandler:remoteCenter.dislikeCommand withSelector:@selector(onLike:) enabled:enabled];
     }
 }
 
@@ -264,6 +264,8 @@ RCT_EXPORT_METHOD(observeAudioInterruptions:(BOOL) observe){
     [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onSeekBackward:) enabled:false];
     [self toggleHandler:remoteCenter.skipBackwardCommand withSelector:@selector(onSkipBackward:) enabled:false];
     [self toggleHandler:remoteCenter.skipForwardCommand withSelector:@selector(onSkipForward:) enabled:false];
+    [self toggleHandler:remoteCenter.likeCommand withSelector:@selector(onLike:) enabled:false];
+    [self toggleHandler:remoteCenter.likeCommand withSelector:@selector(onDislike:) enabled:false];
     [self observeAudioInterruptions:false];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:AVAudioSessionRouteChangeNotification object:nil];
 }
