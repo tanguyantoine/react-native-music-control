@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Build;
@@ -42,7 +43,8 @@ public class MusicControlNotification {
 
         // Optional custom icon with fallback to the play icon
         smallIcon = r.getIdentifier("music_control_icon", "drawable", packageName);
-        if (smallIcon == 0) smallIcon = r.getIdentifier("play", "drawable", packageName);
+        if (smallIcon == 0)
+            smallIcon = r.getIdentifier("play", "drawable", packageName);
     }
 
     public synchronized void setCustomNotificationIcon(String resourceName) {
@@ -64,36 +66,51 @@ public class MusicControlNotification {
         next = createAction("next", "Next", mask, PlaybackStateCompat.ACTION_SKIP_TO_NEXT, next);
         previous = createAction("previous", "Previous", mask, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS, previous);
 
-        if (options != null && options.containsKey("skipForward") && (options.get("skipForward") == 10 || options.get("skipForward") == 5 || options.get("skipForward") == 30)) {
-            skipForward = createAction("skip_forward_" + options.get("skipForward").toString(), "Skip Forward", mask, PlaybackStateCompat.ACTION_FAST_FORWARD, skipForward);
+        if (options != null && options.containsKey("skipForward") && (options.get("skipForward") == 10
+                || options.get("skipForward") == 5 || options.get("skipForward") == 30)) {
+            skipForward = createAction("skip_forward_" + options.get("skipForward").toString(), "Skip Forward", mask,
+                    PlaybackStateCompat.ACTION_FAST_FORWARD, skipForward);
         } else {
-            skipForward = createAction("skip_forward_10", "Skip Forward", mask, PlaybackStateCompat.ACTION_FAST_FORWARD, skipForward);
+            skipForward = createAction("skip_forward_10", "Skip Forward", mask, PlaybackStateCompat.ACTION_FAST_FORWARD,
+                    skipForward);
         }
 
-        if (options != null && options.containsKey("skipBackward") && (options.get("skipBackward") == 10 || options.get("skipBackward") == 5 || options.get("skipBackward") == 30)) {
-            skipBackward = createAction("skip_backward_" + options.get("skipBackward").toString(), "Skip Backward", mask, PlaybackStateCompat.ACTION_REWIND, skipBackward);
+        if (options != null && options.containsKey("skipBackward") && (options.get("skipBackward") == 10
+                || options.get("skipBackward") == 5 || options.get("skipBackward") == 30)) {
+            skipBackward = createAction("skip_backward_" + options.get("skipBackward").toString(), "Skip Backward",
+                    mask, PlaybackStateCompat.ACTION_REWIND, skipBackward);
         } else {
-            skipBackward = createAction("skip_backward_10", "Skip Backward", mask, PlaybackStateCompat.ACTION_REWIND, skipBackward);
+            skipBackward = createAction("skip_backward_10", "Skip Backward", mask, PlaybackStateCompat.ACTION_REWIND,
+                    skipBackward);
         }
     }
 
     /**
-     * NOTE: Synchronized since the NotificationService called prepare without a re-entrant lock.
+     * NOTE: Synchronized since the NotificationService called prepare without a
+     * re-entrant lock.
      * Other call sites (e.g. show/hide in module) are already synchronized.
      */
     public synchronized Notification prepareNotification(NotificationCompat.Builder builder, boolean isPlaying) {
         // Add the buttons
 
         builder.mActions.clear();
-        if (previous != null) builder.addAction(previous);
-        if (skipBackward != null) builder.addAction(skipBackward);
-        if (play != null && !isPlaying) builder.addAction(play);
-        if (pause != null && isPlaying) builder.addAction(pause);
-        if (stop != null) builder.addAction(stop);
-        if (next != null) builder.addAction(next);
-        if (skipForward != null) builder.addAction(skipForward);
+        if (previous != null)
+            builder.addAction(previous);
+        if (skipBackward != null)
+            builder.addAction(skipBackward);
+        if (play != null && !isPlaying)
+            builder.addAction(play);
+        if (pause != null && isPlaying)
+            builder.addAction(pause);
+        if (stop != null)
+            builder.addAction(stop);
+        if (next != null)
+            builder.addAction(next);
+        if (skipForward != null)
+            builder.addAction(skipForward);
 
-        // Set whether notification can be closed based on closeNotification control (default PAUSED)
+        // Set whether notification can be closed based on closeNotification control
+        // (default PAUSED)
         if (module.notificationClose == MusicControlModule.NotificationClose.ALWAYS) {
             builder.setOngoing(false);
         } else if (module.notificationClose == MusicControlModule.NotificationClose.PAUSED) {
@@ -109,20 +126,22 @@ public class MusicControlNotification {
         Intent openApp = context.getPackageManager().getLaunchIntentForPackage(packageName);
         try {
             builder.setContentIntent(PendingIntent.getActivity(context, 0, openApp, PendingIntent.FLAG_IMMUTABLE));
-        }catch(Exception e){
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
 
         // Remove notification
         Intent remove = new Intent(REMOVE_NOTIFICATION);
         remove.putExtra(PACKAGE_NAME, context.getApplicationInfo().packageName);
-        builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, remove, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT));
+        builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, remove,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT));
 
         return builder.build();
     }
 
     public synchronized void show(NotificationCompat.Builder builder, boolean isPlaying) {
-        NotificationManagerCompat.from(context).notify(MusicControlModule.INSTANCE.getNotificationId(), prepareNotification(builder, isPlaying));
+        NotificationManagerCompat.from(context).notify(MusicControlModule.INSTANCE.getNotificationId(),
+                prepareNotification(builder, isPlaying));
     }
 
     public void hide() {
@@ -131,14 +150,16 @@ public class MusicControlNotification {
         try {
             Intent myIntent = new Intent(context, MusicControlNotification.NotificationService.class);
             context.stopService(myIntent);
-        }catch(Exception e){
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
     /**
-     * Code taken from newer version of the support library located in PlaybackStateCompat.toKeyCode
-     * Replace this to PlaybackStateCompat.toKeyCode when React Native updates the support library
+     * Code taken from newer version of the support library located in
+     * PlaybackStateCompat.toKeyCode
+     * Replace this to PlaybackStateCompat.toKeyCode when React Native updates the
+     * support library
      */
     private int toKeyCode(long action) {
         if (action == PlaybackStateCompat.ACTION_PLAY) {
@@ -161,8 +182,10 @@ public class MusicControlNotification {
         return KeyEvent.KEYCODE_UNKNOWN;
     }
 
-    private NotificationCompat.Action createAction(String iconName, String title, long mask, long action, NotificationCompat.Action oldAction) {
-        if ((mask & action) == 0) return null; // When this action is not enabled, return null
+    private NotificationCompat.Action createAction(String iconName, String title, long mask, long action,
+            NotificationCompat.Action oldAction) {
+        if ((mask & action) == 0)
+            return null; // When this action is not enabled, return null
         if (oldAction != null)
             return oldAction; // If this action was already created, we won't create another instance
 
@@ -176,7 +199,8 @@ public class MusicControlNotification {
         Intent intent = new Intent(MEDIA_BUTTON);
         intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
         intent.putExtra(PACKAGE_NAME, packageName);
-        PendingIntent i = PendingIntent.getBroadcast(context, keyCode, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent i = PendingIntent.getBroadcast(context, keyCode, intent,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
         return new NotificationCompat.Action(icon, title, i);
     }
@@ -184,6 +208,7 @@ public class MusicControlNotification {
     public static class NotificationService extends Service {
 
         private final LocalBinder binder = new LocalBinder();
+
         public class LocalBinder extends Binder {
 
             private WeakReference<NotificationService> weakService;
@@ -209,25 +234,30 @@ public class MusicControlNotification {
         public void forceForeground() {
             // API lower than 26 do not need this work around.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Intent intent = new Intent(MusicControlNotification.NotificationService.this, MusicControlNotification.NotificationService.class);
-                // service has already been initialized.
-                // startForeground method should be called within 5 seconds.
-                ContextCompat.startForegroundService(MusicControlNotification.NotificationService.this, intent);
-
-                if(MusicControlModule.INSTANCE == null){
-                    try {
-                        MusicControlModule.INSTANCE.init();
-                    }catch (Exception ex){
-                        ex.printStackTrace();
-                    }
-                }
                 try {
-                    notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
+                    Intent intent = new Intent(MusicControlNotification.NotificationService.this,
+                            MusicControlNotification.NotificationService.class);
+                    // service has already been initialized.
+                    // startForeground method should be called within 5 seconds.
+                    ContextCompat.startForegroundService(MusicControlNotification.NotificationService.this, intent);
+
+                    if (MusicControlModule.INSTANCE == null) {
+                        MusicControlModule.INSTANCE.init();
+                    }
+
+                    notification = MusicControlModule.INSTANCE.notification
+                            .prepareNotification(MusicControlModule.INSTANCE.nb, false);
                     // call startForeground just after startForegroundService.
-                    startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
-                }catch (Exception ex){
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        // add foreground service type for Android >= Q
+                        startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification,
+                                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+                    } else {
+                        startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
+                    }
+                } catch (Exception ex) {
                     ex.printStackTrace();
-                }                
+                }
             }
         }
 
@@ -240,9 +270,16 @@ public class MusicControlNotification {
                 if (MusicControlModule.INSTANCE == null) {
                     MusicControlModule.INSTANCE.init();
                 }
-                notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
-               startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
-            }catch (Exception ex){
+                notification = MusicControlModule.INSTANCE.notification
+                        .prepareNotification(MusicControlModule.INSTANCE.nb, false);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    // add foreground service type for Android >= Q
+                    startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification,
+                            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+                } else {
+                    startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
+                }
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
@@ -253,14 +290,21 @@ public class MusicControlNotification {
                 if (MusicControlModule.INSTANCE == null) {
                     try {
                         MusicControlModule.INSTANCE.init();
-                    }catch (Exception ex){
+                    } catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 }
                 try {
-                    notification = MusicControlModule.INSTANCE.notification.prepareNotification(MusicControlModule.INSTANCE.nb, false);
-                    startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
-                }catch (Exception ex){
+                    notification = MusicControlModule.INSTANCE.notification
+                            .prepareNotification(MusicControlModule.INSTANCE.nb, false);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        // add foreground service type for Android >= Q
+                        startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification,
+                                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+                    } else {
+                        startForeground(MusicControlModule.INSTANCE.getNotificationId(), notification);
+                    }
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
@@ -269,7 +313,8 @@ public class MusicControlNotification {
 
         @Override
         public void onTaskRemoved(Intent rootIntent) {
-            // Destroy the notification and sessions when the task is removed (closed, killed, etc)
+            // Destroy the notification and sessions when the task is removed (closed,
+            // killed, etc)
             if (MusicControlModule.INSTANCE != null) {
                 MusicControlModule.INSTANCE.destroy();
             }

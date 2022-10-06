@@ -8,3 +8,8 @@ node_modules/
 .envrc
 .npmrc
 package-lock.json
+local.properties
+/ios/Pods/
+*.xcuserstate
+xcuserdata
+build/

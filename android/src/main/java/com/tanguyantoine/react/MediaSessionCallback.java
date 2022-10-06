@@ -52,14 +52,15 @@ public class MediaSessionCallback extends MediaSessionCompat.Callback {
 
     @Override
     public void onSetRating(RatingCompat rating) {
-        if(MusicControlModule.INSTANCE == null) return;
+        if (MusicControlModule.INSTANCE == null)
+            return;
         int type = MusicControlModule.INSTANCE.ratingType;
 
-        if(type == RatingCompat.RATING_PERCENTAGE) {
+        if (type == RatingCompat.RATING_PERCENTAGE) {
             emitter.onSetRating(rating.getPercentRating());
-        } else if(type == RatingCompat.RATING_HEART) {
+        } else if (type == RatingCompat.RATING_HEART) {
             emitter.onSetRating(rating.hasHeart());
-        } else if(type == RatingCompat.RATING_THUMB_UP_DOWN) {
+        } else if (type == RatingCompat.RATING_THUMB_UP_DOWN) {
             emitter.onSetRating(rating.isThumbUp());
         } else {
             emitter.onSetRating(rating.getStarRating());
