@@ -188,6 +188,24 @@ RCT_EXPORT_METHOD(stopControl){
     [self stop];
 }
 
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(hasSession) {
+    MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
+    if (center.nowPlayingInfo == nil) {
+        return @(NO);
+    } else {
+        return @(YES);
+    }
+}
+
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isSessionActive) {
+    MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
+    if (center.nowPlayingInfo == nil) {
+        return @(NO);
+    } else {
+        return @(YES);
+    }
+}
+
 RCT_EXPORT_METHOD(observeAudioInterruptions:(BOOL) observe){
     if (self.audioInterruptionsObserved == observe) {
         return;

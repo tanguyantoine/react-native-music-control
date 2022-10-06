@@ -27,11 +27,14 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.media.app.NotificationCompat.MediaStyle;
 import android.util.Log;
+
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.views.imagehelper.ResourceDrawableIdHelper;
 import java.io.IOException;
 import java.io.InputStream;
@@ -269,6 +272,18 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     public synchronized  void setNotificationIds(int notificationId, String channelId) {
         this.notificationId = notificationId;
         this.channelId = channelId;
+    }
+
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    public synchronized boolean hasSession() {
+        if (session == null) return false;
+        return true;
+    }
+
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    public synchronized boolean isSessionActive() {
+        if (session == null) return false;
+        return session.isActive();
     }
 
     @ReactMethod
